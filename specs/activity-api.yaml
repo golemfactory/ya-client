@@ -1,0 +1,493 @@
+openapi: 3.0.1
+info:
+  title: Yagna Activity API
+  description: It conforms with capability level 1 of the [Activity API specification](https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM).
+  version: v1
+servers:
+  - url: /activity-api/v1
+tags:
+  - name: requestor_control
+    description: Requestor Part (Control)
+  - name: requestor_state
+    description: Requestor Part (State)
+  - name: provider
+    description: Provider Part
+paths:
+  /activity:
+    post:
+      tags:
+        - requestor_control
+      summary: Creates new Activity based on given Agreement.
+      description: '**Note:** This call shall get routed as a provider event (see
+        ProviderEvent structure).'
+      operationId: CreateActivity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+        required: true
+      responses:
+        201:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: string
+                example: '"activityId"'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+      x-codegen-request-body-name: agreementId
+  /activity/{activityId}/exec:
+    post:
+      tags:
+        - requestor_control
+      summary: Executes an ExeScript batch within a given Activity.
+      description: '**Note:** This call shall get routed directly to ExeUnit.'
+      operationId: Exec
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExeScriptRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: string
+                example: '"batchId"'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+      x-codegen-request-body-name: script
+  /activity/{activityId}/exec/{batchId}:
+    get:
+      tags:
+        - requestor_control
+      summary: Queries for ExeScript batch results.
+      description: '**Note:** This call shall collect ExeScriptCommand result objects
+        received directly from ExeUnit.'
+      operationId: GetExecBatchResults
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: batchId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: 'common.yaml#/parameters/timeout'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExeScriptCommandResult'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+  /activity/{activityId}:
+    delete:
+      tags:
+        - requestor_control
+      summary: Destroys given Activity.
+      description: '**Note:** This call shall get routed as a provider event (see
+        ProviderEvent structure).'
+      operationId: DestroyActivity
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content: {}
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+  /events:
+    get:
+      tags:
+        - provider
+      summary: Fetch Requestor command events.
+      operationId: CollectActivityEvents
+      parameters:
+        - $ref: 'common.yaml#/parameters/timeout'
+        - $ref: 'common.yaml#/parameters/maxEvents'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: '#/components/schemas/CreateActivity'
+                    - $ref: '#/components/schemas/DestroyActivity'
+                    - $ref: '#/components/schemas/GetActivityState'
+                    - $ref: '#/components/schemas/GetActivityUsage'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+  /activity/{activityId}/state:
+    get:
+      tags:
+        - provider
+        - requestor_state
+      summary: Get state of specified Activity.
+      operationId: GetActivityState
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityState'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+    put:
+      tags:
+        - provider
+      summary: Set state of specified Activity.
+      operationId: SetActivityState
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityState'
+        required: true
+      responses:
+        200:
+          description: Success
+          content: {}
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+  /activity/{activityId}/usage:
+    get:
+      tags:
+        - provider
+        - requestor_state
+      summary: Get usage of specified Activity.
+      operationId: GetActivityUsage
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Returns the current vector of usage counters consumed
+                  by the Activity. The sequence of values corresponds to Usage Vector
+                  property (golem.usage.vector) as indicated in the Agreement (Offer
+                  part).
+                example: '[123.5, 34000]'
+                items:
+                  type: number
+                  format: double
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+  /activity/{activityId}/command:
+    get:
+      tags:
+        - requestor_state
+      summary: Get running command for a specified Activity.
+      description: '**Note:** This call shall get routed directly to ExeUnit.'
+      operationId: GetRunningCommand
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExeScriptCommandState'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+components:
+  schemas:
+    ExeScriptRequest:
+      required:
+        - text
+      type: object
+      properties:
+        text:
+          type: string
+
+    ExeScriptCommandResult:
+      required:
+        - index
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+          minimum: 0
+        result:
+          type: string
+          enum:
+            - Ok
+            - Error
+        message:
+          type: string
+
+    ExeScriptCommandState:
+      required:
+        - command
+      type: object
+      properties:
+        command:
+          type: string
+        progress:
+          type: string
+        params:
+          type: array
+          items:
+            type: string
+
+    ActivityUsage:
+      type: object
+      properties:
+        currentUsage:
+          type: array
+          description: Current usage vector
+          items:
+            type: number
+            format: double
+        timestamp:
+          type: integer
+          description: Usage update timestamp (UTC)
+
+    ActivityState:
+      required:
+        - state
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+            - New
+            - Initialized
+            - Deploying
+            - Ready
+            - Starting
+            - Active
+            - Unresponsive
+            - Terminated
+        reason:
+          type: string
+          description: Reason for Activity termination (specified when Activity in
+            Terminated state).
+        errorMessage:
+          type: string
+          description: If error caused state change - error message shall be provided.
+
+    ProviderEvent:
+      required:
+        - eventType
+        - activityId
+      type: object
+      properties:
+        eventType:
+          type: string
+        activityId:
+          type: string
+      discriminator:
+        propertyName: eventType
+
+    CreateActivity:
+      required:
+        - agreementId
+      allOf:
+        - $ref: '#/components/schemas/ProviderEvent'
+        - type: object
+          properties:
+            agreementId:
+              type: string
+
+    DestroyActivity:
+      required:
+        - agreementId
+      allOf:
+        - $ref: '#/components/schemas/ProviderEvent'
+        - type: object
+          properties:
+            agreementId:
+              type: string
+
+    GetActivityState:
+      allOf:
+        - $ref: '#/components/schemas/ProviderEvent'
+
+    GetActivityUsage:
+      allOf:
+        - $ref: '#/components/schemas/ProviderEvent'

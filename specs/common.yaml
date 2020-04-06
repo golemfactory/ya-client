@@ -1,0 +1,38 @@
+schemas:
+
+
+  ErrorMessage:
+    type: object
+    description: >
+      Generic Error Message structure.
+    properties:
+      message:
+        type: string
+
+
+parameters:
+
+
+  maxEvents:
+    name: maxEvents
+    description: >
+      Maximum number of events that server should return at once
+      (empty value means no limit).
+    required: false
+    in: query
+    schema:
+      type: integer
+      format: int32
+      minimum: 0
+
+  timeout:
+    name: timeout
+    description: >
+      How many seconds server should wait for new events (0.0 means it should
+      return immediately if there are no events)
+    required: false
+    in: query
+    schema:
+      type: number
+      format: float
+      minimum: 0.0
