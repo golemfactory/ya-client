@@ -221,6 +221,9 @@ impl WebClientBuilder {
         if let Some(timeout) = self.timeout {
             builder = builder.timeout(timeout);
         }
+        else {
+            builder = builder.disable_timeout();
+        }
         if let Some(auth) = &self.auth {
             builder = match auth {
                 WebAuth::Bearer(token) => builder.bearer_auth(token),
