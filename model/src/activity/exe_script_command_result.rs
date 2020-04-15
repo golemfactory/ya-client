@@ -12,28 +12,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExeScriptCommandResult {
-    #[serde(rename = "index")]
     pub index: u32,
-    #[serde(rename = "result", skip_serializing_if = "Option::is_none")]
-    pub result: Option<Result>,
-    #[serde(rename = "message", skip_serializing_if = "Option::is_none")]
+    pub result: Result,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
-}
-
-impl ExeScriptCommandResult {
-    pub fn new(index: u32) -> ExeScriptCommandResult {
-        ExeScriptCommandResult {
-            index,
-            result: None,
-            message: None,
-        }
-    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum Result {
-    #[serde(rename = "Ok")]
     Ok,
-    #[serde(rename = "Error")]
     Error,
 }
