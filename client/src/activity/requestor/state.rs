@@ -4,6 +4,7 @@ use ya_model::activity::{ActivityState, ExeScriptCommandState, ACTIVITY_API_PATH
 use crate::{web::WebClient, web::WebInterface, Result};
 
 /// Bindings for Requestor State part of the Activity API.
+#[derive(Clone)]
 pub struct ActivityRequestorStateApi {
     client: WebClient,
 }

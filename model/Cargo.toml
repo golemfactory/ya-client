@@ -3,7 +3,6 @@ name = "ya-model"
 version = "0.1.0"
 authors = ["Golem Factory <contact@golem.network>"]
 edition = "2018"
-
 [dependencies]
 bigdecimal = { version = "0.1.0", features = ["serde"]}
 chrono = { version = "0.4", features = ["serde"]}

@@ -93,12 +93,17 @@ impl WebClient {
         Ok(T::from(WebClient { base_url, awc }))
     }
 
-    pub fn interface_at<T: WebInterface>(&self, base_url: Url) -> T {
+    pub fn interface_at<T: WebInterface>(&self, base_url: impl Into<Option<Url>>) -> Result<T> {
+        let base_url = match base_url.into() {
+            Some(url) => url.into(),
+            None => T::rebase_service_url(self.base_url.clone())?
+        };
+
         let awc = self.awc.clone();
-        T::from(WebClient {
-            base_url: base_url.into(),
+        Ok(T::from(WebClient {
+            base_url,
             awc,
-        })
+        }))
     }
 }
 

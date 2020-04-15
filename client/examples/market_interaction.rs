@@ -14,7 +14,7 @@ use ya_model::market::{
 };
 
 #[derive(StructOpt)]
-#[structopt(name = "Router", about = "Service Bus Router")]
+#[structopt(name = "Market", about = "Market service properties")]
 struct Options {
     #[structopt(short = "a", long, default_value = "localhost:5001")]
     host_port: String,
@@ -259,7 +259,6 @@ async fn requestor_interact(client: MarketRequestorApi, host_port: &String) -> R
 }
 
 async fn interact(host_port: &String) -> Result<()> {
-    //    let client = ApiClient::new(WebClient::builder().host_port(host_port))?;
     let client = WebClient::builder().host_port(host_port).build()?;
 
     futures::try_join!(

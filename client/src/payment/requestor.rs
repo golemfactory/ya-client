@@ -197,7 +197,7 @@ impl RequestorApi {
         self.client.put(&url).send_json(allocation).json().await
     }
 
-    pub async fn release_allocation(&self, allocation_id: &str) -> Result<String> {
+    pub async fn release_allocation(&self, allocation_id: &str) -> Result<()> {
         let url = url_format!("requestor/allocations/{allocation_id}", allocation_id);
         self.client.delete(&url).send().json().await
     }

@@ -3,6 +3,7 @@ use ya_model::activity::{ActivityState, ActivityUsage, ProviderEvent, ACTIVITY_A
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 
+#[derive(Clone)]
 pub struct ActivityProviderApi {
     client: WebClient,
 }
@@ -41,7 +42,7 @@ impl ActivityProviderApi {
     pub async fn get_activity_events(
         &self,
         #[allow(non_snake_case)]
-        timeout: Option<i32>,
+        timeout: Option<f32>,
         #[allow(non_snake_case)]
         maxEvents: Option<i32>,
     ) -> Result<Vec<ProviderEvent>> {

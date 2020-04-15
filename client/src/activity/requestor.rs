@@ -5,6 +5,7 @@ use ya_model::activity::ACTIVITY_API_PATH;
 pub mod control;
 pub mod state;
 
+#[derive(Clone)]
 pub struct ActivityRequestorApi {
     control: control::ActivityRequestorControlApi,
     state: state::ActivityRequestorStateApi,

@@ -131,6 +131,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: commandIndex
+          description: >
+            Wait until command with the specified index finishes. Must be accompanied by a valid "timeout" query parameter.
+          required: false
+          in: query
+          schema:
+            type: number
+            format: integer
+            minimum: 0
         - $ref: 'common.yaml#/parameters/timeout'
       responses:
         200:
@@ -386,6 +395,7 @@ components:
     ExeScriptCommandResult:
       required:
         - index
+        - result
       type: object
       properties:
         index:
