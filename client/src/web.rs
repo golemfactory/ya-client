@@ -96,14 +96,11 @@ impl WebClient {
     pub fn interface_at<T: WebInterface>(&self, base_url: impl Into<Option<Url>>) -> Result<T> {
         let base_url = match base_url.into() {
             Some(url) => url.into(),
-            None => T::rebase_service_url(self.base_url.clone())?
+            None => T::rebase_service_url(self.base_url.clone())?,
         };
 
         let awc = self.awc.clone();
-        Ok(T::from(WebClient {
-            base_url,
-            awc,
-        }))
+        Ok(T::from(WebClient { base_url, awc }))
     }
 }
 
@@ -225,8 +222,7 @@ impl WebClientBuilder {
 
         if let Some(timeout) = self.timeout {
             builder = builder.timeout(timeout);
-        }
-        else {
+        } else {
             builder = builder.disable_timeout();
         }
         if let Some(auth) = &self.auth {
