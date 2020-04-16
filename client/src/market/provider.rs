@@ -19,7 +19,7 @@ impl WebInterface for MarketProviderApi {
         crate::market::service_url().map(Rc::new)
     }
 
-    fn from(client: WebClient) -> Self {
+    fn from_client(client: WebClient) -> Self {
         MarketProviderApi { client }
     }
 }

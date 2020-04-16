@@ -36,7 +36,7 @@ pub trait WebInterface {
         Ok(base_url.join(Self::API_SUFFIX)?.into())
     }
 
-    fn from(client: WebClient) -> Self;
+    fn from_client(client: WebClient) -> Self;
 }
 
 pub struct WebRequest<T> {
@@ -90,7 +90,7 @@ impl WebClient {
     pub fn interface<T: WebInterface>(&self) -> Result<T> {
         let base_url = T::rebase_service_url(self.base_url.clone())?;
         let awc = self.awc.clone();
-        Ok(T::from(WebClient { base_url, awc }))
+        Ok(T::from_client(WebClient { base_url, awc }))
     }
 
     pub fn interface_at<T: WebInterface>(&self, base_url: impl Into<Option<Url>>) -> Result<T> {
@@ -100,7 +100,7 @@ impl WebClient {
         };
 
         let awc = self.awc.clone();
-        Ok(T::from(WebClient { base_url, awc }))
+        Ok(T::from_client(WebClient { base_url, awc }))
     }
 }
 

@@ -26,7 +26,7 @@ impl WebInterface for RequestorApi {
     const API_URL_ENV_VAR: &'static str = crate::payment::PAYMENT_URL_ENV_VAR;
     const API_SUFFIX: &'static str = ya_model::payment::PAYMENT_API_PATH;
 
-    fn from(client: WebClient) -> Self {
+    fn from_client(client: WebClient) -> Self {
         let mut config = RequestorApiConfig::default();
         config.invoice_event_timeout = Some(5);
         config.debit_note_event_timeout = Some(5);

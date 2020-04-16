@@ -12,7 +12,7 @@ impl WebInterface for ActivityProviderApi {
     const API_URL_ENV_VAR: &'static str = crate::activity::ACTIVITY_URL_ENV_VAR;
     const API_SUFFIX: &'static str = ACTIVITY_API_PATH;
 
-    fn from(client: WebClient) -> Self {
+    fn from_client(client: WebClient) -> Self {
         ActivityProviderApi { client }
     }
 }

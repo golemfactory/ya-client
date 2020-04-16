@@ -26,7 +26,7 @@ impl WebInterface for ProviderApi {
     const API_URL_ENV_VAR: &'static str = crate::payment::PAYMENT_URL_ENV_VAR;
     const API_SUFFIX: &'static str = PAYMENT_API_PATH;
 
-    fn from(client: WebClient) -> Self {
+    fn from_client(client: WebClient) -> Self {
         let config = ProviderApiConfig::default();
         ProviderApi::new(&Arc::new(client), config)
     }
