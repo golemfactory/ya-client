@@ -10,12 +10,13 @@ const PAYMENT_URL_ENV_VAR: &str = payment::requestor::RequestorApi::API_URL_ENV_
 
 const YAGNA_APPKEY_ENV_VAR: &str = "YAGNA_APPKEY";
 
-pub trait ApiClient {
+pub trait ApiClient: Clone {
     type Market: WebInterface;
     type Activity: WebInterface;
     type Payment: WebInterface;
 }
 
+#[derive(Clone)]
 pub struct Api<T: ApiClient> {
     pub market: T::Market,
     pub activity: T::Activity,
@@ -25,7 +26,9 @@ pub struct Api<T: ApiClient> {
 pub type RequestorApi = Api<Requestor>;
 pub type ProviderApi = Api<Provider>;
 
+#[derive(Clone)]
 pub struct Requestor;
+#[derive(Clone)]
 pub struct Provider;
 
 impl ApiClient for Requestor {
