@@ -22,19 +22,13 @@ tags:
 security:
   - ApiKeyAuth: []
 
-
 paths:
 
   /events/{subscriptionId}:
-    parameters:
-      - $ref: '#/components/parameters/subscriptionId'
-      - $ref: 'common.yaml#/parameters/timeout'
-      - $ref: '#/components/parameters/afterTimestamp'
-      - $ref: '#/components/parameters/maxEvents'
     get:
       tags:
         - common
-      summary: Reads Market responses to published Offer.
+      summary: Collects events associated with a given Market Subscription.
       description: '
         This is a blocking operation. It will not return until there is at least one new event.
 
@@ -43,6 +37,13 @@ paths:
 
         '
       operationId: collectSubscriptionEvents
+
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId'
+        - $ref: 'common.yaml#/parameters/timeout'
+        - $ref: '#/components/parameters/afterTimestamp'
+        - $ref: '#/components/parameters/maxEvents'
+  
       responses:
         '200':
           description: Event list.
@@ -64,6 +65,43 @@ paths:
         default:
           $ref: '#/components/responses/UnexpectedError'
 
+    delete:
+      tags:
+        - common
+      summary: Clears the server-side event queue.
+      description: '
+        This method clears the event buffer on Daemon side, to release resources. 
+        It is expected for a client (“agent”) application to clear the queue after 
+        the events have been read and processed.
+
+        Note: the Daemon implementations may also implement “self-purging” regimes 
+        to cater for non-compliant client applications.
+        '
+      operationId: purgeSubscriptionEvents
+  
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId'
+        - $ref: '#/components/parameters/beforeTimestamp'
+    
+      responses:
+        '200':
+          description: Number of purged events.
+          content:
+            application/json:
+              schema:
+                type: integer
+                
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+      
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -91,17 +129,24 @@ components:
         format: int32
         minimum: 0
 
-
     afterTimestamp:
       name: afterTimestamp
-      description: Show only events later than specified timestamp
+      description: Apply only to events later than specified timestamp
       in: query
       required: false
       schema:
         type: string
         format: date-time
 
-
+    beforeTimestamp:
+      name: beforeTimestamp
+      description: Apply only to events earlier than specified timestamp
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+    
   responses: 
     Unauthorized:
         description: Authorization information is missing or invalid.
@@ -291,7 +336,7 @@ components:
         activityId:
           type: string
         state:
-          $ref: 'activiry-api.yaml#/components/schemas/ActivityState'
+          $ref: 'activity-api.yaml#/components/schemas/ActivityState'
       
     GetActivityStateEvent:
       allOf:
@@ -318,16 +363,48 @@ components:
       properties:
         debitNoteId:
           type: string
-  
-    DebitNoteStateChangedEvent:
+
+    DebitNoteAcceptedEvent:
       allOf:
         - $ref: '#/components/schemas/Event'
         - type: object
       properties:
         debitNoteId:
           type: string
-        state:
-          $ref: 'payment-api.yaml#/components/schemas/InvoiceStatus'
+
+    DebitNoteRejectedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
+        rejection:
+          $ref: 'payment-api.yaml#/components/schemas/Rejection'
+
+    DebitNoteFailedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
+
+    DebitNoteSettledEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
+
+    DebitNoteCancelledEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
 
     InvoiceReceivedEvent:
       allOf:
@@ -337,15 +414,47 @@ components:
         invoiceId:
           type: string
 
-    InvoiceStateChangedEvent:
+    InvoiceAcceptedEvent:
       allOf:
         - $ref: '#/components/schemas/Event'
         - type: object
       properties:
         invoiceId:
           type: string
-        state:
-          $ref: 'payment-api.yaml#/components/schemas/InvoiceStatus'
+
+    InvoiceRejectedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+        rejection:
+          $ref: 'payment-api.yaml#/components/schemas/Rejection'
+
+    InvoiceFailedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+
+    InvoiceSettledEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+
+    InvoiceCancelledEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
 
     PaymentReceivedEvent:
       allOf:

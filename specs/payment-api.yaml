@@ -271,31 +271,6 @@ paths:
         504:
           $ref: '#/components/responses/AckTimeout'
 
-  /provider/payments:
-    get:
-      tags:
-        - provider
-      summary: Get incoming Payments.
-      operationId: getIncomingPayments
-      description: >
-        Payments can be treated as events and this method can be used to listen
-        for new payments by long-polling.  If there are any payments the method
-        will return them immediately. If there are none the method will wait
-        until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new'
-        payments. Setting the parameter value to the timestamp of the last
-        processed payment ensures that no payments will go unnoticed.
-      parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
-      responses:
-        200:
-          $ref: '#/components/responses/PaymentList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
   /provider/payments/{paymentId}:
     get:
       tags:
@@ -1054,12 +1029,9 @@ components:
         be indicated as an attribute of the Accepted status. However, as they
         are specific - they shall not be standardized by the Payment API.
 
-
         A Rejected Invoice/Debit Note can subsequently be Accepted.
 
-
         An Accepted Invoice/Debit Note cannot be subsequently Rejected.
-
 
         There is a difference between Paid and Settled - depending on a Payment
         Platform. Paid indicates that the Requestor has ordered Payments of
