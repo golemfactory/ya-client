@@ -153,31 +153,6 @@ paths:
         504:
           $ref: '#/components/responses/AckTimeout'
 
-  /provider/debitNoteEvents: # refactor, move to Event API
-    get:
-      tags:
-        - provider
-      summary: Get Debit Note events.
-      operationId: getProviderDebitNoteEvents
-      description: >
-        Listen for Debit Note-related events using long-polling. If there are
-        any events the method will return them immediately. If there are none
-        the method will wait until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new' events.
-        Setting the parameter value to the timestamp of the last processed event
-        ensures that no events will go unnoticed.
-
-      parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
-      responses:
-        200:
-          $ref: '#/components/responses/InvoiceEventList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
   /provider/invoices:
     post:
       tags:
@@ -295,31 +270,6 @@ paths:
           $ref: '#/components/responses/ServerError'
         504:
           $ref: '#/components/responses/AckTimeout'
-
-  /provider/invoiceEvents: # refactor - move to Event API
-    get:
-      tags:
-        - provider
-      summary: Get Invoice events.
-      operationId: getProviderInvoiceEvents
-      description: >
-        Listen for Invoice-related events using long-polling. If there are
-        any events the method will return them immediately. If there are none
-        the method will wait until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new' events.
-        Setting the parameter value to the timestamp of the last processed event
-        ensures that no events will go unnoticed.
-
-      parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
-      responses:
-        200:
-          $ref: '#/components/responses/InvoiceEventList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
 
   /provider/payments:
     get:
@@ -486,31 +436,6 @@ paths:
         504:
           $ref: '#/components/responses/AckTimeout'
 
-  /requestor/debitNoteEvents: # refactor - move to Event API
-    get:
-      tags:
-        - requestor
-      summary: Get Debit Note events.
-      operationId: getRequestorDebitNoteEvents
-      description: >
-        Listen for Debit Note-related events using long-polling. If there are
-        any events the method will return them immediately. If there are none
-        the method will wait until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new' events.
-        Setting the parameter value to the timestamp of the last processed event
-        ensures that no events will go unnoticed.
-
-      parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
-      responses:
-        200:
-          $ref: '#/components/responses/DebitNoteEventList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
   /requestor/invoices:
     get:
       tags:
@@ -632,31 +557,6 @@ paths:
           $ref: '#/components/responses/ServerError'
         504:
           $ref: '#/components/responses/AckTimeout'
-
-  /requestor/invoiceEvents: # refactor - move to Event API
-    get:
-      tags:
-        - requestor
-      summary: Get Invoice events.
-      operationId: getRequestorInvoiceEvents
-      description: >
-        Listen for Invoice-related events using long-polling. If there are
-        any events the method will return them immediately. If there are none
-        the method will wait until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new' events.
-        Setting the parameter value to the timestamp of the last processed event
-        ensures that no events will go unnoticed.
-
-      parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
-      responses:
-        200:
-          $ref: '#/components/responses/InvoiceEventList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
 
   /requestor/allocations:
     post:
@@ -1020,24 +920,6 @@ components:
             items:
               $ref: '#/components/schemas/Payment'
 
-    DebitNoteEventList:
-      description: OK
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/DebitNoteEvent'
-
-    InvoiceEventList:
-      description: OK
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/InvoiceEvent'
-
   schemas:
 
     DebitNote:
@@ -1098,7 +980,7 @@ components:
         - agreementId
         - totalAmountDue
         - creditAccountId
-        - status
+        #- status
 
     Invoice:
       description: >
@@ -1160,7 +1042,7 @@ components:
         - amount
         - creditAccountId
         - paymentDueDate
-        - status
+        #- status
 
     InvoiceStatus:
       description: >
@@ -1292,47 +1174,3 @@ components:
         - timestamp
         - details
 
-    DebitNoteEvent: # move to Event API
-      type: object
-      readOnly: true
-      properties:
-        debitNoteId:
-          type: string
-        timestamp:
-          type: string
-          format: date-time
-        details:
-          type: object
-        eventType:
-          $ref: '#/components/schemas/EventType'
-      required:
-        - debitNoteId
-        - timestamp
-        - eventType
-
-    InvoiceEvent: # move to Event API
-      type: object
-      readOnly: true
-      properties:
-        invoiceId:
-          type: string
-        timestamp:
-          type: string
-          format: date-time
-        details:
-          type: object
-        eventType:
-          $ref: '#/components/schemas/EventType'
-      required:
-        - invoiceId
-        - timestamp
-        - eventType
-
-    EventType: # move to Event API
-      description: Types of Debit Note/Invoice events
-      type: string
-      enum:
-        - RECEIVED
-        - ACCEPTED
-        - REJECTED
-        - CANCELLED

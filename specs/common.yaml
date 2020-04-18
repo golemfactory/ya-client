@@ -8,4 +8,16 @@ schemas:
       message:
         type: string
 
+parameters:
+  timeout:
+    name: timeout
+    description: >
+        How many seconds server should wait for new events (0.0 means it should
+        return immediately if there are no events)
+    required: false
+    in: query
+    schema:
+      type: number
+      format: float
+      minimum: 0.0
 

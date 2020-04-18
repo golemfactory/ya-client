@@ -15,6 +15,10 @@ info:
 servers:
   - url: /event-api/v1
 
+tags:
+  - name: common
+    description: Requestor/Provider 
+  
 security:
   - ApiKeyAuth: []
 
@@ -24,10 +28,12 @@ paths:
   /events/{subscriptionId}:
     parameters:
       - $ref: '#/components/parameters/subscriptionId'
-      - $ref: '#/components/parameters/timeout'
+      - $ref: 'common.yaml#/parameters/timeout'
       - $ref: '#/components/parameters/afterTimestamp'
       - $ref: '#/components/parameters/maxEvents'
     get:
+      tags:
+        - common
       summary: Reads Market responses to published Offer.
       description: '
         This is a blocking operation. It will not return until there is at least one new event.
@@ -49,8 +55,12 @@ paths:
 
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
         default:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -81,17 +91,6 @@ components:
         format: int32
         minimum: 0
 
-    timeout:
-      name: timeout
-      description: >
-          How many seconds server should wait for new events (0.0 means it should
-          return immediately if there are no events)
-      required: false
-      in: query
-      schema:
-        type: number
-        format: float
-        minimum: 0.0
 
     afterTimestamp:
       name: afterTimestamp
@@ -110,9 +109,23 @@ components:
           application/json:
             schema:
               $ref: 'common.yaml#/schemas/ErrorMessage'
+
+    Forbidden:
+        description: Forbidden.
+        content:
+          application/json:
+            schema:
+              $ref: 'common.yaml#/schemas/ErrorMessage'
   
     NotFound:
         description: The specified resource was not found.
+        content:
+          application/json:
+            schema:
+              $ref: 'common.yaml#/schemas/ErrorMessage'
+  
+    ServerError:
+        description: Server error.
         content:
           application/json:
             schema:
@@ -141,6 +154,8 @@ components:
           eventDate:
             type: string
             format: date-time
+  
+    # Market API
   
     DemandProposalEvent:
         allOf:
@@ -174,7 +189,17 @@ components:
           agreement:
             $ref: 'market-api.yaml#/components/schemas/Agreement'
       
-    AgreementEvent: 
+    # Note that this could best be implemented via two-level inheritance (Event<-AgreementEvent<-...)
+    # ...but the OpenAPI Generator seems to be confused by such a setup.
+    AgreementAcceptedEvent: 
+        allOf:
+          - $ref: '#/components/schemas/Event'
+          - type: object
+        properties:
+          agreementId:
+            type: string
+                              
+    AgreementRejectedEvent: 
         allOf:
           - $ref: '#/components/schemas/Event'
           - type: object
@@ -182,28 +207,151 @@ components:
           agreementId:
             type: string
 
-    AgreementAcceptedEvent: 
-        allOf:
-          - $ref: '#/components/schemas/AgreementEvent'
-          - type: object
-                              
-    AgreementRejectedEvent: 
-        allOf:
-          - $ref: '#/components/schemas/AgreementEvent'
-          - type: object
-
     AgreementCancelledEvent: 
         allOf:
-          - $ref: '#/components/schemas/AgreementEvent'
+          - $ref: '#/components/schemas/Event'
           - type: object
+        properties:
+          agreementId:
+            type: string
 
     AgreementTimeoutEvent: 
         allOf:
-          - $ref: '#/components/schemas/AgreementEvent'
+          - $ref: '#/components/schemas/Event'
           - type: object
+        properties:
+          agreementId:
+            type: string
 
     AgreementTerminatedEvent: 
         allOf:
-          - $ref: '#/components/schemas/AgreementEvent'
+          - $ref: '#/components/schemas/Event'
           - type: object
+        properties:
+          agreementId:
+            type: string
+
+    # Activity API
+      
+    CreateActivityEvent:
+      required:
+        - agreementId
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        activityId:
+          type: string
+        agreementId:
+          type: string
+
+    DestroyActivityEvent:
+      required:
+        - agreementId
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        activityId:
+          type: string
+        agreementId:
+          type: string
+
+    ExeScriptCommandFinishedEvent:
+      required:
+        - index
+        - result
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        activityId:
+          type: string
+        batchId:
+          type: string
+        index:
+          type: integer
+          format: int32
+          minimum: 0
+        result:
+          type: string
+          enum:
+            - Ok
+            - Error
+        message:
+          type: string
+    
+    ActivityStateChangedEvent:
+      required:
+        - agreementId
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        activityId:
+          type: string
+        state:
+          $ref: 'activiry-api.yaml#/components/schemas/ActivityState'
+      
+    GetActivityStateEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        activityId:
+          type: string
+
+    GetActivityUsageEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        activityId:
+          type: string
+
+    # Payment API
+
+    DebitNoteReceivedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
   
+    DebitNoteStateChangedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
+        state:
+          $ref: 'payment-api.yaml#/components/schemas/InvoiceStatus'
+
+    InvoiceReceivedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+
+    InvoiceStateChangedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+        state:
+          $ref: 'payment-api.yaml#/components/schemas/InvoiceStatus'
+
+    PaymentReceivedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        paymentId:
+          type: string
+

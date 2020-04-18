@@ -58,8 +58,7 @@ paths:
               schema:
                 type: array
                 items:
-                  oneOf:
-                    - $ref: '#/components/schemas/Offer'
+                  $ref: '#/components/schemas/Offer'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -242,8 +241,7 @@ paths:
               schema:
                 type: array
                 items:
-                  oneOf:
-                    - $ref: '#/components/schemas/Demand'
+                  $ref: '#/components/schemas/Demand'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -523,53 +521,6 @@ paths:
           description: Agreement cancelled.
         default:
           $ref: '#/components/responses/UnexpectedError'
-
-
-  /agreements/{agreementId}/wait: # remove this, refactor into Event API
-    parameters:
-      - $ref: '#/components/parameters/agreementId'
-      - $ref: 'common.yaml#/parameters/timeout'
-    post:
-      tags:
-        - requestor
-      summary: Waits for Agreement approval by the Provider.
-      description: >
-        This is a blocking operation. The call may be aborted by Requestor caller
-        code. After the call is aborted, another `waitForApproval` call can be
-        raised on the same Agreement Id.
-
-
-        It returns one of the following options:
-
-        * `Ok` - Indicates that the Agreement has been approved by the Provider.
-          - The Provider is now ready to accept a request to start an Activity
-            as described in the negotiated agreement.
-          - The Requestor’s corresponding `waitForApproval` call returns Ok after
-            this on the Provider side.
-
-        * `Rejected` - Indicates that the Provider has called `rejectAgreement`,
-          which effectively stops the Agreement handshake. The Requestor may attempt
-          to return to the Negotiation phase by sending a new Proposal.
-
-        * `Cancelled` - Indicates that the Requestor himself has called
-         `cancelAgreement`, which effectively stops the Agreement handshake.
-
-      operationId: waitForApproval
-      responses:
-        '200':
-          description: Agreement approval result.
-          content:
-            application/json:
-              schema:
-                type: string
-                enum: [Approved, Rejected, Cancelled, TimedOut]
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/UnexpectedError'
-
 
   /agreements/{agreementId}/approve:
     parameters:

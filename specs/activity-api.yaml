@@ -28,7 +28,7 @@ tags:
     description: Requestor Part (State)
   - name: provider
     description: Provider Part
-
+    
 paths:
 
   /activity:
@@ -38,7 +38,7 @@ paths:
         - requestor_control
       summary: Creates new Activity based on given Agreement.
       description: '**Note:** This call shall get routed as a provider event (see
-        ProviderEvent structure).'
+        Event API).'
       operationId: CreateActivity
       requestBody:
         content:
@@ -134,70 +134,6 @@ paths:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
       x-codegen-request-body-name: script
 
-  /activity/{activityId}/exec/{batchId}: # should this also move to Event API???
-
-    get:
-      tags:
-        - requestor_control
-      summary: Queries for ExeScript batch results.
-      description: '**Note:** This call shall collect ExeScriptCommand result objects
-        received directly from ExeUnit.'
-      operationId: GetExecBatchResults
-      parameters:
-        - name: activityId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: batchId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: commandIndex
-          description: >
-            Wait until command with the specified index finishes. Must be accompanied by a valid "timeout" query parameter.
-          required: false
-          in: query
-          schema:
-            type: number
-            format: integer
-            minimum: 0
-        - $ref: 'common.yaml#/parameters/timeout'
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ExeScriptCommandResult'
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-        403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-        404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-        500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-
   /activity/{activityId}:
 
     delete:
@@ -205,7 +141,7 @@ paths:
         - requestor_control
       summary: Destroys given Activity.
       description: '**Note:** This call shall get routed as a provider event (see
-        ProviderEvent structure).'
+        Event API).'
       operationId: DestroyActivity
       parameters:
         - name: activityId
@@ -225,43 +161,6 @@ paths:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
         404:
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-        500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-
-  /events: # move this to Event API
-
-    get:
-      tags:
-        - provider
-      summary: Fetch Requestor command events.
-      operationId: CollectActivityEvents
-      parameters:
-        - $ref: 'common.yaml#/parameters/timeout'
-        - $ref: 'common.yaml#/parameters/maxEvents'
-
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/CreateActivity'
-                    - $ref: '#/components/schemas/DestroyActivity'
-                    - $ref: '#/components/schemas/GetActivityState'
-                    - $ref: '#/components/schemas/GetActivityUsage'
-        403:
-          description: Forbidden
           content:
             application/json:
               schema:
@@ -307,7 +206,7 @@ paths:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
 
-  put:
+    put:
       tags:
         - provider
       summary: Set state of specified Activity.
@@ -428,24 +327,6 @@ components:
         text:
           type: string
 
-    ExeScriptCommandResult: # should this also end up in Event API???
-      required:
-        - index
-        - result
-      type: object
-      properties:
-        index:
-          type: integer
-          format: int32
-          minimum: 0
-        result:
-          type: string
-          enum:
-            - Ok
-            - Error
-        message:
-          type: string
-
     ExeScriptCommandState:
       required:
         - command
@@ -497,44 +378,3 @@ components:
           type: string
           description: If error caused state change - error message shall be provided.
 
-    # move the following to Event API      
-    ProviderEvent: 
-      required:
-        - eventType
-        - activityId
-      type: object
-      properties:
-        eventType:
-          type: string
-        activityId:
-          type: string
-      discriminator:
-        propertyName: eventType
-
-    CreateActivity: # rename to CreateActivityEvent
-      required:
-        - agreementId
-      allOf:
-        - $ref: '#/components/schemas/ProviderEvent'
-        - type: object
-          properties:
-            agreementId:
-              type: string
-
-    DestroyActivity: # rename to DestroyActivityEvent
-      required:
-        - agreementId
-      allOf:
-        - $ref: '#/components/schemas/ProviderEvent'
-        - type: object
-          properties:
-            agreementId:
-              type: string
-
-    GetActivityState: # rename to GetActivityStateEvent
-      allOf:
-        - $ref: '#/components/schemas/ProviderEvent'
-
-    GetActivityUsage: # rename to GetActivityUsageEvent
-      allOf:
-        - $ref: '#/components/schemas/ProviderEvent'
