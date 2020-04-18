@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
   title: Yagna Payment API
-  version: 1.0.0
+  version: 1.1.0
   description: '
     Invoicing and Payments is a fundamental area of Yagna Ecosystem
     functionality. It includes aspects of communication between Requestor,
@@ -153,7 +153,7 @@ paths:
         504:
           $ref: '#/components/responses/AckTimeout'
 
-  /provider/debitNoteEvents:
+  /provider/debitNoteEvents: # refactor, move to Event API
     get:
       tags:
         - provider
@@ -296,7 +296,7 @@ paths:
         504:
           $ref: '#/components/responses/AckTimeout'
 
-  /provider/invoiceEvents:
+  /provider/invoiceEvents: # refactor - move to Event API
     get:
       tags:
         - provider
@@ -486,7 +486,7 @@ paths:
         504:
           $ref: '#/components/responses/AckTimeout'
 
-  /requestor/debitNoteEvents:
+  /requestor/debitNoteEvents: # refactor - move to Event API
     get:
       tags:
         - requestor
@@ -633,7 +633,7 @@ paths:
         504:
           $ref: '#/components/responses/AckTimeout'
 
-  /requestor/invoiceEvents:
+  /requestor/invoiceEvents: # refactor - move to Event API
     get:
       tags:
         - requestor
@@ -1292,7 +1292,7 @@ components:
         - timestamp
         - details
 
-    DebitNoteEvent:
+    DebitNoteEvent: # move to Event API
       type: object
       readOnly: true
       properties:
@@ -1310,7 +1310,7 @@ components:
         - timestamp
         - eventType
 
-    InvoiceEvent:
+    InvoiceEvent: # move to Event API
       type: object
       readOnly: true
       properties:
@@ -1328,7 +1328,7 @@ components:
         - timestamp
         - eventType
 
-    EventType:
+    EventType: # move to Event API
       description: Types of Debit Note/Invoice events
       type: string
       enum:

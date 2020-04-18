@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 1.5.2
+  version: 1.6.0
   title: Yagna Market API
   description: '
     ## Yagna Market
@@ -41,7 +41,6 @@ tags:
 
 
 paths:
-
 
   /offers:
     get:
@@ -122,47 +121,6 @@ paths:
         default:
           $ref: '#/components/responses/UnexpectedError'
 
-
-  /offers/{subscriptionId}/events:
-    parameters:
-      - $ref: '#/components/parameters/subscriptionId'
-      - $ref: 'common.yaml#/parameters/timeout'
-      - $ref: 'common.yaml#/parameters/maxEvents'
-    get:
-      tags:
-        - provider
-      summary: Reads Market responses to published Offer.
-      description: >
-        This is a blocking operation. It will not return until there is at least one new event.
-
-
-        **Note**: When `collectDemands` is waiting, simultaneous call to `unsubscribeOffer` on the
-        same `subscriptionId` should result in "Subscription does not exist" error returned from
-        `collectDemands`.
-
-
-        **Note**: Specification requires this endpoint to support list of specific Proposal Ids
-        to listen for messages related only to specific Proposals. This is not covered yet.
-      operationId: collectDemands
-      responses:
-        '200':
-          description: Proposal or Agreement event list.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/AgreementEvent'
-                    - $ref: '#/components/schemas/ProposalEvent'
-                    - $ref: '#/components/schemas/PropertyQueryEvent'
-              # links: TODO
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/UnexpectedError'
 
   /offers/{subscriptionId}/propertyQuery/{queryId}:
     parameters:
@@ -344,48 +302,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '410':
           description: Already unsubscribed.
-        default:
-          $ref: '#/components/responses/UnexpectedError'
-
-
-  /demands/{subscriptionId}/events:
-    parameters:
-      - $ref: '#/components/parameters/subscriptionId'
-      - $ref: 'common.yaml#/parameters/timeout'
-      - $ref: 'common.yaml#/parameters/maxEvents'
-    get:
-      tags:
-        - requestor
-      summary: Reads Market responses to published Demand.
-      description: >
-        This is a blocking operation. It will not return until there is at least one new event.
-
-
-        **Note**: When `collectOffers` is waiting, simultaneous call to `unsubscribeDemand` on the
-        same `subscriptionId` should result in "Subscription does not exist" error returned from
-        `collectOffers`.
-
-
-        **Note**: Specification requires this endpoint to support list of specific Proposal Ids
-        to listen for messages related only to specific Proposals. This is not covered yet.
-      operationId: collectOffers
-      responses:
-        '200':
-          description: Proposal event list.
-          content:
-            application/json4:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/ProposalEvent'
-                    - $ref: '#/components/schemas/PropertyQueryEvent'
-
-          # links: TODO
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -609,7 +525,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
 
 
-  /agreements/{agreementId}/wait:
+  /agreements/{agreementId}/wait: # remove this, refactor into Event API
     parameters:
       - $ref: '#/components/parameters/agreementId'
       - $ref: 'common.yaml#/parameters/timeout'
@@ -760,23 +676,14 @@ paths:
         default:
           $ref: '#/components/responses/UnexpectedError'
 
-
-
 components:
-
-
-
   securitySchemes:
-
-
     ApiKeyAuth:
       type: apiKey
       in: header
       name: X-API-KEY
 
-
   parameters:
-
 
     subscriptionId:
       name: subscriptionId
@@ -808,7 +715,6 @@ components:
 
 
   requestBodies:
-
 
     Offer:
       required: true
@@ -847,7 +753,6 @@ components:
 
 
   responses:
-
 
     SubscriptionId:
       description: Subscribed.
@@ -917,58 +822,58 @@ components:
       allOf:
         - $ref: '#/components/schemas/DemandOfferBase'
         - type: object
-          properties:
-            demandId:
-              type: string
-              readOnly: true
-            requestorId:
-              type: string
-              readOnly: true
+      properties:
+        demandId:
+          type: string
+          readOnly: true
+        requestorId:
+          type: string
+          readOnly: true
 
     Offer:
       allOf:
         - $ref: '#/components/schemas/DemandOfferBase'
         - type: object
-          properties:
-            offerId:
-              type: string
-              readOnly: true
-            providerId:
-              type: string
-              readOnly: true
+      properties:
+        offerId:
+          type: string
+          readOnly: true
+        providerId:
+          type: string
+          readOnly: true
 
     # TODO: add specified OfferProposal and DemandProposal to disabiguate API
     Proposal:
       allOf:
         - $ref: '#/components/schemas/DemandOfferBase'
         - type: object
-          properties:
-            proposalId:
-              type: string
-              readOnly: true
-            issuerId:
-              type: string
-              readOnly: true
-            state:
-              type: string
-              readOnly: true
-              enum: [Initial, Draft, Rejected, Accepted, Expired]
-              description: >
-                * `Initial` - proposal arrived from the market as response
-                to subscription
+      properties:
+        proposalId:
+          type: string
+          readOnly: true
+        issuerId:
+          type: string
+          readOnly: true
+        state:
+          type: string
+          readOnly: true
+          enum: [Initial, Draft, Rejected, Accepted, Expired]
+          description: >
+            * `Initial` - proposal arrived from the market as response
+            to subscription
 
-                * `Draft` - bespoke counter-proposal issued by one party
-                directly to other party (negotiation phase)
+            * `Draft` - bespoke counter-proposal issued by one party
+            directly to other party (negotiation phase)
 
-                * `Rejected` by other party
+            * `Rejected` by other party
 
-                * `Accepted` - promoted into the Agreement draft
+            * `Accepted` - promoted into the Agreement draft
 
-                * `Expired` - not accepted nor rejected before validity period
-            prevProposalId:
-              type: string
-              description: >
-                id of the proposal from other side which this proposal responds to
+            * `Expired` - not accepted nor rejected before validity period
+        prevProposalId:
+          type: string
+          description: >
+            id of the proposal from other side which this proposal responds to
 
     AgreementProposal:
       type: object
@@ -1051,40 +956,4 @@ components:
     PropertyQueryReply:
       type: object
 
-    Event:
-      type: object
-      required:
-        - eventType
-        - eventDate
-      discriminator:
-        propertyName: eventType
-      properties:
-        eventType:
-          type: string
-        eventDate:
-          type: string
-          format: date-time
 
-    ProposalEvent:
-      allOf:
-        - $ref: '#/components/schemas/Event'
-        - type: object
-          properties:
-            proposal:
-              $ref: '#/components/schemas/Proposal'
-
-    AgreementEvent:
-      allOf:
-        - $ref: '#/components/schemas/Event'
-        - type: object
-          properties:
-            agreement:
-              $ref: '#/components/schemas/Agreement'
-
-    PropertyQueryEvent:
-      allOf:
-        - $ref: '#/components/schemas/Event'
-        - type: object
-      properties:
-        propertyQuery:
-          $ref: '#/components/schemas/PropertyQuery'

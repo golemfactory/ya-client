@@ -1,10 +1,26 @@
 openapi: 3.0.1
 info:
   title: Yagna Activity API
-  description: It conforms with capability level 1 of the [Activity API specification](https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM).
-  version: v1
+  version: 1.2.0
+  description: '
+      The Activity API can be perceived as controls which a Requestor-side application
+      has to steer the execution of an Activity as specified in an Agreement which 
+      has been negotiated via the Market API/Protocol. This defines possible interactions 
+      between the Requestor application (via Activity API) and the generic components 
+      running on the Provider node, which host the Provider-side application code. 
+
+      The possible interactions imply a logical “execution environment” component, which 
+      is the host/container for the “payload” code. The “execution environment” is specified 
+      as an ExeUnit, with a generic interface via which a Provider node’s Activity Controller 
+      can operate the hosted code. 
+
+      It conforms with capability level 1 of the [Activity API specification]
+      (https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM).
+  '
+
 servers:
   - url: /activity-api/v1
+
 tags:
   - name: requestor_control
     description: Requestor Part (Control)
@@ -12,8 +28,11 @@ tags:
     description: Requestor Part (State)
   - name: provider
     description: Provider Part
+
 paths:
+
   /activity:
+
     post:
       tags:
         - requestor_control
@@ -60,7 +79,9 @@ paths:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
       x-codegen-request-body-name: agreementId
+
   /activity/{activityId}/exec:
+
     post:
       tags:
         - requestor_control
@@ -112,7 +133,9 @@ paths:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
       x-codegen-request-body-name: script
-  /activity/{activityId}/exec/{batchId}:
+
+  /activity/{activityId}/exec/{batchId}: # should this also move to Event API???
+
     get:
       tags:
         - requestor_control
@@ -174,7 +197,9 @@ paths:
             application/json:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
+
   /activity/{activityId}:
+
     delete:
       tags:
         - requestor_control
@@ -210,7 +235,9 @@ paths:
             application/json:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
-  /events:
+
+  /events: # move this to Event API
+
     get:
       tags:
         - provider
@@ -245,7 +272,9 @@ paths:
             application/json:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
+
   /activity/{activityId}/state:
+
     get:
       tags:
         - provider
@@ -277,7 +306,8 @@ paths:
             application/json:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
-    put:
+
+  put:
       tags:
         - provider
       summary: Set state of specified Activity.
@@ -310,7 +340,9 @@ paths:
             application/json:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
+
   /activity/{activityId}/usage:
+
     get:
       tags:
         - provider
@@ -350,7 +382,9 @@ paths:
             application/json:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
+
   /activity/{activityId}/command:
+
     get:
       tags:
         - requestor_state
@@ -382,6 +416,8 @@ paths:
             application/json:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
+
+
 components:
   schemas:
     ExeScriptRequest:
@@ -392,7 +428,7 @@ components:
         text:
           type: string
 
-    ExeScriptCommandResult:
+    ExeScriptCommandResult: # should this also end up in Event API???
       required:
         - index
         - result
@@ -461,7 +497,8 @@ components:
           type: string
           description: If error caused state change - error message shall be provided.
 
-    ProviderEvent:
+    # move the following to Event API      
+    ProviderEvent: 
       required:
         - eventType
         - activityId
@@ -474,7 +511,7 @@ components:
       discriminator:
         propertyName: eventType
 
-    CreateActivity:
+    CreateActivity: # rename to CreateActivityEvent
       required:
         - agreementId
       allOf:
@@ -484,7 +521,7 @@ components:
             agreementId:
               type: string
 
-    DestroyActivity:
+    DestroyActivity: # rename to DestroyActivityEvent
       required:
         - agreementId
       allOf:
@@ -494,10 +531,10 @@ components:
             agreementId:
               type: string
 
-    GetActivityState:
+    GetActivityState: # rename to GetActivityStateEvent
       allOf:
         - $ref: '#/components/schemas/ProviderEvent'
 
-    GetActivityUsage:
+    GetActivityUsage: # rename to GetActivityUsageEvent
       allOf:
         - $ref: '#/components/schemas/ProviderEvent'
