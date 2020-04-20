@@ -66,12 +66,12 @@ impl<T: ApiClient> TryFrom<&ApiOpts> for Api<T> {
     type Error = crate::Error;
 
     fn try_from(cli: &ApiOpts) -> Result<Self, Self::Error> {
-        let client = WebClient::with_token(cli.app_key)?;
+        let client = WebClient::with_token(&cli.app_key)?;
 
         Ok(Self {
-            market: client.interface_at(cli.market_url)?,
-            activity: client.interface_at(cli.activity_url)?,
-            payment: client.interface_at(cli.payment_url)?,
+            market: client.interface_at(cli.market_url.clone())?,
+            activity: client.interface_at(cli.activity_url.clone())?,
+            payment: client.interface_at(cli.payment_url.clone())?,
         })
     }
 }
