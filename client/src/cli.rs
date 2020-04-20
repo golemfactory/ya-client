@@ -62,11 +62,11 @@ pub struct ApiOpts {
     payment_url: Option<Url>,
 }
 
-impl<T: ApiClient> TryFrom<ApiOpts> for Api<T> {
+impl<T: ApiClient> TryFrom<&ApiOpts> for Api<T> {
     type Error = crate::Error;
 
-    fn try_from(cli: ApiOpts) -> Result<Self, Self::Error> {
-        let client = WebClient::with_token(&cli.app_key)?;
+    fn try_from(cli: &ApiOpts) -> Result<Self, Self::Error> {
+        let client = WebClient::with_token(cli.app_key)?;
 
         Ok(Self {
             market: client.interface_at(cli.market_url)?,
