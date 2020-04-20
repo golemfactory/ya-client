@@ -43,7 +43,7 @@ impl ApiClient for Provider {
     type Payment = payment::provider::ProviderApi;
 }
 
-#[derive(StructOpt)]
+#[derive(StructOpt, Clone)]
 pub struct ApiOpts {
     /// Yagna daemon application key
     #[structopt(long = "app-key", env = YAGNA_APPKEY_ENV_VAR, hide_env_values = true)]
