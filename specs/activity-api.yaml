@@ -409,6 +409,8 @@ components:
             - Error
         message:
           type: string
+        isBatchFinished:
+          type: boolean
 
     ExeScriptCommandState:
       required:

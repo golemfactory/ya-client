@@ -14,6 +14,8 @@ use serde::{Deserialize, Serialize};
 pub struct ExeScriptCommandResult {
     pub index: u32,
     pub result: Result,
+    #[serde(rename = "isBatchFinished")]
+    pub is_batch_finished: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
