@@ -8,6 +8,7 @@ pub enum EventType {
     Accepted,
     Rejected,
     Cancelled,
+    Settled,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -18,17 +19,14 @@ impl TryFrom<String> for EventType {
     type Error = InvalidOption;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        if let Some(v) = match value.as_str() {
-            "RECEIVED" => Some(EventType::Received),
-            "ACCEPTED" => Some(EventType::Accepted),
-            "REJECTED" => Some(EventType::Rejected),
-            "CANCELLED" => Some(EventType::Cancelled),
-            _ => None,
-        } {
-            return Ok(v);
+        match value.as_str() {
+            "RECEIVED" => Ok(EventType::Received),
+            "ACCEPTED" => Ok(EventType::Accepted),
+            "REJECTED" => Ok(EventType::Rejected),
+            "CANCELLED" => Ok(EventType::Cancelled),
+            "SETTLED" => Ok(EventType::Settled),
+            _ => Err(InvalidOption(value)),
         }
-
-        Err(InvalidOption(value))
     }
 }
 

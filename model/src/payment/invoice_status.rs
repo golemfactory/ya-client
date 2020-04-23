@@ -20,7 +20,13 @@ impl From<String> for InvoiceStatus {
 
 impl From<InvoiceStatus> for String {
     fn from(invoice_status: InvoiceStatus) -> Self {
-        serde_json::to_string(&invoice_status)
+        invoice_status.to_string()
+    }
+}
+
+impl ToString for InvoiceStatus {
+    fn to_string(&self) -> String {
+        serde_json::to_string(self)
             .unwrap()
             .trim_matches('"')
             .to_owned()

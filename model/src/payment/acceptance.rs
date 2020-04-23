@@ -7,12 +7,3 @@ pub struct Acceptance {
     pub total_amount_accepted: BigDecimal,
     pub allocation_id: String,
 }
-
-impl Acceptance {
-    pub fn new(total_amount_accepted: BigDecimal, allocation_id: String) -> Acceptance {
-        Acceptance {
-            total_amount_accepted,
-            allocation_id,
-        }
-    }
-}

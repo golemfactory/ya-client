@@ -9,16 +9,3 @@ pub struct Rejection {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub message: Option<String>,
 }
-
-impl Rejection {
-    pub fn new(
-        rejection_reason: crate::payment::RejectionReason,
-        total_amount_accepted: BigDecimal,
-    ) -> Rejection {
-        Rejection {
-            rejection_reason,
-            total_amount_accepted,
-            message: None,
-        }
-    }
-}
