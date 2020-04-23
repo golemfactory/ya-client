@@ -1,0 +1,17 @@
+name: openapi-spec
+on:
+  push:
+jobs:
+  validate-openapi-spec:
+    name: validate openapi spec
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check activity-api
+        uses: docker://jamescooke/openapi-validator
+        working-directory: /github/workspace/specs/
+        with:
+          args: activity-api.yml
