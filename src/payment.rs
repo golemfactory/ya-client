@@ -5,4 +5,4 @@ pub mod requestor;
 pub use provider::PaymentProviderApi;
 pub use requestor::PaymentRequestorApi;
 
-const PAYMENT_URL_ENV_VAR: &str = "YAGNA_PAYMENT_URL";
+pub(crate) const PAYMENT_URL_ENV_VAR: &str = "YAGNA_PAYMENT_URL";

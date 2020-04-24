@@ -4,9 +4,9 @@ use url::Url;
 use crate::{activity, market, payment, web::WebClient, web::WebInterface};
 use std::convert::TryFrom;
 
-const ACTIVITY_URL_ENV_VAR: &str = activity::ActivityRequestorApi::API_URL_ENV_VAR;
-const MARKET_URL_ENV_VAR: &str = market::MarketRequestorApi::API_URL_ENV_VAR;
-const PAYMENT_URL_ENV_VAR: &str = payment::PaymentRequestorApi::API_URL_ENV_VAR;
+use crate::activity::ACTIVITY_URL_ENV_VAR;
+use crate::market::MARKET_URL_ENV_VAR;
+use crate::payment::PAYMENT_URL_ENV_VAR;
 
 const YAGNA_APPKEY_ENV_VAR: &str = "YAGNA_APPKEY";
 
