@@ -6,7 +6,7 @@ use std::convert::TryFrom;
 
 const ACTIVITY_URL_ENV_VAR: &str = activity::ActivityRequestorApi::API_URL_ENV_VAR;
 const MARKET_URL_ENV_VAR: &str = market::MarketRequestorApi::API_URL_ENV_VAR;
-const PAYMENT_URL_ENV_VAR: &str = payment::requestor::RequestorApi::API_URL_ENV_VAR;
+const PAYMENT_URL_ENV_VAR: &str = payment::PaymentRequestorApi::API_URL_ENV_VAR;
 
 const YAGNA_APPKEY_ENV_VAR: &str = "YAGNA_APPKEY";
 
@@ -34,13 +34,13 @@ pub struct Provider;
 impl ApiClient for Requestor {
     type Market = market::MarketRequestorApi;
     type Activity = activity::ActivityRequestorApi;
-    type Payment = payment::requestor::RequestorApi;
+    type Payment = payment::PaymentRequestorApi;
 }
 
 impl ApiClient for Provider {
     type Market = market::MarketProviderApi;
     type Activity = activity::ActivityProviderApi;
-    type Payment = payment::provider::ProviderApi;
+    type Payment = payment::PaymentProviderApi;
 }
 
 #[derive(StructOpt, Clone)]

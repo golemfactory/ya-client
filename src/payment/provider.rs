@@ -18,22 +18,22 @@ pub struct ProviderApiConfig {
 }
 
 #[derive(Clone)]
-pub struct ProviderApi {
+pub struct PaymentProviderApi {
     client: Arc<WebClient>,
     config: ProviderApiConfig,
 }
 
-impl WebInterface for ProviderApi {
+impl WebInterface for PaymentProviderApi {
     const API_URL_ENV_VAR: &'static str = crate::payment::PAYMENT_URL_ENV_VAR;
     const API_SUFFIX: &'static str = PAYMENT_API_PATH;
 
     fn from_client(client: WebClient) -> Self {
         let config = ProviderApiConfig::default();
-        ProviderApi::new(&Arc::new(client), config)
+        PaymentProviderApi::new(&Arc::new(client), config)
     }
 }
 
-impl ProviderApi {
+impl PaymentProviderApi {
     pub fn new(client: &Arc<WebClient>, config: ProviderApiConfig) -> Self {
         Self {
             client: client.clone(),

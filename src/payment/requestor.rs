@@ -18,12 +18,12 @@ pub struct RequestorApiConfig {
 }
 
 #[derive(Clone)]
-pub struct RequestorApi {
+pub struct PaymentRequestorApi {
     client: WebClient,
     config: Arc<RequestorApiConfig>,
 }
 
-impl WebInterface for RequestorApi {
+impl WebInterface for PaymentRequestorApi {
     const API_URL_ENV_VAR: &'static str = crate::payment::PAYMENT_URL_ENV_VAR;
     const API_SUFFIX: &'static str = ya_client_model::payment::PAYMENT_API_PATH;
 
@@ -37,7 +37,7 @@ impl WebInterface for RequestorApi {
     }
 }
 
-impl RequestorApi {
+impl PaymentRequestorApi {
     pub fn new(client: &WebClient, config: RequestorApiConfig) -> Self {
         let config = config.into();
         let client = client.clone();
