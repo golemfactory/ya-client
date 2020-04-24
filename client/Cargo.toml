@@ -3,6 +3,7 @@ name = "ya-client"
 version = "0.2.0"
 authors = ["Golem Factory <contact@golem.network>"]
 edition = "2018"
+license="LGPL-3.0"
 
 [features]
 default = []
