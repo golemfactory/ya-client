@@ -2,10 +2,10 @@ use std::env;
 
 use ya_client::{
     activity::{ActivityProviderApi, ActivityRequestorControlApi, ActivityRequestorStateApi},
+    model::activity::ExeScriptRequest,
     web::WebClient,
     Result,
 };
-use ya_model::activity::ExeScriptRequest;
 
 async fn provider(client: &ActivityProviderApi, activity_id: &str) -> Result<()> {
     println!("[?] Events for activity {}", activity_id);

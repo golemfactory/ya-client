@@ -1,4 +1,4 @@
-//! Async bindings for the Yagna API (REST)
+//! Yagna REST API client async binding
 
 #[macro_use]
 pub mod web;
@@ -15,4 +15,4 @@ pub mod cli;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-pub use ya_model as model;
+pub use ya_client_model as model;

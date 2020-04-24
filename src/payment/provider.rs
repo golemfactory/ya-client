@@ -1,9 +1,10 @@
+//! Provider part of the Payment API
 use chrono::{DateTime, TimeZone};
 use std::fmt::Display;
 use std::sync::Arc;
 
 use crate::{web::WebClient, web::WebInterface, Result};
-use ya_model::payment::*;
+use ya_client_model::payment::*;
 
 #[derive(Default, Clone)]
 pub struct ProviderApiConfig {

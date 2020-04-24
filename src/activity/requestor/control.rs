@@ -1,5 +1,5 @@
 //! Requestor control part of Activity API
-use ya_model::activity::{ExeScriptCommandResult, ExeScriptRequest, ACTIVITY_API_PATH};
+use ya_client_model::activity::{ExeScriptCommandResult, ExeScriptRequest, ACTIVITY_API_PATH};
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 

@@ -3,7 +3,7 @@ use awc::error::{JsonPayloadError, PayloadError, SendRequestError};
 use awc::http::StatusCode;
 use backtrace::Backtrace as Trace; // needed b/c of thiserror magic
 
-use ya_model::ErrorMessage;
+use ya_client_model::ErrorMessage;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {

@@ -1,9 +1,10 @@
+//! Requestor part of the Payment API
 use chrono::{DateTime, TimeZone};
 use std::fmt::Display;
 use std::sync::Arc;
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
-use ya_model::payment::*;
+use ya_client_model::payment::*;
 
 #[derive(Default)]
 pub struct RequestorApiConfig {
@@ -24,7 +25,7 @@ pub struct RequestorApi {
 
 impl WebInterface for RequestorApi {
     const API_URL_ENV_VAR: &'static str = crate::payment::PAYMENT_URL_ENV_VAR;
-    const API_SUFFIX: &'static str = ya_model::payment::PAYMENT_API_PATH;
+    const API_SUFFIX: &'static str = ya_client_model::payment::PAYMENT_API_PATH;
 
     fn from_client(client: WebClient) -> Self {
         let mut config = RequestorApiConfig::default();

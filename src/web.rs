@@ -18,7 +18,7 @@ pub enum WebAuth {
 }
 
 /// Convenient wrapper for the [`awc::Client`](
-/// https://docs.rs/awc/0.2.8/awc/struct.Client.html) with builder.
+/// https://docs.rs/awc/1.0/awc/struct.Client.html) with builder.
 #[derive(Clone)]
 pub struct WebClient {
     base_url: Rc<Url>,

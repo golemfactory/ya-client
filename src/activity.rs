@@ -1,4 +1,4 @@
-//! Activity API part of the Yagna API
+//! Activity part of the Yagna API
 mod provider;
 mod requestor;
 

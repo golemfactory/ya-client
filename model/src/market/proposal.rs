@@ -88,21 +88,21 @@ impl Proposal {
     }
 }
 
-/// * `Initial` - proposal arrived from the market as response to subscription
-/// * `Draft` - bespoke counter-proposal issued by one party directly to other party (negotiation phase)
-/// * `Rejected` by other party
-/// * `Accepted` - promoted into the Agreement draft
-/// * `Expired` - not accepted nor rejected before validity period
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum State {
     #[serde(rename = "Initial")]
+    /// Proposal arrived from the market as response to subscription
     Initial,
     #[serde(rename = "Draft")]
+    /// Bespoke counter-proposal issued by one party directly to other party (negotiation phase)
     Draft,
     #[serde(rename = "Rejected")]
+    /// Rejected by other party
     Rejected,
     #[serde(rename = "Accepted")]
+    /// Promoted to the Agreement draft
     Accepted,
     #[serde(rename = "Expired")]
+    /// Not accepted nor rejected before validity period
     Expired,
 }

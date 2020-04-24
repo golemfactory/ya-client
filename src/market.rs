@@ -1,4 +1,4 @@
-//! Market API part of the Yagna API
+//! Market part of the Yagna API
 mod provider;
 mod requestor;
 

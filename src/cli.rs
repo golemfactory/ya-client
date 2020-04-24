@@ -45,7 +45,7 @@ impl ApiClient for Provider {
 
 #[derive(StructOpt, Clone)]
 pub struct ApiOpts {
-    /// Yagna daemon application key
+    /// Yagna service application key (for HTTP Bearer authorization)
     #[structopt(long = "app-key", env = YAGNA_APPKEY_ENV_VAR, hide_env_values = true)]
     app_key: String,
 

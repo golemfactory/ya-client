@@ -6,11 +6,11 @@ use structopt::StructOpt;
 
 use ya_client::{
     market::{MarketProviderApi, MarketRequestorApi},
+    model::market::{
+        proposal::State, AgreementProposal, Demand, Offer, Proposal, ProviderEvent, RequestorEvent,
+    },
     web::WebClient,
     Error, Result,
-};
-use ya_model::market::{
-    proposal::State, AgreementProposal, Demand, Offer, Proposal, ProviderEvent, RequestorEvent,
 };
 
 #[derive(StructOpt)]
