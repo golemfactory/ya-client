@@ -157,7 +157,7 @@ impl MarketRequestorApi {
     ///
     /// It returns one of the following options:
     ///
-    /// * `Ok` - Indicates that the Agreement has been approved by the Provider.
+    /// * `Approved` - Indicates that the Agreement has been approved by the Provider.
     /// - The Provider is now ready to accept a request to start an Activity
     /// as described in the negotiated agreement.
     /// - The Requestor’s corresponding `wait_for_approval` call returns Ok after
