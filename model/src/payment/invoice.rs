@@ -15,7 +15,7 @@ pub struct Invoice {
     pub activity_ids: Vec<String>,
     pub amount: BigDecimal,
     pub payment_due_date: DateTime<Utc>,
-    pub status: crate::payment::InvoiceStatus,
+    pub status: crate::payment::DocumentStatus,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
