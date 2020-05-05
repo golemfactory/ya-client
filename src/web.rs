@@ -162,6 +162,7 @@ impl WebRequest<SendClientRequest> {
                 response.status()
             ))?);
         }
+        log::trace!("{:?}", response);
 
         Ok(response.json().await?)
     }
