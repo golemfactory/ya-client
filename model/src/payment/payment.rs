@@ -1,13 +1,14 @@
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use crate::NodeId;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Payment {
     pub payment_id: String,
-    pub payer_id: String,
-    pub payee_id: String,
+    pub payer_id: NodeId,
+    pub payee_id: NodeId,
     pub payer_addr: String,
     pub payee_addr: String,
     pub amount: BigDecimal,
