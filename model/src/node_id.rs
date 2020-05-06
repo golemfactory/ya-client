@@ -8,6 +8,7 @@ use std::{fmt, str};
 #[error("NodeId parsing error: {0}")]
 pub struct ParseError(String);
 
+/// Yagna node identity compliant with [Ethereum addresses](https://en.wikipedia.org/wiki/Ethereum#Addresses)
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct NodeId {
     inner: [u8; 20],
