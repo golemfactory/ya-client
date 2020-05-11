@@ -7,6 +7,7 @@ use ya_client_model::market::{Agreement, Offer, Proposal, ProviderEvent, MARKET_
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 
 /// Bindings for Provider part of the Market API.
+#[derive(Clone)]
 pub struct MarketProviderApi {
     client: WebClient,
 }
