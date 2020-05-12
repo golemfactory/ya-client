@@ -182,7 +182,6 @@ pub(crate) fn default_on_timeout<T: Default>(err: Error) -> Result<T> {
 #[derive(Clone, Debug)]
 pub struct WebClientBuilder {
     pub(crate) host_port: Option<String>,
-    pub(crate) api_root: Option<String>,
     pub(crate) auth: Option<WebAuth>,
     pub(crate) headers: HeaderMap,
     pub(crate) timeout: Option<Duration>,
@@ -196,11 +195,6 @@ impl WebClientBuilder {
 
     pub fn host_port<T: Into<String>>(mut self, host_port: T) -> Self {
         self.host_port = Some(host_port.into());
-        self
-    }
-
-    pub fn api_root<T: Into<String>>(mut self, api_root: T) -> Self {
-        self.api_root = Some(api_root.into());
         self
     }
 
@@ -255,7 +249,6 @@ impl Default for WebClientBuilder {
     fn default() -> Self {
         WebClientBuilder {
             host_port: None,
-            api_root: None,
             auth: None,
             headers: HeaderMap::new(),
             timeout: None,
