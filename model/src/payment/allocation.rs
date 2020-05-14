@@ -22,22 +22,3 @@ pub struct NewAllocation {
     pub timeout: Option<DateTime<Utc>>,
     pub make_deposit: bool,
 }
-
-impl Allocation {
-    pub fn new(
-        allocation_id: String,
-        total_amount: BigDecimal,
-        spent_amount: BigDecimal,
-        remaining_amount: BigDecimal,
-        make_deposit: bool,
-    ) -> Allocation {
-        Allocation {
-            allocation_id,
-            total_amount,
-            spent_amount,
-            remaining_amount,
-            timeout: None,
-            make_deposit,
-        }
-    }
-}
