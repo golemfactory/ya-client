@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
   title: Yagna Payment API
-  version: 1.0.0
+  version: 1.1.0
   description: '
     Invoicing and Payments is a fundamental area of Yagna Ecosystem
     functionality. It includes aspects of communication between Requestor,
