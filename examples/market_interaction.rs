@@ -1,11 +1,11 @@
-use awc::Client;
-use futures::TryFutureExt;
 use serde_json;
 use std::{env, thread, time::Duration};
 use structopt::StructOpt;
+use url::Url;
 
+use ya_client::web::WebAuth;
 use ya_client::{
-    market::{MarketProviderApi, MarketRequestorApi},
+    market::{MarketProviderApi, MarketRequestorApi, DEFAULT_MARKET_URL},
     model::market::{
         proposal::State, AgreementProposal, Demand, Offer, Proposal, ProviderEvent, RequestorEvent,
     },
@@ -16,22 +16,40 @@ use ya_client::{
 #[derive(StructOpt)]
 #[structopt(name = "Market", about = "Market service properties")]
 struct Options {
-    #[structopt(short = "a", long, default_value = "localhost:5001")]
-    host_port: String,
-    #[structopt(long, default_value = "debug")]
+    #[structopt(short, long, default_value = DEFAULT_MARKET_URL)]
+    url: Url,
+    #[structopt(long)]
+    app_key: Option<String>,
+    #[structopt(long, default_value = "info")]
     log_level: String,
 }
 
-async fn query_market_stats(host_port: &String) -> Result<serde_json::Value> {
-    let url = format!("http://{}/admin/marketStats", host_port);
-    Client::default()
-        .get(url)
-        .send()
-        .map_err(Error::from)
-        .await?
-        .json()
-        .map_err(Error::from)
-        .await
+async fn check_provider_subscriptions(
+    client: &MarketProviderApi,
+    expected_cnt: usize,
+) -> Result<()> {
+    let provider_subscriptions = client.get_offers().await?;
+
+    println!(
+        "  <=PROVIDER | {} active subscriptions",
+        provider_subscriptions.len(),
+    );
+    assert_eq!(provider_subscriptions.len(), expected_cnt);
+    Ok(())
+}
+
+async fn check_requestor_subscriptions(
+    client: &MarketRequestorApi,
+    expected_cnt: usize,
+) -> Result<()> {
+    let requestor_subscriptions = client.get_demands().await?;
+
+    println!(
+        "REQUESTOR=>  | {} active subscriptions",
+        requestor_subscriptions.len(),
+    );
+    assert_eq!(requestor_subscriptions.len(), expected_cnt);
+    Ok(())
 }
 
 /// compares to given proposals
@@ -50,7 +68,7 @@ fn cmp_proposals(p1: &Proposal, p2: &Proposal) {
 //////////////
 // PROVIDER //
 //////////////
-async fn provider_interact(client: MarketProviderApi, host_port: &String) -> Result<()> {
+async fn provider_interact(client: MarketProviderApi) -> Result<()> {
     // provider - publish offer
     let offer = Offer::new(serde_json::json!({"zima":"już"}), "(&(lato=nie))".into());
     let provider_subscription_id = client.subscribe(&offer).await?;
@@ -59,13 +77,7 @@ async fn provider_interact(client: MarketProviderApi, host_port: &String) -> Res
         provider_subscription_id
     );
 
-    let provider_subscriptions = client.get_offers().await?;
-
-    println!(
-        "  <=PROVIDER | {} active subscriptions\n\t {:#?}",
-        provider_subscriptions.len(),
-        provider_subscriptions
-    );
+    check_provider_subscriptions(&client, 1).await?;
 
     // provider - get events
     'prov_events: loop {
@@ -128,23 +140,16 @@ async fn provider_interact(client: MarketProviderApi, host_port: &String) -> Res
         }
     }
 
-    let market_stats = query_market_stats(host_port).await?;
-    println!("  <=PROVIDER | Market stats: {:#?}", market_stats);
-
     println!("  <=PROVIDER | Unsubscribing...");
     let res = client.unsubscribe(&provider_subscription_id).await?;
     println!("  <=PROVIDER | Unsubscribed: {}", res);
-
-    let market_stats = query_market_stats(host_port).await?;
-    println!("  <=PROVIDER | Market stats: {:#?}", market_stats);
-
-    Ok(())
+    check_provider_subscriptions(&client, 0).await
 }
 
 //\\\\\\\\\\\//
 // REQUESTOR //
 //\\\\\\\\\\\//
-async fn requestor_interact(client: MarketRequestorApi, host_port: &String) -> Result<()> {
+async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
     thread::sleep(Duration::from_millis(300));
     // requestor - publish demand
     let demand = Demand::new(serde_json::json!({"lato":"nie"}), "(&(zima=już))".into());
@@ -154,13 +159,7 @@ async fn requestor_interact(client: MarketRequestorApi, host_port: &String) -> R
         requestor_subscription_id
     );
 
-    let requestor_subscriptions = client.get_demands().await?;
-
-    println!(
-        "REQUESTOR=>  | {} active subscriptions\n\t {:#?}",
-        requestor_subscriptions.len(),
-        requestor_subscriptions
-    );
+    check_requestor_subscriptions(&client, 1).await?;
 
     // requestor - get events
     'req_events: loop {
@@ -245,38 +244,32 @@ async fn requestor_interact(client: MarketRequestorApi, host_port: &String) -> R
         }
     }
 
-    let market_stats = query_market_stats(host_port).await?;
-    println!("REQUESTOR=>  | Market stats: {:#?}", market_stats);
-
     println!("REQUESTOR=>  | Unsunscribing...");
     let res = client.unsubscribe(&requestor_subscription_id).await?;
     println!("REQUESTOR=>  | Unsubscribed: {}", res);
-
-    let market_stats = query_market_stats(host_port).await?;
-    println!("REQUESTOR=>  | Market stats: {:#?}", market_stats);
-
-    Ok(())
-}
-
-async fn interact(host_port: &String) -> Result<()> {
-    let client = WebClient::builder().host_port(host_port).build()?;
-
-    futures::try_join!(
-        provider_interact(client.interface()?, host_port),
-        requestor_interact(client.interface()?, host_port)
-    )
-    .map(|_| ())
+    check_requestor_subscriptions(&client, 0).await
 }
 
 #[actix_rt::main]
 async fn main() -> Result<()> {
     let options = Options::from_args();
-    println!("\nrun this example with RUST_LOG=info to see REST calls\n");
+    println!("\nrun this example with RUST_LOG=debug to see REST calls\n");
     env::set_var(
         "RUST_LOG",
         env::var("RUST_LOG").unwrap_or(options.log_level),
     );
     env_logger::init();
 
-    interact(&options.host_port).await
+    let mut client_builder = WebClient::builder();
+    if let Some(app_key) = options.app_key {
+        client_builder = client_builder.auth(WebAuth::Bearer(app_key));
+    }
+    let client = client_builder.build()?;
+
+    futures::try_join!(
+        provider_interact(client.interface_at(options.url.clone())?),
+        requestor_interact(client.interface_at(options.url)?)
+    )?;
+
+    Ok(())
 }
