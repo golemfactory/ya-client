@@ -20,7 +20,7 @@ pub struct DebitNote {
     pub usage_counter_vector: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub payment_due_date: Option<DateTime<Utc>>,
-    pub status: crate::payment::InvoiceStatus,
+    pub status: crate::payment::DocumentStatus,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
