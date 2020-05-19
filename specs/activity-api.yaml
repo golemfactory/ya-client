@@ -5,6 +5,8 @@ info:
   version: v1
 servers:
   - url: /activity-api/v1
+security:
+  - app_key: []
 tags:
   - name: requestor_control
     description: Requestor Part (Control)
@@ -383,6 +385,11 @@ paths:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
 components:
+  securitySchemes:
+    app_key:
+      type: apiKey
+      in: header
+      name: Authorization
   schemas:
     ExeScriptRequest:
       required:

@@ -33,7 +33,8 @@ tags:
     description: Requestor part
   - name: provider
     description: Provider part
-
+security:
+  - app_key: []
 paths:
 
   /provider/debitNotes:
@@ -801,6 +802,11 @@ paths:
           $ref: '#/components/responses/ServerError'
 
 components:
+  securitySchemes:
+    app_key:
+      type: apiKey
+      in: header
+      name: Authorization
 
   parameters:
 
