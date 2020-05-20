@@ -3,18 +3,31 @@ use chrono::{DateTime, TimeZone};
 use std::fmt::Display;
 use std::sync::Arc;
 
+use crate::payment::parse_env_var;
 use crate::{web::WebClient, web::WebInterface, Result};
+use std::num::ParseIntError;
+use std::time::Duration;
 use ya_client_model::payment::*;
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ProviderApiConfig {
-    send_debit_note_timeout: Option<u32>, // all timeouts are in seconds
-    cancel_debit_note_timeout: Option<u32>,
-    debit_note_event_timeout: Option<u32>,
-    send_invoice_timeout: Option<u32>,
-    cancel_invoice_timeout: Option<u32>,
-    invoice_event_timeout: Option<u32>,
-    payment_event_timeout: Option<u32>,
+    // All timeouts are given in seconds.
+    // None is interpreted by server as default timeout (60 seconds).
+    pub send_debit_note_timeout: Option<u32>,
+    pub cancel_debit_note_timeout: Option<u32>,
+    pub send_invoice_timeout: Option<u32>,
+    pub cancel_invoice_timeout: Option<u32>,
+}
+
+impl ProviderApiConfig {
+    pub fn from_env() -> std::result::Result<Self, ParseIntError> {
+        Ok(Self {
+            send_debit_note_timeout: parse_env_var("SEND_DEBIT_NOTE_TIMEOUT")?,
+            cancel_debit_note_timeout: parse_env_var("CANCEL_DEBIT_NOTE_TIMEOUT")?,
+            send_invoice_timeout: parse_env_var("SEND_INVOICE_TIMEOUT")?,
+            cancel_invoice_timeout: parse_env_var("CANCEL_INVOICE_TIMEOUT")?,
+        })
+    }
 }
 
 #[derive(Clone)]
@@ -95,13 +108,14 @@ impl PaymentProviderApi {
     pub async fn get_debit_note_events<Tz>(
         &self,
         later_than: Option<&DateTime<Tz>>,
+        timeout: Option<Duration>,
     ) -> Result<Vec<DebitNoteEvent>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,
     {
         let laterThan = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = self.config.debit_note_event_timeout;
+        let timeout = timeout.map(|d| d.as_secs());
         let url = url_format!(
             "provider/debitNoteEvents",
             #[query] laterThan,
@@ -161,13 +175,14 @@ impl PaymentProviderApi {
     pub async fn get_invoice_events<Tz>(
         &self,
         later_than: Option<&DateTime<Tz>>,
+        timeout: Option<Duration>,
     ) -> Result<Vec<InvoiceEvent>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,
     {
         let laterThan = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = self.config.invoice_event_timeout;
+        let timeout = timeout.map(|d| d.as_secs());
         let url = url_format!(
             "provider/invoiceEvents",
             #[query] laterThan,
@@ -181,13 +196,14 @@ impl PaymentProviderApi {
     pub async fn get_payments<Tz>(
         &self,
         later_than: Option<&DateTime<Tz>>,
+        timeout: Option<Duration>,
     ) -> Result<Vec<Payment>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,
     {
         let laterThan = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = self.config.payment_event_timeout;
+        let timeout = timeout.map(|d| d.as_secs());
         let url = url_format!(
             "provider/payments",
             #[query] laterThan,
