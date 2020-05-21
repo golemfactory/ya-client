@@ -5,18 +5,18 @@ use url::Url;
 
 use ya_client::web::WebAuth;
 use ya_client::{
-    market::{MarketProviderApi, MarketRequestorApi, DEFAULT_MARKET_URL},
+    market::{MarketProviderApi, MarketRequestorApi},
     model::market::{
         proposal::State, AgreementProposal, Demand, Offer, Proposal, ProviderEvent, RequestorEvent,
     },
-    web::WebClient,
+    web::{WebClient, WebInterface},
     Error, Result,
 };
 
 #[derive(StructOpt)]
 #[structopt(name = "Market", about = "Market service properties")]
 struct Options {
-    #[structopt(short, long, default_value = DEFAULT_MARKET_URL)]
+    #[structopt(short, long, default_value = <MarketRequestorApi as WebInterface>::API_URL_ENV_VAR )]
     url: Url,
     #[structopt(long)]
     app_key: Option<String>,
