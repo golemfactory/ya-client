@@ -1,3 +1,4 @@
+use crate::NodeId;
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -6,8 +7,8 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct DebitNote {
     pub debit_note_id: String,
-    pub issuer_id: String,
-    pub recipient_id: String,
+    pub issuer_id: NodeId,
+    pub recipient_id: NodeId,
     pub payee_addr: String,
     pub payer_addr: String,
     #[serde(skip_serializing_if = "Option::is_none", default)]
