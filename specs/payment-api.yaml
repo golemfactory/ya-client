@@ -840,7 +840,7 @@ components:
       required: false
       in: query
       schema:
-        type: integer
+        type: number
         minimum: 0
         default: 60
 
@@ -852,7 +852,7 @@ components:
       required: false
       in: query
       schema:
-        type: integer
+        type: number
         minimum: 0
         default: 0
 

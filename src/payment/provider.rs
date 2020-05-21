@@ -3,30 +3,25 @@ use chrono::{DateTime, TimeZone};
 use std::fmt::Display;
 use std::sync::Arc;
 
-use crate::payment::parse_env_var;
 use crate::{web::WebClient, web::WebInterface, Result};
-use std::num::ParseIntError;
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use ya_client_model::payment::*;
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct ProviderApiConfig {
     // All timeouts are given in seconds.
     // None is interpreted by server as default timeout (60 seconds).
-    pub send_debit_note_timeout: Option<u32>,
-    pub cancel_debit_note_timeout: Option<u32>,
-    pub send_invoice_timeout: Option<u32>,
-    pub cancel_invoice_timeout: Option<u32>,
+    pub send_debit_note_timeout: Option<f64>,
+    pub cancel_debit_note_timeout: Option<f64>,
+    pub send_invoice_timeout: Option<f64>,
+    pub cancel_invoice_timeout: Option<f64>,
 }
 
 impl ProviderApiConfig {
-    pub fn from_env() -> std::result::Result<Self, ParseIntError> {
-        Ok(Self {
-            send_debit_note_timeout: parse_env_var("SEND_DEBIT_NOTE_TIMEOUT")?,
-            cancel_debit_note_timeout: parse_env_var("CANCEL_DEBIT_NOTE_TIMEOUT")?,
-            send_invoice_timeout: parse_env_var("SEND_INVOICE_TIMEOUT")?,
-            cancel_invoice_timeout: parse_env_var("CANCEL_INVOICE_TIMEOUT")?,
-        })
+    pub fn from_env() -> envy::Result<Self> {
+        envy::from_env()
     }
 }
 
@@ -115,7 +110,7 @@ impl PaymentProviderApi {
         Tz::Offset: Display,
     {
         let laterThan = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = timeout.map(|d| d.as_secs());
+        let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "provider/debitNoteEvents",
             #[query] laterThan,
@@ -182,7 +177,7 @@ impl PaymentProviderApi {
         Tz::Offset: Display,
     {
         let laterThan = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = timeout.map(|d| d.as_secs());
+        let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "provider/invoiceEvents",
             #[query] laterThan,
@@ -203,7 +198,7 @@ impl PaymentProviderApi {
         Tz::Offset: Display,
     {
         let laterThan = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = timeout.map(|d| d.as_secs());
+        let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "provider/payments",
             #[query] laterThan,
