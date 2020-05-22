@@ -1,7 +1,4 @@
 //! Requestor part of the Market API
-use std::rc::Rc;
-use url::Url;
-
 use ya_client_model::market::{Agreement, AgreementProposal, Demand, Proposal, RequestorEvent};
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
@@ -15,10 +12,6 @@ pub struct MarketRequestorApi {
 impl WebInterface for MarketRequestorApi {
     const API_URL_ENV_VAR: &'static str = crate::market::MARKET_URL_ENV_VAR;
     const API_SUFFIX: &'static str = ya_client_model::market::MARKET_API_PATH;
-
-    fn rebase_service_url(_base_url: Rc<Url>) -> Result<Rc<Url>> {
-        crate::market::service_url().map(Rc::new)
-    }
 
     fn from_client(client: WebClient) -> Self {
         MarketRequestorApi { client }
