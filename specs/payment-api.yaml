@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
   title: Yagna Payment API
-  version: 1.1.0
+  version: 1.2.0
   description: '
     Invoicing and Payments is a fundamental area of Yagna Ecosystem
     functionality. It includes aspects of communication between Requestor,
@@ -1282,18 +1282,16 @@ components:
         timestamp:
           type: string
           format: date-time
-        agreementId:
-          type: string
         allocationId:
           type: string
-        debitNoteIds:
+        agreementPayments:
           type: array
           items:
-            type: string
-        invoiceIds:
+            $ref: '#/components/schemas/AgreementPayment'
+        activityPayments:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/ActivityPayment'
         details:
           type: string
           format: byte
@@ -1303,8 +1301,38 @@ components:
         - payeeId
         - amount
         - timestamp
-        - agreementId
+        - agreementPayments
+        - activityPayments
         - details
+
+    AgreementPayment:
+      description: >
+        Share of a Payment assigned to an Agreement, but not to any particular
+        Activity within that Agreement.
+      type: object
+      readOnly: true
+      properties:
+        agreementId:
+          type: string
+        amount:
+          type: string
+      required:
+        - agreementId
+        - amount
+
+    ActivityPayment:
+      description: >
+        Share of a Payment assigned to a particular Activity.
+      type: object
+      readOnly: true
+      properties:
+        activityId:
+          type: string
+        amount:
+          type: string
+      required:
+        - activityId
+        - amount
 
     DebitNoteEvent:
       type: object
