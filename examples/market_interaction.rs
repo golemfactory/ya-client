@@ -3,7 +3,6 @@ use std::{env, thread, time::Duration};
 use structopt::StructOpt;
 use url::Url;
 
-use ya_client::web::WebAuth;
 use ya_client::{
     market::{MarketProviderApi, MarketRequestorApi},
     model::market::{
@@ -262,9 +261,9 @@ async fn main() -> Result<()> {
 
     let mut client_builder = WebClient::builder();
     if let Some(app_key) = options.app_key {
-        client_builder = client_builder.auth(WebAuth::Bearer(app_key));
+        client_builder = client_builder.auth_token(&app_key);
     }
-    let client = client_builder.build()?;
+    let client = client_builder.build();
 
     futures::try_join!(
         provider_interact(client.interface_at(options.url.clone())?),

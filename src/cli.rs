@@ -7,6 +7,7 @@ use std::convert::TryFrom;
 use crate::activity::ACTIVITY_URL_ENV_VAR;
 use crate::market::MARKET_URL_ENV_VAR;
 use crate::payment::PAYMENT_URL_ENV_VAR;
+use crate::web::{DEFAULT_YAGNA_API_URL, YAGNA_API_URL_ENV_VAR};
 
 const YAGNA_APPKEY_ENV_VAR: &str = "YAGNA_APPKEY";
 
@@ -44,21 +45,31 @@ impl ApiClient for Provider {
 }
 
 #[derive(StructOpt, Clone)]
+#[structopt(rename_all = "kebab-case")]
 pub struct ApiOpts {
     /// Yagna service application key (for HTTP Bearer authorization)
-    #[structopt(long = "app-key", env = YAGNA_APPKEY_ENV_VAR, hide_env_values = true)]
+    #[structopt(long, env = YAGNA_APPKEY_ENV_VAR, hide_env_values = true)]
     app_key: String,
 
+    /// default prefix URL for all APIs
+    #[structopt(
+        long,
+        env = YAGNA_API_URL_ENV_VAR,
+        hide_env_values = true,
+        default_value = DEFAULT_YAGNA_API_URL
+    )]
+    api_url: Url,
+
     /// Market API URL
-    #[structopt(long = "market-url", env = MARKET_URL_ENV_VAR, hide_env_values = true)]
+    #[structopt(long, env = MARKET_URL_ENV_VAR, hide_env_values = true)]
     market_url: Option<Url>,
 
     /// Activity API URL
-    #[structopt(long = "activity-url", env = ACTIVITY_URL_ENV_VAR, hide_env_values = true)]
+    #[structopt(long, env = ACTIVITY_URL_ENV_VAR, hide_env_values = true)]
     activity_url: Option<Url>,
 
     /// Payment API URL
-    #[structopt(long = "payment-url", env = PAYMENT_URL_ENV_VAR, hide_env_values = true)]
+    #[structopt(long, env = PAYMENT_URL_ENV_VAR, hide_env_values = true)]
     payment_url: Option<Url>,
 }
 
@@ -66,7 +77,10 @@ impl<T: ApiClient> TryFrom<&ApiOpts> for Api<T> {
     type Error = crate::Error;
 
     fn try_from(cli: &ApiOpts) -> Result<Self, Self::Error> {
-        let client = WebClient::with_token(&cli.app_key)?;
+        let client = WebClient::builder()
+            .api_url(cli.api_url.clone())
+            .auth_token(&cli.app_key)
+            .build();
 
         Ok(Self {
             market: client.interface_at(cli.market_url.clone())?,
