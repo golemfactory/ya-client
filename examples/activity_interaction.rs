@@ -77,7 +77,7 @@ async fn requestor_state(client: &ActivityRequestorStateApi, activity_id: &str) 
 }
 
 async fn interact() -> Result<()> {
-    let client = WebClient::builder().build()?;
+    let client = WebClient::builder().build();
     requestor(&client, "agreement_id").await?;
     provider(&client.interface()?, "activity_id").await
 }
