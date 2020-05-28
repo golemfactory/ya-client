@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
+use std::fmt::{Display, Formatter, Result as FmtResult};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
@@ -40,11 +41,12 @@ impl From<DocumentStatus> for String {
     }
 }
 
-impl ToString for DocumentStatus {
-    fn to_string(&self) -> String {
-        serde_json::to_string(self)
+impl Display for DocumentStatus {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        let str = serde_json::to_string(self)
             .unwrap()
             .trim_matches('"')
-            .to_owned()
+            .to_owned();
+        write!(f, "{}", str)
     }
 }
