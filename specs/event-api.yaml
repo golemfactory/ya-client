@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 0.1.0
+  version: 0.1.1
   title: Yagna Event API
   description: '
     Event API is a technical interface which facilitates the flow of event notifications 
@@ -40,6 +40,8 @@ paths:
 
       parameters:
         - $ref: '#/components/parameters/subscriptionId'
+        - $ref: '#/components/parameters/includeEventTypes'
+        - $ref: '#/components/parameters/excludeEventTypes'
         - $ref: 'common.yaml#/parameters/timeout'
         - $ref: '#/components/parameters/afterTimestamp'
         - $ref: '#/components/parameters/maxEvents'
@@ -81,6 +83,8 @@ paths:
   
       parameters:
         - $ref: '#/components/parameters/subscriptionId'
+        - $ref: '#/components/parameters/includeEventTypes'
+        - $ref: '#/components/parameters/excludeEventTypes'
         - $ref: '#/components/parameters/beforeTimestamp'
     
       responses:
@@ -116,6 +120,27 @@ components:
       required: true
       schema:
         type: string
+
+    includeEventTypes:
+      name: includeEventTypes
+      description: >
+          Array of Event Types to be included by the operation. 
+          Empty array indicates all Event Types should be included.
+      in: query
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/EventType'
+
+    excludeEventTypes:
+      name: excludeEventTypes
+      description: >
+          Array of Event Types to be excluded by the operation. 
+      in: query
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/EventType'
 
     maxEvents:
       name: maxEvents
@@ -185,7 +210,38 @@ components:
   
 
   schemas:
-    # refactor the following to Event API
+    EventType:
+        type: string
+        enum:
+          - DemandProposalEvent
+          - OfferProposalEvent
+          - PropertyQueryEvent
+          - AgreementProposalEvent
+          - AgreementAcceptedEvent
+          - AgreementRejectedEvent
+          - AgreementCancelledEvent
+          - AgreementTimeoutEvent
+          - AgreementTerminatedEvent
+          - CreateActivityEvent
+          - DestroyActivityEvent
+          - ExeScriptCommandFinishedEvent
+          - ActivityStateChangedEvent
+          - GetActivityStateEvent
+          - GetActivityUsageEvent
+          - DebitNoteReceivedEvent
+          - DebitNoteAcceptedEvent
+          - DebitNoteRejectedEvent
+          - DebitNoteFailedEvent
+          - DebitNoteSettledEvent
+          - DebitNoteCancelledEvent
+          - InvoiceReceivedEvent
+          - InvoiceAcceptedEvent
+          - InvoiceRejectedEvent
+          - InvoiceFailedEvent
+          - InvoiceSettledEvent
+          - InvoiceCancelledEvent
+          - PaymentReceivedEvent
+
     Event:
         type: object
         required:
