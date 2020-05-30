@@ -22,6 +22,8 @@ pub struct Offer {
     pub offer_id: Option<String>,
     #[serde(rename = "providerId", skip_serializing_if = "Option::is_none")]
     pub provider_id: Option<String>, // TODO: use NodeId
+
+                                     // TODO: ttl
 }
 
 impl Offer {

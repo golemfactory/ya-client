@@ -1,5 +1,5 @@
-//! Provider part of Activity API
-use ya_model::activity::{ActivityState, ActivityUsage, ProviderEvent, ACTIVITY_API_PATH};
+//! Provider part of the Activity API
+use ya_client_model::activity::{ActivityState, ActivityUsage, ProviderEvent, ACTIVITY_API_PATH};
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 

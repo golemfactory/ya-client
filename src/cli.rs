@@ -4,9 +4,10 @@ use url::Url;
 use crate::{activity, market, payment, web::WebClient, web::WebInterface};
 use std::convert::TryFrom;
 
-const ACTIVITY_URL_ENV_VAR: &str = activity::ActivityRequestorApi::API_URL_ENV_VAR;
-const MARKET_URL_ENV_VAR: &str = market::MarketRequestorApi::API_URL_ENV_VAR;
-const PAYMENT_URL_ENV_VAR: &str = payment::requestor::RequestorApi::API_URL_ENV_VAR;
+use crate::activity::ACTIVITY_URL_ENV_VAR;
+use crate::market::MARKET_URL_ENV_VAR;
+use crate::payment::PAYMENT_URL_ENV_VAR;
+use crate::web::{DEFAULT_YAGNA_API_URL, YAGNA_API_URL_ENV_VAR};
 
 const YAGNA_APPKEY_ENV_VAR: &str = "YAGNA_APPKEY";
 
@@ -34,31 +35,41 @@ pub struct Provider;
 impl ApiClient for Requestor {
     type Market = market::MarketRequestorApi;
     type Activity = activity::ActivityRequestorApi;
-    type Payment = payment::requestor::RequestorApi;
+    type Payment = payment::PaymentRequestorApi;
 }
 
 impl ApiClient for Provider {
     type Market = market::MarketProviderApi;
     type Activity = activity::ActivityProviderApi;
-    type Payment = payment::provider::ProviderApi;
+    type Payment = payment::PaymentProviderApi;
 }
 
 #[derive(StructOpt, Clone)]
+#[structopt(rename_all = "kebab-case")]
 pub struct ApiOpts {
-    /// Yagna daemon application key
-    #[structopt(long = "app-key", env = YAGNA_APPKEY_ENV_VAR, hide_env_values = true)]
+    /// Yagna service application key (for HTTP Bearer authorization)
+    #[structopt(long, env = YAGNA_APPKEY_ENV_VAR, hide_env_values = true)]
     app_key: String,
 
+    /// default prefix URL for all APIs
+    #[structopt(
+        long,
+        env = YAGNA_API_URL_ENV_VAR,
+        hide_env_values = true,
+        default_value = DEFAULT_YAGNA_API_URL
+    )]
+    api_url: Url,
+
     /// Market API URL
-    #[structopt(long = "market-url", env = MARKET_URL_ENV_VAR, hide_env_values = true)]
+    #[structopt(long, env = MARKET_URL_ENV_VAR, hide_env_values = true)]
     market_url: Option<Url>,
 
     /// Activity API URL
-    #[structopt(long = "activity-url", env = ACTIVITY_URL_ENV_VAR, hide_env_values = true)]
+    #[structopt(long, env = ACTIVITY_URL_ENV_VAR, hide_env_values = true)]
     activity_url: Option<Url>,
 
     /// Payment API URL
-    #[structopt(long = "payment-url", env = PAYMENT_URL_ENV_VAR, hide_env_values = true)]
+    #[structopt(long, env = PAYMENT_URL_ENV_VAR, hide_env_values = true)]
     payment_url: Option<Url>,
 }
 
@@ -66,7 +77,10 @@ impl<T: ApiClient> TryFrom<&ApiOpts> for Api<T> {
     type Error = crate::Error;
 
     fn try_from(cli: &ApiOpts) -> Result<Self, Self::Error> {
-        let client = WebClient::with_token(&cli.app_key)?;
+        let client = WebClient::builder()
+            .api_url(cli.api_url.clone())
+            .auth_token(&cli.app_key)
+            .build();
 
         Ok(Self {
             market: client.interface_at(cli.market_url.clone())?,

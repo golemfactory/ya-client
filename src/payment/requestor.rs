@@ -1,42 +1,48 @@
+//! Requestor part of the Payment API
 use chrono::{DateTime, TimeZone};
 use std::fmt::Display;
 use std::sync::Arc;
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
-use ya_model::payment::*;
+use serde::{Deserialize, Serialize};
+use std::time::Duration;
+use ya_client_model::payment::*;
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct RequestorApiConfig {
-    accept_debit_note_timeout: Option<u32>, // all timeouts are in seconds
-    reject_debit_note_timeout: Option<u32>,
-    debit_note_event_timeout: Option<u32>,
-    accept_invoice_timeout: Option<u32>,
-    reject_invoice_timeout: Option<u32>,
-    invoice_event_timeout: Option<u32>,
-    payment_event_timeout: Option<u32>,
+    // All timeouts are given in seconds.
+    // None is interpreted by server as default timeout (60 seconds).
+    pub accept_debit_note_timeout: Option<f64>,
+    pub reject_debit_note_timeout: Option<f64>,
+    pub accept_invoice_timeout: Option<f64>,
+    pub reject_invoice_timeout: Option<f64>,
+}
+
+impl RequestorApiConfig {
+    pub fn from_env() -> envy::Result<Self> {
+        envy::from_env()
+    }
 }
 
 #[derive(Clone)]
-pub struct RequestorApi {
+pub struct PaymentRequestorApi {
     client: WebClient,
     config: Arc<RequestorApiConfig>,
 }
 
-impl WebInterface for RequestorApi {
+impl WebInterface for PaymentRequestorApi {
     const API_URL_ENV_VAR: &'static str = crate::payment::PAYMENT_URL_ENV_VAR;
-    const API_SUFFIX: &'static str = ya_model::payment::PAYMENT_API_PATH;
+    const API_SUFFIX: &'static str = ya_client_model::payment::PAYMENT_API_PATH;
 
     fn from_client(client: WebClient) -> Self {
-        let mut config = RequestorApiConfig::default();
-        config.invoice_event_timeout = Some(5);
-        config.debit_note_event_timeout = Some(5);
-        config.accept_invoice_timeout = Some(50);
+        let config = RequestorApiConfig::default();
         let config = Arc::new(config);
         Self { client, config }
     }
 }
 
-impl RequestorApi {
+impl PaymentRequestorApi {
     pub fn new(client: &WebClient, config: RequestorApiConfig) -> Self {
         let config = config.into();
         let client = client.clone();
@@ -97,13 +103,14 @@ impl RequestorApi {
     pub async fn get_debit_note_events<Tz>(
         &self,
         later_than: Option<&DateTime<Tz>>,
+        timeout: Option<Duration>,
     ) -> Result<Vec<DebitNoteEvent>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,
     {
         let laterThan = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = self.config.debit_note_event_timeout;
+        let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "requestor/debitNoteEvents",
             #[query] laterThan,
@@ -159,13 +166,14 @@ impl RequestorApi {
     pub async fn get_invoice_events<Tz>(
         &self,
         later_than: Option<&DateTime<Tz>>,
+        timeout: Option<Duration>,
     ) -> Result<Vec<InvoiceEvent>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,
     {
         let laterThan = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = self.config.invoice_event_timeout;
+        let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "requestor/invoiceEvents",
             #[query] laterThan,
@@ -207,13 +215,14 @@ impl RequestorApi {
     pub async fn get_payments<Tz>(
         &self,
         later_than: Option<&DateTime<Tz>>,
+        timeout: Option<Duration>,
     ) -> Result<Vec<Payment>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,
     {
         let laterThan = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = self.config.payment_event_timeout;
+        let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "requestor/payments",
             #[query] laterThan,

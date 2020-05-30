@@ -1,6 +1,6 @@
-//! Requestor part of Activity API
+//! Requestor part of the Activity API
 use crate::web::{WebClient, WebInterface};
-use ya_model::activity::ACTIVITY_API_PATH;
+use ya_client_model::activity::ACTIVITY_API_PATH;
 
 pub mod control;
 pub mod state;

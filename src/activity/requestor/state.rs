@@ -1,5 +1,5 @@
 //! Requestor state part of Activity API
-use ya_model::activity::{ActivityState, ExeScriptCommandState, ACTIVITY_API_PATH};
+use ya_client_model::activity::{ActivityState, ExeScriptCommandState, ACTIVITY_API_PATH};
 
 use crate::{web::WebClient, web::WebInterface, Result};
 

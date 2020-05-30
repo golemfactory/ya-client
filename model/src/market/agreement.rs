@@ -73,10 +73,10 @@ impl Agreement {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum State {
-    /// newly created by a Requestor (based on Proposal)
+    /// Newly created by a Requestor (based on Proposal)
     #[serde(rename = "Proposal")]
     Proposal,
-    /// confirmed by a Requestor and send to Provider for approval
+    /// Confirmed by a Requestor and send to Provider for approval
     #[serde(rename = "Pending")]
     Pending,
     /// Cancelled by a Requestor
@@ -88,10 +88,10 @@ pub enum State {
     /// Approved by both sides
     #[serde(rename = "Approved")]
     Approved,
-    /// Expired - not accepted, rejected nor cancelled within validity period
+    /// Not accepted, rejected nor cancelled within validity period
     #[serde(rename = "Expired")]
     Expired,
-    /// `Terminated` - finished after approval.
+    /// Finished after approval
     #[serde(rename = "Terminated")]
     Terminated,
 }

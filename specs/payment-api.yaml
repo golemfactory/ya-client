@@ -715,7 +715,7 @@ components:
       required: false
       in: query
       schema:
-        type: integer
+        type: number
         minimum: 0
         default: 60
 
@@ -727,7 +727,7 @@ components:
       required: false
       in: query
       schema:
-        type: integer
+        type: number
         minimum: 0
         default: 0
 
@@ -922,6 +922,12 @@ components:
         recipientId:
           type: string
           readOnly: true
+        payeeAddr:
+          type: string
+          readOnly: true
+        payerAddr:
+          type: string
+          readOnly: true
         previousDebitNoteId:
           type: string
           readOnly: true
@@ -931,16 +937,13 @@ components:
           readOnly: true
         agreementId:
           type: string
+          readOnly: true
         activityId:
           type: string
         totalAmountDue:
           type: string
         usageCounterVector:
           type: object
-        creditAccountId:
-          type: string
-        paymentPlatform:
-          type: string
         paymentDueDate:
           type: string
           format: date-time
@@ -953,9 +956,9 @@ components:
         - recipientId
         - timestamp
         - agreementId
+        - activityId
         - totalAmountDue
-        - creditAccountId
-        #- status
+        - status
 
     Invoice:
       description: >
@@ -981,6 +984,12 @@ components:
         recipientId:
           type: string
           readOnly: true
+        payeeAddr:
+          type: string
+          readOnly: true
+        payerAddr:
+          type: string
+          readOnly: true
         lastDebitNoteId:
           type: string
           readOnly: true
@@ -996,12 +1005,6 @@ components:
             type: string
         amount:
           type: string
-        usageCounterVector:
-          type: object
-        creditAccountId:
-          type: string
-        paymentPlatform:
-          type: string
         paymentDueDate:
           type: string
           format: date-time
@@ -1015,7 +1018,6 @@ components:
         - timestamp
         - agreementId
         - amount
-        - creditAccountId
         - paymentDueDate
         #- status
 
@@ -1120,11 +1122,17 @@ components:
           type: string
         payeeId:
           type: string
+        payerAddr:
+          type: string
+        payeeAddr:
+          type: string
         amount:
           type: string
         timestamp:
           type: string
           format: date-time
+        agreementId:
+          type: string
         allocationId:
           type: string
         debitNoteIds:
@@ -1144,5 +1152,6 @@ components:
         - payeeId
         - amount
         - timestamp
+        - agreementId
         - details
 

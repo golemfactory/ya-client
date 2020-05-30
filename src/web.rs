@@ -7,10 +7,20 @@ use awc::{
 use bytes::Bytes;
 use futures::Stream;
 use serde::{de::DeserializeOwned, Serialize};
-use std::{rc::Rc, str::FromStr, time::Duration};
+use std::{env, rc::Rc, str::FromStr, time::Duration};
 use url::{form_urlencoded, Url};
 
 use crate::{Error, Result};
+
+pub const YAGNA_API_URL_ENV_VAR: &str = "YAGNA_API_URL";
+pub const DEFAULT_YAGNA_API_URL: &str = "http://127.0.0.1:7465";
+
+pub fn rest_api_url() -> Url {
+    let api_url = env::var(YAGNA_API_URL_ENV_VAR).unwrap_or(DEFAULT_YAGNA_API_URL.into());
+    api_url
+        .parse()
+        .expect(&format!("invalid API URL: {}", api_url))
+}
 
 #[derive(Clone, Debug)]
 pub enum WebAuth {
@@ -18,7 +28,7 @@ pub enum WebAuth {
 }
 
 /// Convenient wrapper for the [`awc::Client`](
-/// https://docs.rs/awc/0.2.8/awc/struct.Client.html) with builder.
+/// https://docs.rs/awc/1.0/awc/struct.Client.html) with builder.
 #[derive(Clone)]
 pub struct WebClient {
     base_url: Rc<Url>,
@@ -47,12 +57,6 @@ pub struct WebRequest<T> {
 impl WebClient {
     pub fn builder() -> WebClientBuilder {
         WebClientBuilder::default()
-    }
-
-    pub fn with_token(token: &str) -> Result<WebClient> {
-        WebClientBuilder::default()
-            .auth(WebAuth::Bearer(token.to_string()))
-            .build()
     }
 
     /// constructs endpoint url in form of `<base_url>/<suffix>`.
@@ -88,9 +92,7 @@ impl WebClient {
     }
 
     pub fn interface<T: WebInterface>(&self) -> Result<T> {
-        let base_url = T::rebase_service_url(self.base_url.clone())?;
-        let awc = self.awc.clone();
-        Ok(T::from_client(WebClient { base_url, awc }))
+        self.interface_at(None)
     }
 
     pub fn interface_at<T: WebInterface>(&self, base_url: impl Into<Option<Url>>) -> Result<T> {
@@ -168,7 +170,7 @@ impl WebRequest<SendClientRequest> {
 }
 
 // this is used internally to translate from HTTP Timeout into default result
-// (empty vec most of tht time)
+// (empty vec most of the time)
 pub(crate) fn default_on_timeout<T: Default>(err: Error) -> Result<T> {
     match err {
         Error::TimeoutError { msg, url, .. } => {
@@ -181,26 +183,20 @@ pub(crate) fn default_on_timeout<T: Default>(err: Error) -> Result<T> {
 
 #[derive(Clone, Debug)]
 pub struct WebClientBuilder {
-    pub(crate) host_port: Option<String>,
-    pub(crate) api_root: Option<String>,
+    pub(crate) api_url: Option<Url>,
     pub(crate) auth: Option<WebAuth>,
     pub(crate) headers: HeaderMap,
     pub(crate) timeout: Option<Duration>,
 }
 
 impl WebClientBuilder {
-    pub fn auth(mut self, auth: WebAuth) -> Self {
-        self.auth = Some(auth);
+    pub fn auth_token(mut self, token: &str) -> Self {
+        self.auth = Some(WebAuth::Bearer(token.to_string()));
         self
     }
 
-    pub fn host_port<T: Into<String>>(mut self, host_port: T) -> Self {
-        self.host_port = Some(host_port.into());
-        self
-    }
-
-    pub fn api_root<T: Into<String>>(mut self, api_root: T) -> Self {
-        self.api_root = Some(api_root.into());
+    pub fn api_url(mut self, url: Url) -> Self {
+        self.api_url = Some(url);
         self
     }
 
@@ -217,7 +213,7 @@ impl WebClientBuilder {
         Ok(self)
     }
 
-    pub fn build(self) -> Result<WebClient> {
+    pub fn build(self) -> WebClient {
         let mut builder = awc::Client::build();
 
         if let Some(timeout) = self.timeout {
@@ -234,19 +230,9 @@ impl WebClientBuilder {
             builder = builder.header(key.clone(), value.clone());
         }
 
-        if let Some(env_url) = std::env::var("YAGNA_API_URL").ok() {
-            Ok(WebClient {
-                base_url: Rc::new(Url::parse(&env_url)?),
-                awc: builder.finish(),
-            })
-        } else {
-            Ok(WebClient {
-                base_url: Rc::new(Url::parse(&format!(
-                    "http://{}",
-                    self.host_port.unwrap_or_else(|| "127.0.0.1:5001".into())
-                ))?),
-                awc: builder.finish(),
-            })
+        WebClient {
+            base_url: Rc::new(self.api_url.unwrap_or_else(|| rest_api_url())),
+            awc: builder.finish(),
         }
     }
 }
@@ -254,8 +240,7 @@ impl WebClientBuilder {
 impl Default for WebClientBuilder {
     fn default() -> Self {
         WebClientBuilder {
-            host_port: None,
-            api_root: None,
+            api_url: None,
             auth: None,
             headers: HeaderMap::new(),
             timeout: None,

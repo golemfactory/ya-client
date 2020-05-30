@@ -1,12 +1,10 @@
-//! Provider part of Market API
-use std::rc::Rc;
-use url::Url;
-
-use ya_model::market::{Agreement, Offer, Proposal, ProviderEvent, MARKET_API_PATH};
+//! Provider part of the Market API
+use ya_client_model::market::{Agreement, Offer, Proposal, ProviderEvent, MARKET_API_PATH};
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 
 /// Bindings for Provider part of the Market API.
+#[derive(Clone)]
 pub struct MarketProviderApi {
     client: WebClient,
 }
@@ -14,10 +12,6 @@ pub struct MarketProviderApi {
 impl WebInterface for MarketProviderApi {
     const API_URL_ENV_VAR: &'static str = crate::market::MARKET_URL_ENV_VAR;
     const API_SUFFIX: &'static str = MARKET_API_PATH;
-
-    fn rebase_service_url(_base_url: Rc<Url>) -> Result<Rc<Url>> {
-        crate::market::service_url().map(Rc::new)
-    }
 
     fn from_client(client: WebClient) -> Self {
         MarketProviderApi { client }
@@ -32,7 +26,6 @@ impl MarketProviderApi {
     }
 
     /// Fetches all active Offers which have been published by the Provider.
-    ///
     pub async fn get_offers(&self) -> Result<Vec<Offer>> {
         self.client.get("offers").send().json().await
     }
