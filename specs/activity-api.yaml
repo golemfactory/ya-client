@@ -387,9 +387,8 @@ paths:
 components:
   securitySchemes:
     app_key:
-      type: apiKey
-      in: header
-      name: Authorization
+      type: http
+      scheme: bearer
   schemas:
     ExeScriptRequest:
       required:
