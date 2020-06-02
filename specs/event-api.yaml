@@ -35,6 +35,26 @@ paths:
         **Note**: The `collectSubscriptionEvents` call is still possible after the subscription has been destroyed 
         (ie. even for a removed subscription, the related events may still arrive from the network).
 
+        **Note**: The Event Type filtering criteria can be used to specify event types to be included or excluded 
+        from scope. Asterisk (*) can be used as a wildcard. Eg.
+
+        1) include all Event Types
+
+        includeEventTypes: ["*"]
+
+        2) include only specific Event Types
+
+        includeEventTypes: ["DemandProposalEvent", "PropertyQueryEvent"]
+
+        3) include all apart from some specific Event Types
+
+        includeEventTypes: ["*"]
+        excludeEventTypes: ["DemandProposalEvent", "PropertyQueryEvent"]
+
+        4) include all Event Types with Agreement in name
+
+        includeEventTypes: ["*Agreement*"]
+
         '
       operationId: collectSubscriptionEvents
 
@@ -124,23 +144,28 @@ components:
     includeEventTypes:
       name: includeEventTypes
       description: >
-          Array of Event Types to be included by the operation. 
-          Empty array indicates all Event Types should be included.
+          Array of Event Type expressions specifying events to be included by the operation. 
+          The expressions may include asterisk (*) wildcard to bulk-include sets of event types.
+          Event Types which match any of the Event Type expressions (and match none of excludeEventTypes 
+          expressions) shall be taken in scope of the operation.
       in: query
       schema:
         type: array
         items:
-          $ref: '#/components/schemas/EventType'
+          type: string
 
     excludeEventTypes:
       name: excludeEventTypes
       description: >
-          Array of Event Types to be excluded by the operation. 
+          Array of Event Types expressions specifying events to be excluded by the operation. 
+          The expressions may include asterisk (*) wildcard to bulk-exclude sets of event types.
+          Event Types which match any of the "exclude" Event Type expressions shall not be taken 
+          in scope of the operation.
       in: query
       schema:
         type: array
         items:
-          $ref: '#/components/schemas/EventType'
+          type: string
 
     maxEvents:
       name: maxEvents
