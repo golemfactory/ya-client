@@ -59,6 +59,12 @@ impl WebClient {
         WebClientBuilder::default()
     }
 
+    pub fn with_token(token: &str) -> WebClient {
+        WebClientBuilder::default()
+            .auth_token(token)
+            .build()
+    }
+
     /// constructs endpoint url in form of `<base_url>/<suffix>`.
     ///
     /// suffix should not have leading slash ie. `offer` not `/offer`
