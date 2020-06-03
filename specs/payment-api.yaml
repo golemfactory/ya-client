@@ -33,10 +33,11 @@ tags:
     description: Requestor part
   - name: provider
     description: Provider part
+
 security:
   - app_key: []
-paths:
 
+paths:
   /provider/debitNotes:
     post:
       tags:
@@ -804,8 +805,7 @@ paths:
 components:
   securitySchemes:
     app_key:
-      type: http
-      scheme: bearer
+      $ref: 'common.yaml#/components/securitySchemes/app_key'
 
   parameters:
 
