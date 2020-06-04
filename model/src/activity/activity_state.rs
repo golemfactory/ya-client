@@ -83,8 +83,8 @@ pub enum State {
     Initialized,
     Deployed,
     Ready,
-    Active,
     Terminated,
+    Unresponsive,
 }
 
 impl Default for State {
