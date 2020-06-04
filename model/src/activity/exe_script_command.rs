@@ -64,7 +64,7 @@ impl From<ExeScriptCommand> for ExeScriptCommandState {
                 command: "Terminate".to_string(),
                 progress: None,
                 params: None,
-            }
+            },
         }
     }
 }
