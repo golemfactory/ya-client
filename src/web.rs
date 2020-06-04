@@ -60,9 +60,7 @@ impl WebClient {
     }
 
     pub fn with_token(token: &str) -> WebClient {
-        WebClientBuilder::default()
-            .auth_token(token)
-            .build()
+        WebClientBuilder::default().auth_token(token).build()
     }
 
     /// constructs endpoint url in form of `<base_url>/<suffix>`.
