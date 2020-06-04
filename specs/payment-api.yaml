@@ -34,8 +34,10 @@ tags:
   - name: provider
     description: Provider part
 
-paths:
+security:
+  - app_key: []
 
+paths:
   /provider/debitNotes:
     post:
       tags:
@@ -801,6 +803,9 @@ paths:
           $ref: '#/components/responses/ServerError'
 
 components:
+  securitySchemes:
+    app_key:
+      $ref: 'common.yaml#/components/securitySchemes/app_key'
 
   parameters:
 

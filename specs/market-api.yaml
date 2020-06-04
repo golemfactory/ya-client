@@ -31,7 +31,7 @@ servers:
   - url: /market-api/v1
 
 security:
-  - ApiKeyAuth: []
+  - app_key: []
 
 tags:
   - name: requestor
@@ -39,10 +39,7 @@ tags:
   - name: provider
     description: Provider part
 
-
 paths:
-
-
   /offers:
     get:
       tags:
@@ -192,7 +189,7 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/PropertyQueryReply'
       responses:
-        '204': 
+        '204':
           description: OK, query reply posted.
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -417,7 +414,7 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/PropertyQueryReply'
       responses:
-        '204': 
+        '204':
           description: OK, query reply posted.
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -764,15 +761,9 @@ paths:
 
 components:
 
-
-
   securitySchemes:
-
-
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-KEY
+    app_key:
+      $ref: 'common.yaml#/components/securitySchemes/app_key'
 
 
   parameters:
