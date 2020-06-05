@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
+use std::fmt::{Display, Formatter, Result as FmtResult};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
@@ -32,9 +33,16 @@ impl TryFrom<String> for EventType {
 
 impl From<EventType> for String {
     fn from(event_type: EventType) -> Self {
-        serde_json::to_string(&event_type)
+        event_type.to_string()
+    }
+}
+
+impl Display for EventType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        let str = serde_json::to_string(self)
             .unwrap()
             .trim_matches('"')
-            .to_owned()
+            .to_owned();
+        write!(f, "{}", str)
     }
 }
