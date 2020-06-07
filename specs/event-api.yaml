@@ -40,20 +40,20 @@ paths:
 
         1) include all Event Types
 
-        includeEventTypes: ["*"]
+        `includeEventTypes: ["*"]`
 
         2) include only specific Event Types
 
-        includeEventTypes: ["DemandProposalEvent", "PropertyQueryEvent"]
+        `includeEventTypes: ["DemandProposalEvent", "PropertyQueryEvent"]`
 
         3) include all apart from some specific Event Types
 
-        includeEventTypes: ["*"]
-        excludeEventTypes: ["DemandProposalEvent", "PropertyQueryEvent"]
+        `includeEventTypes: ["*"]
+        excludeEventTypes: ["DemandProposalEvent", "PropertyQueryEvent"]`
 
         4) include all Event Types with Agreement in name
 
-        includeEventTypes: ["*Agreement*"]
+        `includeEventTypes: ["*Agreement*"]`
 
         '
       operationId: collectSubscriptionEvents
