@@ -49,7 +49,7 @@ paths:
 
       operationId: getOffers
       responses:
-        '200':
+        200:
           description: Offer list.
           content:
             application/json:
@@ -57,12 +57,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Offer'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
     post:
       tags:
@@ -80,15 +80,15 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Offer'
       responses:
-        '201':
+        201:
           $ref: '#/components/responses/SubscriptionId'
           # links: TODO
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 
   /offers/{subscriptionId}:
@@ -107,16 +107,16 @@ paths:
         all expected/useful inputs from `collectDemands`.
       operationId: unsubscribeOffer
       responses:
-        '204':
+        204:
           description: Offer revoked.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Already unsubscribed.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 
   /offers/{subscriptionId}/propertyQuery/{queryId}:
@@ -147,16 +147,16 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/PropertyQueryReply'
       responses:
-        '204':
+        204:
           description: OK, query reply posted.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /offers/{subscriptionId}/proposals/{proposalId}:
     parameters:
@@ -168,16 +168,16 @@ paths:
       summary: Fetches Proposal (Demand) with given id.
       operationId: getProposalDemand
       responses:
-        '200':
+        200:
           $ref: '#/components/responses/Proposal'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     delete:
       tags:
         - provider
@@ -187,16 +187,16 @@ paths:
         will not create another counter-Proposal.
       operationId: rejectProposalDemand
       responses:
-        '204':
+        204:
           description: Proposal rejected.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal already rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - provider
@@ -209,19 +209,19 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Proposal'
       responses:
-        '201':
+        201:
           $ref: '#/components/responses/ProposalId'
           # links: TODO
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /demands:
     get:
@@ -232,7 +232,7 @@ paths:
 
       operationId: getDemands
       responses:
-        '200':
+        200:
           description: Demand list.
           content:
             application/json:
@@ -240,12 +240,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Demand'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
     post:
       tags:
@@ -263,15 +263,15 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Demand'
       responses:
-        '201':
+        201:
           $ref: '#/components/responses/SubscriptionId'
           # links: TODO
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 
   /demands/{subscriptionId}:
@@ -290,16 +290,16 @@ paths:
         all expected/useful inputs from `collectOffers`.
       operationId: unsubscribeDemand
       responses:
-        '204':
+        204:
           description: Demand revoked.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Already unsubscribed.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /demands/{subscriptionId}/propertyQuery/{queryId}:
     parameters:
@@ -329,16 +329,16 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/PropertyQueryReply'
       responses:
-        '204':
+        204:
           description: OK, query reply posted.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /demands/{subscriptionId}/proposals/{proposalId}:
     parameters:
@@ -350,16 +350,16 @@ paths:
       summary: Fetches Proposal (Offer) with given id.
       operationId: getProposalOffer
       responses:
-        '200':
+        200:
           $ref: '#/components/responses/Proposal'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     delete:
       tags:
         - requestor
@@ -369,16 +369,16 @@ paths:
         will not create another counter-Proposal.
       operationId: rejectProposalOffer
       responses:
-        '204':
+        204:
           description: Proposal rejected.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal already rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - requestor
@@ -391,19 +391,19 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Proposal'
       responses:
-        '201':
+        201:
           $ref: '#/components/responses/ProposalId'
           # links: TODO
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 
   /agreements:
@@ -433,7 +433,7 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/AgreementProposal'
       responses:
-        '201':
+        201:
           description: Agreement created.
           content:
             application/json:
@@ -448,12 +448,12 @@ paths:
               parameters:
                 agreementId: '$response.body'
             # TODO: more links
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 
   /agreements/{agreementId}:
@@ -466,18 +466,18 @@ paths:
       summary: Fetches agreement with given agreement id.
       operationId: getAgreement
       responses:
-        '200':
+        200:
           description: Agreement.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Agreement'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     delete:
       tags:
         - requestor
@@ -486,16 +486,16 @@ paths:
         Causes the awaiting `waitForApproval` call to return with `Cancelled` response.
       operationId: cancelAgreement
       responses:
-        '204':
+        204:
           description: Agreement cancelled.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
           description: Agreement already approved.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 
   /agreements/{agreementId}/confirm:
@@ -509,16 +509,16 @@ paths:
         Signs Agreement self-created via `createAgreement` and sends it to the Provider.
       operationId: confirmAgreement
       responses:
-        '204':
+        204:
           description: Agreement confirmed.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Agreement cancelled.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}/approve:
     parameters:
@@ -559,18 +559,18 @@ paths:
         **Note**: Mutually exclusive with `rejectAgreement`.
       operationId: approveAgreement
       responses:
-        '204':
+        204:
           description: Agreement approved.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
           description: Agreement already rejected.
-        '410':
+        410:
           description: Agreement cancelled by the Requstor.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 
   /agreements/{agreementId}/reject:
@@ -588,18 +588,18 @@ paths:
         **Note**: Mutually exclusive with `approveAgreement`.
       operationId: rejectAgreement
       responses:
-        '204':
+        204:
           description: Agreement rejected.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
           description: Agreement already approved.
-        '410':
+        410:
           description: Agreement cancelled by the Requstor.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 
   /agreements/{agreementId}/terminate:
@@ -612,18 +612,18 @@ paths:
       summary: Terminates approved Agreement.
       operationId: terminateAgreement
       responses:
-        '204':
+        204:
           description: Agreement terminated.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
           description: Agreement not in Approved state.
-        '410':
+        410:
           description: Agreement cancelled by the Requstor.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 components:
 
@@ -724,34 +724,6 @@ components:
           schema:
             type: string
             description: Proposal Id
-
-    BadRequest:
-      description: Bad request.
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    Unauthorized:
-      description: Authorization information is missing or invalid.
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    NotFound:
-      description: The specified resource was not found.
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    UnexpectedError:
-      description: Unexpected error.
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
 
   schemas:
 

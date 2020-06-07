@@ -50,11 +50,11 @@ paths:
         201:
           $ref: '#/components/responses/DebitNote'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     get:
       tags:
@@ -65,9 +65,9 @@ paths:
         200:
           $ref: '#/components/responses/DebitNoteList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /provider/debitNotes/{debitNodeId}:
     get:
@@ -81,11 +81,11 @@ paths:
         200:
           $ref: '#/components/responses/DebitNote'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /provider/debitNotes/{debitNodeId}/payments:
     get:
@@ -99,9 +99,9 @@ paths:
         200:
           $ref: '#/components/responses/PaymentList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /provider/debitNotes/{debitNodeId}/send:
     post:
@@ -119,13 +119,13 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
   /provider/debitNotes/{debitNodeId}/cancel:
     post:
@@ -145,15 +145,15 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         409:
           $ref: '#/components/responses/DebitNoteCancelRefused'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
   /provider/invoices:
     post:
@@ -167,11 +167,11 @@ paths:
         201:
           $ref: '#/components/responses/Invoice'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     get:
       tags:
@@ -182,9 +182,9 @@ paths:
         200:
           $ref: '#/components/responses/InvoiceList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /provider/invoices/{invoiceId}:
     get:
@@ -198,11 +198,11 @@ paths:
         200:
           $ref: '#/components/responses/Invoice'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /provider/invoices/{invoiceId}/payments:
     get:
@@ -216,9 +216,9 @@ paths:
         200:
           $ref: '#/components/responses/PaymentList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
 
   /provider/invoices/{invoiceId}/send:
@@ -237,13 +237,13 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
   /provider/invoices/{invoiceId}/cancel:
     post:
@@ -263,15 +263,15 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         409:
           $ref: '#/components/responses/InvoiceCancelRefused'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
   /provider/payments/{paymentId}:
     get:
@@ -285,11 +285,11 @@ paths:
         200:
           $ref: '#/components/responses/Payment'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/debitNotes:
     get:
@@ -301,9 +301,9 @@ paths:
         200:
           $ref: '#/components/responses/DebitNoteList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/debitNotes/{debitNodeId}:
     get:
@@ -317,11 +317,11 @@ paths:
         200:
           $ref: '#/components/responses/DebitNote'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/debitNotes/{debitNodeId}/payments:
     get:
@@ -335,9 +335,9 @@ paths:
         200:
           $ref: '#/components/responses/PaymentList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/debitNotes/{debitNodeId}/accept:
     post:
@@ -365,15 +365,15 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
   /requestor/debitNotes/{debitNodeId}/reject:
     post:
@@ -403,15 +403,15 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
   /requestor/invoices:
     get:
@@ -423,9 +423,9 @@ paths:
         200:
           $ref: '#/components/responses/InvoiceList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/invoices/{invoiceId}:
     get:
@@ -439,11 +439,11 @@ paths:
         200:
           $ref: '#/components/responses/Invoice'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/invoices/{invoiceId}/payments:
     get:
@@ -457,9 +457,9 @@ paths:
         200:
           $ref: '#/components/responses/PaymentList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/invoices/{invoiceId}/accept:
     post:
@@ -487,15 +487,15 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
   /requestor/invoices/{invoiceId}/reject:
     post:
@@ -525,15 +525,15 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
   /requestor/allocations:
     post:
@@ -548,11 +548,11 @@ paths:
         201:
           $ref: '#/components/responses/Allocation'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     get:
       tags:
@@ -563,9 +563,9 @@ paths:
         200:
           $ref: '#/components/responses/AllocationList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/allocations/{allocationId}:
     get:
@@ -579,11 +579,11 @@ paths:
         200:
           $ref: '#/components/responses/Allocation'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     put:
       tags:
@@ -598,11 +598,11 @@ paths:
         200:
           $ref: '#/components/responses/Allocation'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     delete:
       tags:
@@ -628,11 +628,11 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/payments:
     get:
@@ -655,9 +655,9 @@ paths:
         200:
           $ref: '#/components/responses/PaymentList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
   /requestor/payments/{paymentId}:
     get:
@@ -671,11 +671,11 @@ paths:
         200:
           $ref: '#/components/responses/Payment'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
 components:
   securitySchemes:
@@ -787,47 +787,12 @@ components:
     OK:
       description: OK
 
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    NotFound:
-      description: Object not found
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    ServerError:
-      description: Server error
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    AckTimeout:
-      description: The Requestor has not responded to the request within timeout.
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
     DebitNoteCancelRefused:
       description: The Requestor has refused to cancel the Debit Note.
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     DebitNote:
       description: OK
@@ -850,7 +815,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     Invoice:
       description: OK

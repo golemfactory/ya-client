@@ -77,15 +77,15 @@ paths:
                   $ref: '#/components/schemas/Event'
 
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'common.yaml#/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         '500':
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
     delete:
       tags:
@@ -116,15 +116,15 @@ paths:
                 type: integer
                 
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'common.yaml#/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         '500':
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
       
 components:
   securitySchemes:
@@ -196,43 +196,6 @@ components:
       schema:
         type: string
         format: date-time
-    
-  responses: 
-    Unauthorized:
-        description: Authorization information is missing or invalid.
-        content:
-          application/json:
-            schema:
-              $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    Forbidden:
-        description: Forbidden.
-        content:
-          application/json:
-            schema:
-              $ref: 'common.yaml#/schemas/ErrorMessage'
-  
-    NotFound:
-        description: The specified resource was not found.
-        content:
-          application/json:
-            schema:
-              $ref: 'common.yaml#/schemas/ErrorMessage'
-  
-    ServerError:
-        description: Server error.
-        content:
-          application/json:
-            schema:
-              $ref: 'common.yaml#/schemas/ErrorMessage'
-  
-    UnexpectedError:
-        description: Unexpected error.
-        content:
-          application/json:
-            schema:
-              $ref: 'common.yaml#/schemas/ErrorMessage'
-  
 
   schemas:
     EventType:

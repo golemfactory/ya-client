@@ -1,11 +1,3 @@
-schemas:
-  ErrorMessage:
-    type: object
-    description: >
-      Generic Error Message structure.
-    properties:
-      message:
-        type: string
 
 parameters:
   timeout:
@@ -20,8 +12,69 @@ parameters:
       format: float
       minimum: 0.0
 
+responses: 
+  BadRequest:
+    description: (400) Bad request
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  Unauthorized:
+    description: (401) Authorization information is missing or invalid.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  Forbidden:
+    description: (403) Forbidden.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  NotFound:
+    description: (404) The specified resource was not found.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  ServerError:
+    description: (500) Server error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  AckTimeout:
+    description: (504) The Requestor has not responded to the request within timeout.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+        
+  UnexpectedError:
+    description: Unexpected error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+              
 components:
   securitySchemes:
     app_key:
       type: http
       scheme: bearer
+
+  schemas:
+    ErrorMessage:
+      type: object
+      description: >
+        Generic Error Message structure.
+      properties:
+        message:
+          type: string
+      

@@ -31,7 +31,7 @@ tags:
     description: Requestor Part (State)
   - name: provider
     description: Provider Part
-    
+
 paths:
 
   /activity:
@@ -58,29 +58,14 @@ paths:
                 type: string
                 example: '"activityId"'
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/BadRequest'
         403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/Forbidden'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
+
       x-codegen-request-body-name: agreementId
 
   /activity/{activityId}/exec:
@@ -112,29 +97,13 @@ paths:
                 type: string
                 example: '"batchId"'
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/BadRequest'
         403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/Forbidden'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
       x-codegen-request-body-name: script
 
   /activity/{activityId}:
@@ -157,24 +126,12 @@ paths:
           description: Success
           content: {}
         403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/Forbidden'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-
+          $ref: 'common.yaml#/responses/ServerError'
+  
   /activity/{activityId}/state:
 
     get:
@@ -197,18 +154,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ActivityState'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-
+          $ref: 'common.yaml#/responses/ServerError'
+        
     put:
       tags:
         - provider
@@ -231,18 +180,10 @@ paths:
           description: Success
           content: {}
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-
+          $ref: 'common.yaml#/responses/ServerError'
+  
   /activity/{activityId}/usage:
 
     get:
@@ -273,18 +214,10 @@ paths:
                   type: number
                   format: double
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-
+          $ref: 'common.yaml#/responses/ServerError'
+          
   /activity/{activityId}/command:
 
     get:
@@ -307,18 +240,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ExeScriptCommandState'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
-
+          $ref: 'common.yaml#/responses/ServerError'
+        
 
 components:
   securitySchemes:
