@@ -72,7 +72,7 @@ impl PaymentRequestorApi {
         &self,
         debit_note_id: &str,
         acceptance: &Acceptance,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let timeout = self.config.accept_debit_note_timeout;
         let url = url_format!(
             "requestor/debitNotes/{debit_note_id}/accept",
@@ -88,7 +88,7 @@ impl PaymentRequestorApi {
         &self,
         debit_note_id: &str,
         rejection: &Rejection,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let timeout = self.config.reject_debit_note_timeout;
         let url = url_format!(
             "requestor/debitNotes/{debit_note_id}/reject",
@@ -151,7 +151,7 @@ impl PaymentRequestorApi {
 
     #[allow(non_snake_case)]
     #[rustfmt::skip]
-    pub async fn reject_invoice(&self, invoice_id: &str, rejection: &Rejection) -> Result<String> {
+    pub async fn reject_invoice(&self, invoice_id: &str, rejection: &Rejection) -> Result<()> {
         let timeout = self.config.reject_invoice_timeout;
         let url = url_format!(
             "requestor/invoices/{invoice_id}/reject",

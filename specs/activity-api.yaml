@@ -21,6 +21,9 @@ info:
 servers:
   - url: /activity-api/v1
 
+security:
+  - app_key: []
+
 tags:
   - name: requestor_control
     description: Requestor Part (Control)
@@ -318,6 +321,9 @@ paths:
 
 
 components:
+  securitySchemes:
+    app_key:
+      $ref: 'common.yaml#/components/securitySchemes/app_key'
   schemas:
     ExeScriptRequest:
       required:
@@ -360,16 +366,19 @@ components:
       type: object
       properties:
         state:
-          type: string
-          enum:
-            - New
-            - Initialized
-            - Deploying
-            - Ready
-            - Starting
-            - Active
-            - Unresponsive
-            - Terminated
+          type: array
+          description: State pair tuple (CurrentState, NextState). NextState is equal to null
+            if there is no pending transition between states.
+          items:
+            type: string
+            nullable: true
+            enum:
+              - New
+              - Initialized
+              - Deployed
+              - Ready
+              - Unresponsive
+              - Terminated
         reason:
           type: string
           description: Reason for Activity termination (specified when Activity in

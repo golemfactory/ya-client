@@ -28,6 +28,7 @@ pub enum ExeScriptCommand {
         from: String,
         to: String,
     },
+    Terminate {},
 }
 
 impl From<ExeScriptCommand> for ExeScriptCommandState {
@@ -58,6 +59,11 @@ impl From<ExeScriptCommand> for ExeScriptCommandState {
                 command: "Transfer".to_string(),
                 progress: None,
                 params: Some(vec![from, to]),
+            },
+            ExeScriptCommand::Terminate {} => ExeScriptCommandState {
+                command: "Terminate".to_string(),
+                progress: None,
+                params: None,
             },
         }
     }

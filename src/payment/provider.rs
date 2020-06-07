@@ -88,7 +88,7 @@ impl PaymentProviderApi {
 
     #[allow(non_snake_case)]
     #[rustfmt::skip]
-    pub async fn cancel_debit_note(&self, debit_note_id: &str) -> Result<String> {
+    pub async fn cancel_debit_note(&self, debit_note_id: &str) -> Result<()> {
         let timeout = self.config.cancel_debit_note_timeout;
         let url = url_format!(
             "provider/debitNotes/{debit_note_id}/cancel",
@@ -155,7 +155,7 @@ impl PaymentProviderApi {
 
     #[allow(non_snake_case)]
     #[rustfmt::skip]
-    pub async fn cancel_invoice(&self, invoice_id: &str) -> Result<String> {
+    pub async fn cancel_invoice(&self, invoice_id: &str) -> Result<()> {
         let timeout = self.config.cancel_invoice_timeout;
         let url = url_format!(
             "provider/invoices/{invoice_id}/cancel",

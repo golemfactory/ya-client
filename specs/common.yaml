@@ -1,5 +1,4 @@
 schemas:
-
   ErrorMessage:
     type: object
     description: >
@@ -21,3 +20,8 @@ parameters:
       format: float
       minimum: 0.0
 
+components:
+  securitySchemes:
+    app_key:
+      type: http
+      scheme: bearer

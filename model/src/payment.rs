@@ -1,4 +1,6 @@
 pub mod acceptance;
+pub mod activity_payment;
+pub mod agreement_payment;
 pub mod allocation;
 pub mod debit_note;
 pub mod debit_note_event;
@@ -11,6 +13,8 @@ pub mod rejection;
 pub mod rejection_reason;
 
 pub use self::acceptance::Acceptance;
+pub use self::activity_payment::ActivityPayment;
+pub use self::agreement_payment::AgreementPayment;
 pub use self::allocation::Allocation;
 pub use self::allocation::NewAllocation;
 pub use self::debit_note::DebitNote;

@@ -1,3 +1,4 @@
+use crate::payment::{ActivityPayment, AgreementPayment};
 use crate::NodeId;
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
@@ -13,12 +14,9 @@ pub struct Payment {
     pub payee_addr: String,
     pub amount: BigDecimal,
     pub timestamp: DateTime<Utc>,
-    pub agreement_id: String,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub allocation_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub debit_note_ids: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub invoice_ids: Option<Vec<String>>,
+    pub agreement_payments: Vec<AgreementPayment>,
+    pub activity_payments: Vec<ActivityPayment>,
     pub details: String,
 }
