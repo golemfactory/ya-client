@@ -1076,6 +1076,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/Event'
         - type: object
-      properties:
-        propertyQuery:
-          $ref: '#/components/schemas/PropertyQuery'
+          properties:
+            propertyQuery:
+              $ref: '#/components/schemas/PropertyQuery'
