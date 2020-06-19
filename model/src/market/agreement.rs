@@ -11,7 +11,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::ErrorMessage;
+use crate::{ErrorMessage, NodeId};
 
 /// Agreement expresses the terms of the deal between Provider and Requestor.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -62,11 +62,11 @@ impl Agreement {
         }
     }
 
-    pub fn provider_id(&self) -> Result<&str, ErrorMessage> {
+    pub fn provider_id(&self) -> Result<&NodeId, ErrorMessage> {
         self.offer.provider_id()
     }
 
-    pub fn requestor_id(&self) -> Result<&str, ErrorMessage> {
+    pub fn requestor_id(&self) -> Result<&NodeId, ErrorMessage> {
         self.demand.requestor_id()
     }
 }

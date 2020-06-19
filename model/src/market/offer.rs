@@ -10,7 +10,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::ErrorMessage;
+use crate::{ErrorMessage, NodeId};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Offer {
@@ -21,9 +21,8 @@ pub struct Offer {
     #[serde(rename = "offerId", skip_serializing_if = "Option::is_none")]
     pub offer_id: Option<String>,
     #[serde(rename = "providerId", skip_serializing_if = "Option::is_none")]
-    pub provider_id: Option<String>, // TODO: use NodeId
-
-                                     // TODO: ttl
+    pub provider_id: Option<NodeId>,
+    // TODO: add field for TTL
 }
 
 impl Offer {
@@ -43,10 +42,7 @@ impl Offer {
             .ok_or("no offer id".into())
     }
 
-    pub fn provider_id(&self) -> Result<&str, ErrorMessage> {
-        self.provider_id
-            .as_ref()
-            .map(AsRef::as_ref)
-            .ok_or("no provider id".into())
+    pub fn provider_id(&self) -> Result<&NodeId, ErrorMessage> {
+        self.provider_id.as_ref().ok_or("no provider id".into())
     }
 }

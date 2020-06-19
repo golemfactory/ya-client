@@ -11,7 +11,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::market::{Demand, Offer};
-use crate::ErrorMessage;
+use crate::{ErrorMessage, NodeId};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Proposal {
@@ -22,7 +22,7 @@ pub struct Proposal {
     #[serde(rename = "proposalId", skip_serializing_if = "Option::is_none")]
     pub proposal_id: Option<String>,
     #[serde(rename = "issuerId", skip_serializing_if = "Option::is_none")]
-    pub issuer_id: Option<String>, // TODO: use NodeId
+    pub issuer_id: Option<NodeId>,
     /// * `Initial` - proposal arrived from the market as response to subscription
     /// * `Draft` - bespoke counter-proposal issued by one party directly to other party (negotiation phase)
     /// * `Rejected` by other party
@@ -73,7 +73,7 @@ impl Proposal {
         self.proposal_id.as_ref().ok_or("no proposal id".into())
     }
 
-    pub fn issuer_id(&self) -> Result<&String, ErrorMessage> {
+    pub fn issuer_id(&self) -> Result<&NodeId, ErrorMessage> {
         self.issuer_id.as_ref().ok_or("no issuer id".into())
     }
 
