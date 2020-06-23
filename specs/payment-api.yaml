@@ -854,7 +854,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Allocation'
+            $ref: '#/components/schemas/Payment'
 
     PaymentList:
       description: OK
