@@ -1,0 +1,22 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.4.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+-   repo: https://github.com/APIDevTools/swagger-cli
+    rev: v4.0.3
+    hooks:
+        - id: swagger-validation
+          name: Check market-api spec
+          files: specs/market-api.yaml$
+        - id: swagger-validation
+          name: Check activity-api spec
+          files: specs/activity-api.yaml$
+        - id: swagger-validation
+          name: Check payment-api spec
+          files: specs/payment-api.yaml$
