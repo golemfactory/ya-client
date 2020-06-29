@@ -11,6 +11,7 @@ pub struct Invoice {
     pub recipient_id: NodeId,
     pub payee_addr: String,
     pub payer_addr: String,
+    pub payment_platform: String,
     pub timestamp: DateTime<Utc>,
     pub agreement_id: String,
     pub activity_ids: Vec<String>,

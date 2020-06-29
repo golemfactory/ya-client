@@ -12,6 +12,7 @@ pub struct Payment {
     pub payee_id: NodeId,
     pub payer_addr: String,
     pub payee_addr: String,
+    pub payment_platform: String,
     pub amount: BigDecimal,
     pub timestamp: DateTime<Utc>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
