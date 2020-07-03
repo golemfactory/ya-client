@@ -169,10 +169,10 @@ impl WebRequest<SendClientRequest> {
             ))?);
         }
         let raw_body = response.body().await?;
-        let body = std::str::from_utf8(&raw_body).unwrap();
+        let body = String::from_utf8(raw_body.to_vec())?;
         log::debug!("WebRequest.json(). url={}, resp={}", self.url, body);
 
-        Ok(serde_json::from_str(body)?)
+        Ok(serde_json::from_str(&body)?)
     }
 }
 
