@@ -6,4 +6,6 @@ use serde::{Deserialize, Serialize};
 pub struct AgreementPayment {
     pub agreement_id: String,
     pub amount: BigDecimal,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub allocation_id: Option<String>,
 }

@@ -1294,8 +1294,6 @@ components:
         timestamp:
           type: string
           format: date-time
-        allocationId:
-          type: string
         agreementPayments:
           type: array
           items:
@@ -1331,6 +1329,8 @@ components:
           type: string
         amount:
           type: string
+        allocationId:
+          type: string
       required:
         - agreementId
         - amount
@@ -1344,6 +1344,8 @@ components:
         activityId:
           type: string
         amount:
+          type: string
+        allocationId:
           type: string
       required:
         - activityId
