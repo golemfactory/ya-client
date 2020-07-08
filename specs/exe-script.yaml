@@ -23,7 +23,10 @@ info:
     {
         "transfer": {
             "from": "http://34.244.4.185:8000/LICENSE",
-            "to": "container:/input/file_in"
+            "to": "container:/input/file_in",
+            "format": "zip",
+            "depth": 2,
+            "fileset": [{"desc":"all images", "includes": ["*.jpg"], "excludes": ["db*.*"] }]
         }
     },
     {
@@ -107,7 +110,28 @@ components:
           type: string
         to:
           type: string
-          
+        format:
+          type: string
+        depth:
+          type: number
+        fileset:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileSet'
+
+    FileSet:
+      properties:
+        desc:
+          type: string
+        includes:
+          type: array
+          items:
+            type: string
+        excludes:
+          type: array
+          items:
+            type: string
+                
     RunCommand:
       allOf:
         - $ref: '#/components/schemas/Command'
