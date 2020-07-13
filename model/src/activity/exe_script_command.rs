@@ -27,8 +27,38 @@ pub enum ExeScriptCommand {
     Transfer {
         from: String,
         to: String,
+        #[serde(flatten)]
+        args: TransferArgs,
     },
     Terminate {},
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
+pub struct TransferArgs {
+    pub format: Option<String>,
+    pub depth: Option<usize>,
+    pub fileset: Option<FileSet>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum FileSet {
+    Pattern(SetEntry<String>),
+    Object(SetEntry<SetObject>),
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
+pub struct SetObject {
+    pub desc: Option<String>,
+    pub includes: Option<SetEntry<String>>,
+    pub excludes: Option<SetEntry<String>>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum SetEntry<T> {
+    Single(T),
+    Multiple(Vec<T>),
 }
 
 impl From<ExeScriptCommand> for ExeScriptCommandState {
@@ -55,7 +85,7 @@ impl From<ExeScriptCommand> for ExeScriptCommandState {
                     args
                 }),
             },
-            ExeScriptCommand::Transfer { from, to } => ExeScriptCommandState {
+            ExeScriptCommand::Transfer { from, to, .. } => ExeScriptCommandState {
                 command: "Transfer".to_string(),
                 progress: None,
                 params: Some(vec![from, to]),
