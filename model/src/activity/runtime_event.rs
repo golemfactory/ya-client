@@ -13,7 +13,7 @@ pub struct RuntimeEvent {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum RuntimeEventKind {
     Started {
-        command: ExeScriptCommand
+        command: ExeScriptCommand,
     },
     Finished {
         return_code: i32,
