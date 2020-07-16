@@ -11,6 +11,7 @@ pub struct DebitNote {
     pub recipient_id: NodeId,
     pub payee_addr: String,
     pub payer_addr: String,
+    pub payment_platform: String,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub previous_debit_note_id: Option<String>,
     pub timestamp: DateTime<Utc>,

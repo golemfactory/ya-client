@@ -1076,6 +1076,9 @@ components:
         payerAddr:
           type: string
           readOnly: true
+        paymentPlatform:
+          type: string
+          readOnly: true
         previousDebitNoteId:
           type: string
           readOnly: true
@@ -1136,6 +1139,9 @@ components:
           type: string
           readOnly: true
         payerAddr:
+          type: string
+          readOnly: true
+        paymentPlatform:
           type: string
           readOnly: true
         lastDebitNoteId:
@@ -1242,6 +1248,10 @@ components:
         allocationId:
           type: string
           readOnly: true
+        address:
+          type: string
+        paymentPlatform:
+          type: string
         totalAmount:
           type: string
         spentAmount:
@@ -1277,13 +1287,13 @@ components:
           type: string
         payeeAddr:
           type: string
+        paymentPlatform:
+          type: string
         amount:
           type: string
         timestamp:
           type: string
           format: date-time
-        allocationId:
-          type: string
         agreementPayments:
           type: array
           items:
@@ -1299,6 +1309,9 @@ components:
         - paymentId
         - payerId
         - payeeId
+        - payerAddr
+        - payeeAddr
+        - paymentPlatform
         - amount
         - timestamp
         - agreementPayments
@@ -1316,6 +1329,8 @@ components:
           type: string
         amount:
           type: string
+        allocationId:
+          type: string
       required:
         - agreementId
         - amount
@@ -1329,6 +1344,8 @@ components:
         activityId:
           type: string
         amount:
+          type: string
+        allocationId:
           type: string
       required:
         - activityId
