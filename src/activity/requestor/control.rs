@@ -1,7 +1,11 @@
 //! Requestor control part of Activity API
-use ya_client_model::activity::{ExeScriptCommandResult, ExeScriptRequest, ACTIVITY_API_PATH};
+use ya_client_model::activity::ACTIVITY_API_PATH;
+use ya_client_model::activity::{ExeScriptCommandResult, ExeScriptRequest, RuntimeEvent};
 
-use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
+use crate::web::{default_on_timeout, Event, WebClient, WebInterface};
+use crate::{Error, Result};
+use futures::{Stream, StreamExt};
+use std::convert::TryFrom;
 
 /// Bindings for Requestor Control part of the Activity API.
 #[derive(Clone)]
@@ -59,5 +63,37 @@ impl ActivityRequestorControlApi {
             #[query] command_index,
         );
         self.client.get(&uri).send().json().await.or_else(default_on_timeout)
+    }
+
+    /// Streams ExeScript batch results
+    pub async fn stream_exec_batch_results(
+        &self,
+        activity_id: &str,
+        batch_id: &str,
+    ) -> Result<impl Stream<Item = RuntimeEvent>> {
+        let uri = url_format!(
+            "activity/{activity_id}/exec/{batch_id}",
+            activity_id,
+            batch_id,
+        );
+        let stream = self
+            .client
+            .event_stream(&uri)
+            .await?
+            .filter_map(|result| async {
+                match result {
+                    Ok(evt) => RuntimeEvent::try_from(evt).ok(),
+                    _ => None,
+                }
+            });
+        Ok(stream)
+    }
+}
+
+impl TryFrom<Event> for RuntimeEvent {
+    type Error = Error;
+
+    fn try_from(evt: Event) -> Result<Self> {
+        serde_json::from_str(evt.data.as_str()).map_err(Error::from)
     }
 }
