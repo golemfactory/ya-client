@@ -5,6 +5,7 @@ pub mod exe_script_command_result;
 pub mod exe_script_command_state;
 pub mod exe_script_request;
 pub mod provider_event;
+pub mod runtime_event;
 
 pub use self::activity_state::{ActivityState, State, StatePair};
 pub use self::activity_usage::ActivityUsage;
@@ -13,5 +14,6 @@ pub use self::exe_script_command_result::{ExeScriptCommandResult, Result as Comm
 pub use self::exe_script_command_state::ExeScriptCommandState;
 pub use self::exe_script_request::ExeScriptRequest;
 pub use self::provider_event::ProviderEvent;
+pub use self::runtime_event::{RuntimeEvent, RuntimeEventKind};
 
 pub const ACTIVITY_API_PATH: &str = "/activity-api/v1/";
