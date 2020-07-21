@@ -1,5 +1,6 @@
 //! Web utils
 use crate::{Error, Result};
+use awc::http::header::qitem;
 use awc::{
     error::PayloadError,
     http::{header, HeaderMap, HeaderName, HeaderValue, Method, StatusCode},
@@ -89,7 +90,9 @@ impl WebClient {
         let request = self
             .awc
             .request(Method::GET, &url)
-            .set(awc::http::header::ContentType(mime::TEXT_EVENT_STREAM));
+            .set(awc::http::header::Accept(vec![qitem(
+                mime::TEXT_EVENT_STREAM,
+            )]));
         let stream = request
             .send()
             .await?
@@ -299,6 +302,7 @@ impl<'a> QueryParamsBuilder<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct Event {
     pub id: Option<u64>,
     pub event: String,
