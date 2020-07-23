@@ -687,7 +687,7 @@ paths:
             to the Agreement.
           - The Provider is now ready to accept a request to start an Activity
             as described in the negotiated agreement.
-          - The Requestor’s corresponding ConfirmAgreement call returns Ok after
+          - The Requestor’s corresponding `waitForApproval` call returns `Approved` after
             the one on the Provider side.
 
         * `Cancelled` - Indicates that before delivering the approved Agreement,
