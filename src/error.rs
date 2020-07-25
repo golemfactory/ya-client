@@ -34,6 +34,8 @@ pub enum Error {
     InvalidHeaderValue(#[from] awc::http::header::InvalidHeaderValue),
     #[error("invalid UTF8 string: {0}")]
     FromUtf8Error(#[from] std::string::FromUtf8Error),
+    #[error("invalid UTF8 string: {0}")]
+    Utf8Error(#[from] std::str::Utf8Error),
     #[error("Url parse error: {0}")]
     UrlParseError(#[from] url::ParseError),
     #[error("Yagna model error: {0}")]
