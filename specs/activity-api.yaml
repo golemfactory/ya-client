@@ -48,6 +48,7 @@ paths:
           application/json:
             schema:
               type: string
+              example: de6673f5-3f16-40ef-a8a3-b7c922092447
         required: true
       responses:
         201:
@@ -106,6 +107,65 @@ paths:
           $ref: 'common.yaml#/responses/ServerError'
       x-codegen-request-body-name: script
 
+  /activity/{activityId}/exec/{batchId}:
+    get:
+      tags:
+        - requestor_control
+      summary: Queries for ExeScript batch results.
+      description: 'This call shall collect ExeScriptCommand result objects
+        received directly from ExeUnit (via the long polling pattern). 
+        The events are persistent, ie. the API can be called repeatedly
+        to receive the same events (the calls don’t remove the event records 
+        from the receiving queue).
+        **Note:** two formats of response are specified (as indicated by the Accept header):
+          - application/json - standard JSON response
+          - text/event-stream - an EventSource implementation (as per https://www.w3.org/TR/eventsource/)'
+      operationId: GetExecBatchResults
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: batchId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commandIndex
+          description: >
+            Wait until command with the specified index finishes. Must be accompanied by a valid "pollTimeout" query parameter.
+          required: false
+          in: query
+          schema:
+            type: number
+            format: integer
+            minimum: 0
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/pollTimeout'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json: # standard JSON response
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExeScriptCommandResult'
+            text/event-stream: # an EventSource implementation (as per https://www.w3.org/TR/eventsource/)
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExeScriptCommandResult'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        500:
+          $ref: 'common.yaml#/responses/ServerError'
+
   /activity/{activityId}:
 
     delete:
@@ -131,7 +191,31 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         500:
           $ref: 'common.yaml#/responses/ServerError'
-  
+
+  /events:
+    get:
+      tags:
+        - provider
+      summary: Fetch Requestor command events.
+      operationId: CollectActivityEvents
+      parameters:
+        - $ref: 'common.yaml#/parameters/appSessionId'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/pollTimeout'
+        - $ref: 'common.yaml#/parameters/maxEvents'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/ProviderEventList'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        500:
+          $ref: 'common.yaml#/responses/ServerError'
+            
   /activity/{activityId}/state:
 
     get:
@@ -223,7 +307,7 @@ paths:
     get:
       tags:
         - requestor_state
-      summary: Get running command for a specified Activity.
+      summary: Get running commands for a specified Activity.
       description: '**Note:** This call shall get routed directly to ExeUnit.'
       operationId: GetRunningCommand
       parameters:
@@ -238,7 +322,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExeScriptCommandState'
+                $ref: '#/components/responses/ExeScriptCommandStateList'
         404:
           $ref: 'common.yaml#/responses/NotFound'
         500:
@@ -249,6 +333,26 @@ components:
   securitySchemes:
     app_key:
       $ref: 'common.yaml#/components/securitySchemes/app_key'
+
+  responses:
+    ExeScriptCommandStateList:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ExeScriptCommandState'
+
+    ProviderEventList:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ProviderEvent'
+          
   schemas:
     ExeScriptRequest:
       required:
@@ -260,9 +364,12 @@ components:
 
     ExeScriptCommandState:
       required:
+        - batchId
         - command
       type: object
       properties:
+        batchId:
+          type: string
         command:
           type: string
         progress:
@@ -272,6 +379,30 @@ components:
           items:
             type: string
 
+    ExeScriptCommandResult:
+      required:
+        - index
+        - eventDate
+        - result
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+          minimum: 0
+        eventDate:
+          type: string
+          format: date-time
+        result:
+          type: string
+          enum:
+            - Ok
+            - Error
+        message:
+          type: string
+        isBatchFinished:
+          type: boolean
+        
     ActivityUsage:
       type: object
       properties:
@@ -311,4 +442,49 @@ components:
         errorMessage:
           type: string
           description: If error caused state change - error message shall be provided.
+
+    ProviderEvent:
+      required:
+        - eventType
+        - eventDate
+        - activityId
+      type: object
+      properties:
+        eventType:
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+        activityId:
+          type: string
+      discriminator:
+        propertyName: eventType
+
+    CreateActivity:
+      required:
+        - agreementId
+      allOf:
+        - $ref: '#/components/schemas/ProviderEvent'
+        - type: object
+          properties:
+            agreementId:
+              type: string
+
+    DestroyActivity:
+      required:
+        - agreementId
+      allOf:
+        - $ref: '#/components/schemas/ProviderEvent'
+        - type: object
+          properties:
+            agreementId:
+              type: string
+
+    GetActivityState:
+      allOf:
+        - $ref: '#/components/schemas/ProviderEvent'
+
+    GetActivityUsage:
+      allOf:
+        - $ref: '#/components/schemas/ProviderEvent'
 

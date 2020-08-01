@@ -45,16 +45,13 @@ paths:
       tags:
         - provider
       operationId: getOffers
-      summary: Fetches all active Offers which have been published by the Provider.
+      summary: GetOffers - Fetches all active Offers which have been published by the Provider.
+      parameters:
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxItems'
       responses:
         200:
-          description: Offer list.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Offer'
+          $ref: '#/components/responses/OfferList'
         400:
           $ref: 'common.yaml#/responses/BadRequest'
         401:
@@ -66,7 +63,7 @@ paths:
       tags:
         - provider
       operationId: subscribeOffer
-      summary: Publishes Provider capabilities via Offer.
+      summary: SubscribeOffer - Publishes Provider capabilities via Offer.
       description: >
         Offer object can be considered an "open" or public Offer, as it is not directed
         at a specific Requestor, but rather is sent to the market so that the matching
@@ -88,7 +85,6 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-
   /offers/{subscriptionId}:
     parameters:
       - $ref: '#/components/parameters/subscriptionId'
@@ -96,7 +92,7 @@ paths:
       tags:
         - provider
       operationId: unsubscribeOffer
-      summary: Stop subscription for previously published Offer.
+      summary: UnsubscribeOffer - Stop subscription for previously published Offer.
       description: >
         Stop receiving Proposals.
 
@@ -116,17 +112,16 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-
   /offers/{subscriptionId}/events:
     parameters:
       - $ref: '#/components/parameters/subscriptionId'
-      - $ref: 'common.yaml#/parameters/timeout'
+      - $ref: 'common.yaml#/parameters/pollTimeout'
       - $ref: 'common.yaml#/parameters/maxEvents'
     get:
       tags:
         - provider
       operationId: collectDemands
-      summary: Reads Market responses to published Offer.
+      summary: CollectDemands - Reads Market responses to published Offer.
       description: >
         This is a blocking operation. It will not return until there is at least one new event.
 
@@ -140,17 +135,7 @@ paths:
         to listen for messages related only to specific Proposals. This is not covered yet.
       responses:
         200:
-          description: Proposal or Agreement event list.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/AgreementEvent'
-                    - $ref: '#/components/schemas/ProposalEvent'
-                    - $ref: '#/components/schemas/PropertyQueryEvent'
-              # links: TODO
+          $ref: '#/components/responses/EventList'
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
@@ -166,21 +151,21 @@ paths:
       tags:
         - provider
       operationId: queryReplyOffers
-      summary: Handles dynamic property query.
+      summary: QueryReplyOffers - Handles dynamic property query.
       description: >
+        Sends a response to a received property value query.
+
         The Market Matching Mechanism, when resolving the match relation for the
         specific Demand-Offer pair, is to detect the “dynamic” properties required
         (via constraints) by the other side. At this point, it is able to query the
         issuing node for those properties and submit the other side’s requested
         properties as the context of the query.
 
-
         **Note**: The property query responses may be submitted in “chunks”, ie. the
         responder may choose to resolve ‘quick’/lightweight’ properties faster and
         provide response sooner, while still working on more time-consuming properties
         in the background. Therefore the response contains both the resolved properties,
         as well as list of properties which responder knows still require resolution.
-
 
         **Note**: This method must be implemented for Market API Capability Level 2.
       requestBody:
@@ -205,7 +190,7 @@ paths:
       tags:
         - provider
       operationId: getProposalDemand
-      summary: Fetches Proposal (Demand) with given id.
+      summary: GetProposalDemand - Fetches Proposal (Demand) with given id.
       responses:
         200:
           $ref: '#/components/responses/Proposal'
@@ -221,7 +206,7 @@ paths:
       tags:
         - provider
       operationId: rejectProposalDemand
-      summary: Rejects Proposal (Demand).
+      summary: RejectProposalDemand - Rejects Proposal (Demand).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
@@ -240,7 +225,7 @@ paths:
       tags:
         - provider
       operationId: counterProposalOffer
-      summary: Responds with a bespoke Offer to received Demand.
+      summary: CounterProposalOffer - Responds with a bespoke Offer to received Demand.
       description: >
         Creates and sends a modified version of original Offer (a
         counter-proposal) adjusted to previously received Proposal (ie. Demand).
@@ -267,16 +252,13 @@ paths:
       tags:
         - requestor
       operationId: getDemands
-      summary: Fetches all active Demands which have been published by the Requestor.
+      summary: GetDemands - Fetches all active Demands which have been published by the Requestor.
+      parameters:
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxItems'
       responses:
         200:
-          description: Demand list.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Demand'
+          $ref: '#/components/responses/DemandList'
         400:
           $ref: 'common.yaml#/responses/BadRequest'
         401:
@@ -288,7 +270,7 @@ paths:
       tags:
         - requestor
       operationId: subscribeDemand
-      summary: Publishes Requestor capabilities via Demand.
+      summary: SubscribeDemand - Publishes Requestor capabilities via Demand.
       description: >
         Demand object can be considered an "open" or public Demand, as it is not directed
         at a specific Provider, but rather is sent to the market so that the matching
@@ -310,7 +292,6 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-
   /demands/{subscriptionId}:
     parameters:
       - $ref: '#/components/parameters/subscriptionId'
@@ -318,7 +299,7 @@ paths:
       tags:
         - requestor
       operationId: unsubscribeDemand
-      summary: Stop subscription for previously published Demand.
+      summary: UnsubscribeDemand - Stop subscription for previously published Demand.
       description: >
         Stop receiving Proposals.
 
@@ -341,13 +322,13 @@ paths:
   /demands/{subscriptionId}/events:
     parameters:
       - $ref: '#/components/parameters/subscriptionId'
-      - $ref: 'common.yaml#/parameters/timeout'
+      - $ref: 'common.yaml#/parameters/pollTimeout'
       - $ref: 'common.yaml#/parameters/maxEvents'
     get:
       tags:
         - requestor
       operationId: collectOffers
-      summary: Reads Market responses to published Demand.
+      summary: CollectOffers - Reads Market responses to published Demand.
       description: >
         This is a blocking operation. It will not return until there is at least one new event.
 
@@ -361,17 +342,7 @@ paths:
         to listen for messages related only to specific Proposals. This is not covered yet.
       responses:
         200:
-          description: Proposal event list.
-          content:
-            application/json4:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/ProposalEvent'
-                    - $ref: '#/components/schemas/PropertyQueryEvent'
-
-          # links: TODO
+          $ref: '#/components/responses/EventList'
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
@@ -387,21 +358,21 @@ paths:
       tags:
         - requestor
       operationId: queryReplyDemands
-      summary: Handles dynamic property query.
+      summary: QueryReplyDemands - Handles dynamic property query.
       description: >
+        Sends a response to a received property value query.
+
         The Market Matching Mechanism, when resolving the match relation for the
         specific Demand-Offer pair, is to detect the “dynamic” properties required
         (via constraints) by the other side. At this point, it is able to query the
         issuing node for those properties and submit the other side’s requested
         properties as the context of the query.
 
-
         **Note**: The property query responses may be submitted in “chunks”, ie. the
         responder may choose to resolve ‘quick’/lightweight’ properties faster and
         provide response sooner, while still working on more time-consuming properties
         in the background. Therefore the response contains both the resolved properties,
         as well as list of properties which responder knows still require resolution.
-
 
         **Note**: This method must be implemented for Market API Capability Level 2.
       requestBody:
@@ -426,7 +397,7 @@ paths:
       tags:
         - requestor
       operationId: getProposalOffer
-      summary: Fetches Proposal (Offer) with given id.
+      summary: GetProposalOffer - Fetches Proposal (Offer) with given id.
       responses:
         200:
           $ref: '#/components/responses/Proposal'
@@ -461,7 +432,7 @@ paths:
       tags:
         - requestor
       operationId: counterProposalDemand
-      summary: Responds with a bespoke Demand to received Offer.
+      summary: CounterProposalDemand - Responds with a bespoke Demand to received Offer.
       description: >
         Creates and sends a modified version of original Demand (a
         counter-proposal) adjusted to previously received Proposal (ie. Offer).
@@ -483,29 +454,24 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-
   /agreements:
     post:
       tags:
         - requestor
       operationId: createAgreement
-      summary: Creates Agreement from selected Proposal.
+      summary: CreateAgreement - Creates Agreement from selected Proposal.
       description: >
         Initiates the Agreement handshake phase.
-
 
         Formulates an Agreement artifact from the Proposal indicated by the
         received Proposal Id. Created Agreement is in `Proposal` state.
 
-
         The Approval Expiry Date is added to Agreement artifact and implies
         the effective timeout on the whole Agreement Confirmation sequence.
-
 
         A successful call to `createAgreement` shall immediately be followed
         by a `confirmAgreement` and `waitForApproval` call in order to listen
         for responses from the Provider.
-
 
         **Note**: Moves given Proposal to `Approved` state.
       requestBody:
@@ -537,7 +503,6 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-
   /agreements/{agreementId}:
     parameters:
       - $ref: '#/components/parameters/agreementId'
@@ -546,7 +511,7 @@ paths:
         - requestor
         - provider
       operationId: getAgreement
-      summary: Fetches agreement with given agreement id.
+      summary: GetAgreement - Fetches agreement with given agreement id.
       responses:
         200:
           description: Agreement.
@@ -564,7 +529,7 @@ paths:
       tags:
         - requestor
       operationId: cancelAgreement
-      summary: Cancels agreement.
+      summary: CancelAgreement - Cancels agreement.
       description: >
         Causes:
           - the awaiting `approveAgreement` on Provider side to return with `Cancelled` response.
@@ -583,15 +548,15 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-
   /agreements/{agreementId}/confirm:
     parameters:
       - $ref: '#/components/parameters/agreementId'
+      - $ref: 'common.yaml#/parameters/appSessionId'
     post:
       tags:
         - requestor
       operationId: confirmAgreement
-      summary: Sends Agreement proposal to the Provider.
+      summary: ConfirmAgreement - Sends Agreement proposal to the Provider.
       description: >
         Signs self-created Agreement and sends it to the Provider.
 
@@ -610,66 +575,63 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /agreements/{agreementId}/wait:
+  /agreements/events:
     parameters:
-      - $ref: '#/components/parameters/agreementId'
-      - $ref: 'common.yaml#/parameters/timeout'
-    post:
+      - $ref: 'common.yaml#/parameters/pollTimeout'
+      - $ref: 'common.yaml#/parameters/maxEvents'
+      - $ref: 'common.yaml#/parameters/appSessionId'
+    get:
       tags:
         - requestor
-      operationId: waitForApproval
-      summary: Waits for Agreement approval by the Provider.
+        - provider
+      operationId: collectAgreementEvents
+      summary: CollectAgreementEvents - Collects events related to an Agreement.
       description: >
-        This is a blocking operation. The call may be aborted by Requestor caller
-        code. After the call is aborted, another `waitForApproval` call can be
-        raised on the same Agreement Id.
+        This is a blocking operation. 
 
-        It returns one of the following options:
+        It returns events such as:
 
-        * `Approved` - Indicates that the Agreement has been approved by the Provider.
+        * `AgreementProposalEvent` - Noew Agreement has been proposed by a Requestor.
+
+        * `AgreementApprovedEvent` - Indicates that the Agreement has been approved by the Provider.
           - The Provider is now ready to accept a request to start an Activity
             as described in the negotiated agreement.
           - The Providers’s corresponding `approveAgreement` call returns `Approved` after
             this on the Provider side.
 
-        * `Rejected` - Indicates that the Provider has called `rejectAgreement`,
+        * `AgreementRejectedEvent` - Indicates that the Provider has called `rejectAgreement`,
           which effectively stops the Agreement handshake. The Requestor may attempt
           to return to the Negotiation phase by sending a new Proposal.
 
-        * `Cancelled` - Indicates that the Requestor himself has called
-         `cancelAgreement`, which effectively stops the Agreement handshake.
+        * `AgreementCancelledEvent` - Indicates that the Requestor himself has called
+          `cancelAgreement`, which effectively stops the Agreement handshake.
+
+        * `AgreementTerminatedEvent` - Indicates that the Agreement has been terminated.
 
       responses:
-        '200':
-          description: Agreement approval result.
-          content:
-            application/json:
-              schema:
-                type: string
-                enum: [Approved, Rejected, Cancelled]
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '408':
-          $ref: '#/components/responses/TimedOut'
-        '409':
-          description: Agreement not in `Pending` state.
-        '410':
-          $ref: '#/components/responses/Expired'
+        200:
+          $ref: '#/components/responses/AgreementEventList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        408:
+          $ref: 'common.yaml#/responses/Timeout'
+        410:
+          $ref: 'common.yaml#/responses/Gone'
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}/approve:
     parameters:
       - $ref: '#/components/parameters/agreementId'
-      - $ref: 'common.yaml#/parameters/timeout'
+      - $ref: 'common.yaml#/parameters/appSessionId'
+      - $ref: 'common.yaml#/parameters/ackTimeout'
     post:
       tags:
         - provider
       operationId: approveAgreement
-      summary: Approves Agreement proposed by the Reqestor.
+      summary: ApproveAgreement - Approves Agreement proposed by the Reqestor.
       description: >
         This is a blocking operation. The call may be aborted by Provider caller
         code. After the call is aborted or timed out, another `approveAgreement`
@@ -720,7 +682,6 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-
   /agreements/{agreementId}/reject:
     parameters:
       - $ref: '#/components/parameters/agreementId'
@@ -728,7 +689,7 @@ paths:
       tags:
         - provider
       operationId: rejectAgreement
-      summary: Rejects Agreement proposed by the Requestor.
+      summary: RejectAgreement - Rejects Agreement proposed by the Requestor.
       description: >
         The Requestor side is notified about the Provider’s decision to reject
         a negotiated agreement. This effectively stops the Agreement handshake.
@@ -749,7 +710,6 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-
   /agreements/{agreementId}/terminate:
     parameters:
       - $ref: '#/components/parameters/agreementId'
@@ -758,7 +718,7 @@ paths:
         - provider
         - requestor
       operationId: terminateAgreement
-      summary: Terminates approved Agreement.
+      summary: TerminateAgreement - Terminates approved Agreement.
       description: >
         Method to finish/close the Agreement while in `Approved` state.
 
@@ -880,6 +840,43 @@ components:
             type: string
             description: Proposal Id
 
+    DemandList:
+      description: Demand list.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Demand'
+
+    OfferList:
+      description: Offer list.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Offer'
+    
+    EventList:
+      description: Proposal or Agreement event list.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Event'
+
+    AgreementEventList:
+      description: Agreement-related event list.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AgreementEvent'
+
+          
   schemas:
 
     DemandOfferBase:
@@ -888,6 +885,9 @@ components:
         - properties
         - constraints
       properties:
+        timestamp:
+          type: string
+          format: date-time
         properties:
           type: object
         constraints:
@@ -1048,18 +1048,61 @@ components:
       allOf:
         - $ref: '#/components/schemas/Event'
         - type: object
-          properties:
-            proposal:
-              $ref: '#/components/schemas/Proposal'
+      properties:
+        proposal:
+          $ref: '#/components/schemas/Proposal'
 
-    AgreementEvent:
+    # note this should be specified as a sub-class of Event, BUT 
+    # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(
+    AgreementEvent: 
+      type: object
+      required:
+        - eventType
+        - eventDate
+      discriminator:
+        propertyName: eventType
+      properties:
+        eventType:
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+        agreementId:
+          type: string
+        
+    AgreementProposalEvent: 
       allOf:
-        - $ref: '#/components/schemas/Event'
+        - $ref: '#/components/schemas/AgreementEvent'
         - type: object
-          properties:
-            agreement:
-              $ref: '#/components/schemas/Agreement'
+      properties:
+        agreement:
+          $ref: '#/components/schemas/Agreement'
+    
+    AgreementAcceptedEvent: 
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+                              
+    AgreementRejectedEvent: 
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
 
+    AgreementCancelledEvent: 
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+
+    AgreementTimeoutEvent: 
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+
+    AgreementTerminatedEvent: 
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+        
     PropertyQueryEvent:
       allOf:
         - $ref: '#/components/schemas/Event'
