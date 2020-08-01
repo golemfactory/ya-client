@@ -6,7 +6,7 @@ info:
     The specification of ExeScript commands format as per [Activity API specification]
     (https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM)
     Including TRANSFER command syntax extension described in 
-    (https://github.com/golemfactory/golem-architecture/blob/prekucki/gips/1-multifile-transfer/GIPS/GIP-PR0001-multifile-transfer.md)
+    [this specification](https://github.com/golemfactory/golem-architecture/blob/master/GIPS/GIP-PR0001-multifile-transfer.md).
 
     ## Implementation Notes
 
@@ -151,4 +151,3 @@ components:
           type: array
           items:
             type: string
-
