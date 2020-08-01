@@ -41,7 +41,7 @@ paths:
         - requestor_control
       summary: Creates new Activity based on given Agreement.
       description: '**Note:** This call shall get routed as a provider event (see
-        Event API).'
+        ProviderEvent structure).'
       operationId: CreateActivity
       requestBody:
         content:
@@ -173,7 +173,7 @@ paths:
         - requestor_control
       summary: Destroys given Activity.
       description: '**Note:** This call shall get routed as a provider event (see
-        Event API).'
+        ProviderEvent structure).'
       operationId: DestroyActivity
       parameters:
         - name: activityId
