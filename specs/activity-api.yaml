@@ -206,11 +206,7 @@ paths:
 
       responses:
         200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/responses/ProviderEventList'
+          $ref: '#/components/responses/ProviderEventList'
         403:
           $ref: 'common.yaml#/responses/Forbidden'
         500:
