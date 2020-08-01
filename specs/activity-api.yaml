@@ -318,11 +318,7 @@ paths:
             type: string
       responses:
         200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/responses/ExeScriptCommandStateList'
+          $ref: '#/components/responses/ExeScriptCommandStateList'
         404:
           $ref: 'common.yaml#/responses/NotFound'
         500:
@@ -487,4 +483,3 @@ components:
     GetActivityUsage:
       allOf:
         - $ref: '#/components/schemas/ProviderEvent'
-
