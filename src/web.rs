@@ -122,6 +122,15 @@ impl WebRequest<ClientRequest> {
         }
     }
 
+    pub fn send_bytes(self, bytes: Vec<u8>) -> WebRequest<SendClientRequest> {
+        let url = self.url;
+        let inner_request = self
+            .inner_request
+            .content_type("application/octet-stream")
+            .send_body(bytes);
+        WebRequest { url, inner_request }
+    }
+
     pub fn send(self) -> WebRequest<SendClientRequest> {
         WebRequest {
             inner_request: self.inner_request.send(),
@@ -146,6 +155,18 @@ where
 }
 
 impl WebRequest<SendClientRequest> {
+    pub async fn bytes(self) -> Result<Vec<u8>> {
+        let url = self.url.clone();
+        let response = self
+            .inner_request
+            .await
+            .map_err(|e| Error::from((e, url.clone())))?;
+
+        let mut response = filter_http_status(response, url).await?;
+        let raw_body = response.body().await?;
+        Ok(raw_body.to_vec())
+    }
+
     pub async fn json<T: DeserializeOwned>(self) -> Result<T> {
         let url = self.url.clone();
         let response = self

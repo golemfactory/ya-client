@@ -19,6 +19,8 @@ pub enum ProviderEvent {
         activity_id: String,
         #[serde(rename = "agreementId")]
         agreement_id: String,
+        #[serde(rename = "requestorPubKey", skip_serializing_if = "Option::is_none")]
+        requestor_pub_key: Option<String>,
     },
     #[serde(rename = "DestroyActivity")]
     DestroyActivity {

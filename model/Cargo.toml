@@ -11,6 +11,7 @@ edition = "2018"
 [features]
 default = []
 with-diesel = ['diesel']
+sgx=['secp256k1', 'openssl', 'base64', 'secp256k1/serde']
 
 [dependencies]
 bigdecimal = { version = "0.1.0", features = ["serde"]}
@@ -19,3 +20,8 @@ diesel = { version = "1.4", optional = true }
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"
 thiserror = "1.0"
+
+secp256k1={ version = "0.17", optional=true }
+openssl= { version="0.10", optional=true }
+base64 = { version = "0.12.3", optional = true}
+rand = "0.7.3"

@@ -31,7 +31,9 @@ paths:
         content:
           application/json:
             schema:
-              type: string
+              oneOf:
+                - type: string
+                - $ref: '#/components/schemas/CreateActivityRequest'
         required: true
       responses:
         201:
@@ -39,8 +41,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                example: '"activityId"'
+                $ref: '#/components/schemas/CreateActivityResult'
         400:
           description: Bad Request
           content:
@@ -118,6 +119,46 @@ paths:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
       x-codegen-request-body-name: script
+  /activity/{activityId}/encrypted:
+    post:
+      tags:
+        - requestor_control
+      summary: Sends encrypted command to secure exe-unit.
+      operationId: callEncrypted
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/octen-stream:
+              schema:
+                type: string
+                format: binary
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+
   /activity/{activityId}/exec/{batchId}:
     get:
       tags:
@@ -393,6 +434,54 @@ components:
     app_key:
       $ref: 'common.yaml#/components/securitySchemes/app_key'
   schemas:
+    CreateActivityRequest:
+      type: object
+      required:
+        - agreementId
+      properties:
+        agreementId:
+          type: string
+        requestorPubKey:
+          type: string
+
+    CreateActivityResult:
+      type: object
+      required:
+        - activityId
+      properties:
+        activityId:
+          type: string
+        credentials:
+          oneOf:
+            - $ref: '#/components/schemas/SgxCredentials'
+
+    SgxCredentials:
+      type: object
+      required:
+        - enclavePubKey
+        - requestorPubKey
+        - payloadHash
+        - iasReport
+        - iasSig
+        - sessionKey
+      properties:
+        enclavePubKey:
+          type: string
+          format: base64
+        requestorPubKey:
+          type: string
+          format: byte
+        payloadHash:
+          type: string
+        iasReport:
+          type: string
+        iasSig:
+          type: string
+          format: byte
+        sessionKey:
+          type: string
+          format: byte
+
     ExeScriptRequest:
       required:
         - text
@@ -497,6 +586,9 @@ components:
           properties:
             agreementId:
               type: string
+            requestorPubKey:
+              type: string
+              format: byte
 
     DestroyActivity:
       required:
