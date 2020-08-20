@@ -39,7 +39,6 @@ impl SgxCredentials {
 
 mod binenc {
     use super::*;
-    use base64;
     use serde::de::Error;
     use serde::{Deserializer, Serializer};
 
@@ -47,7 +46,7 @@ mod binenc {
     where
         S: Serializer,
     {
-        let s = base64::encode(&bytes);
+        let s = hex::encode(&bytes);
         serializer.serialize_str(&s)
     }
 
@@ -56,8 +55,7 @@ mod binenc {
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-
-        let bytes = base64::decode(&s).map_err(D::Error::custom)?;
+        let bytes = hex::decode(&s).map_err(D::Error::custom)?;
         Ok(bytes)
     }
 }
