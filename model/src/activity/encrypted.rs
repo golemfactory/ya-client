@@ -1,4 +1,4 @@
-use crate::activity::{ExeScriptCommand, ExeScriptCommandResult};
+use crate::activity::{ExeScriptCommand, ExeScriptCommandResult, ExeScriptCommandState};
 use rand::Rng as _;
 use secp256k1::ecdh::SharedSecret;
 use secp256k1::{PublicKey, SecretKey};
@@ -19,6 +19,7 @@ pub struct Request {
 pub enum RequestCommand {
     Exec { exe_script: Vec<ExeScriptCommand> },
     GetExecBatchResults { command_index: Option<usize> },
+    GetRunningCommand,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -27,6 +28,7 @@ pub enum RequestCommand {
 pub enum Response {
     Exec(Result<String, RpcMessageError>),
     GetExecBatchResults(Result<Vec<ExeScriptCommandResult>, RpcMessageError>),
+    GetRunningCommand(Result<ExeScriptCommandState, RpcMessageError>),
     Error(RpcMessageError),
 }
 

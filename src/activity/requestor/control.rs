@@ -6,7 +6,6 @@ use ya_client_model::activity::{
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 
-
 /// Bindings for Requestor Control part of the Activity API.
 #[derive(Clone)]
 pub struct ActivityRequestorControlApi {
@@ -105,6 +104,7 @@ pub mod sgx {
     use secp256k1::{PublicKey, SecretKey};
     use std::sync::Arc;
     use ya_client_model::activity::encrypted::EncryptionCtx;
+    use ya_client_model::activity::ExeScriptCommandState;
 
     #[derive(thiserror::Error, Debug)]
     pub enum SgxError {
@@ -159,29 +159,13 @@ pub mod sgx {
         }
 
         pub async fn exec(&self, exe_script: Vec<ExeScriptCommand>) -> Result<String> {
-            let batch_id = gen_id();
-            let activity_id = self.session.activity_id.clone();
             let request = enc::Request {
-                activity_id,
-                batch_id,
+                activity_id: self.session.activity_id.clone(),
+                batch_id: gen_id(),
                 timeout: None,
                 command: enc::RequestCommand::Exec { exe_script },
             };
-            let bytes = self
-                .session
-                .ctx
-                .encrypt(&request)
-                .map_err(|e| AppError::InternalError(e.to_string()))?;
-            let uri = format!(
-                "activity/{activity_id}/encrypted",
-                activity_id = self.session.activity_id
-            );
-            let resp: enc::Response = self
-                .session
-                .ctx
-                .decrypt(&self.client.post(&uri).send_bytes(bytes).bytes().await?)
-                .map_err(|e| AppError::InternalError(e.to_string()))?;
-            let resp = match resp {
+            let resp = match self.send(request).await? {
                 enc::Response::Exec(r) => r,
                 enc::Response::Error(e) => Err(e),
                 _ => return Err(AppError::InternalError("invalid response".to_string())),
@@ -195,14 +179,39 @@ pub mod sgx {
             timeout: Option<f32>,
             command_index: Option<usize>,
         ) -> Result<Vec<ExeScriptCommandResult>> {
-            let batch_id = batch_id.to_string();
-            let activity_id = self.session.activity_id.clone();
             let request = enc::Request {
-                activity_id,
-                batch_id,
+                activity_id: self.session.activity_id.clone(),
+                batch_id: batch_id.to_string(),
                 timeout,
                 command: enc::RequestCommand::GetExecBatchResults { command_index },
             };
+            let resp = match self.send(request).await? {
+                enc::Response::GetExecBatchResults(r) => r,
+                enc::Response::Error(e) => Err(e),
+                _ => return Err(AppError::InternalError("invalid response".to_string())),
+            };
+            Ok(resp.map_err(|e| AppError::InternalError(e.to_string()))?)
+        }
+
+        pub async fn get_running_command(
+            &self,
+            timeout: Option<f32>,
+        ) -> Result<ExeScriptCommandState> {
+            let request = enc::Request {
+                activity_id: self.session.activity_id.clone(),
+                batch_id: String::new(),
+                timeout,
+                command: enc::RequestCommand::GetRunningCommand,
+            };
+            let resp = match self.send(request).await? {
+                enc::Response::GetRunningCommand(r) => r,
+                enc::Response::Error(e) => Err(e),
+                _ => return Err(AppError::InternalError("invalid response".to_string())),
+            };
+            Ok(resp.map_err(|e| AppError::InternalError(e.to_string()))?)
+        }
+
+        async fn send(&self, request: enc::Request) -> Result<enc::Response> {
             let bytes = self
                 .session
                 .ctx
@@ -212,24 +221,18 @@ pub mod sgx {
                 "activity/{activity_id}/encrypted",
                 activity_id = self.session.activity_id
             );
-            let resp: enc::Response = self
+            let response = self
                 .session
                 .ctx
                 .decrypt(&self.client.post(&uri).send_bytes(bytes).bytes().await?)
                 .map_err(|e| AppError::InternalError(e.to_string()))?;
-            let resp = match resp {
-                enc::Response::GetExecBatchResults(r) => r,
-                enc::Response::Error(e) => Err(e),
-                _ => return Err(AppError::InternalError("invalid response".to_string())),
-            };
-            Ok(resp.map_err(|e| AppError::InternalError(e.to_string()))?)
+            Ok(response)
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-
 
     #[test]
     #[cfg(feature = "sgx")]
@@ -250,8 +253,4 @@ mod test {
             .unwrap();
         assert_eq!(data2.as_slice(), data.as_ref())
     }
-
-
-
-
 }
