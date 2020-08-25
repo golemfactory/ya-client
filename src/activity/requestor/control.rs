@@ -158,6 +158,10 @@ pub mod sgx {
             Ok(SecureActivityRequestorApi { client, session })
         }
 
+        pub fn activity_id(&self) -> String {
+            self.session.activity_id.clone()
+        }
+
         pub async fn exec(&self, exe_script: Vec<ExeScriptCommand>) -> Result<String> {
             let request = enc::Request {
                 activity_id: self.session.activity_id.clone(),
