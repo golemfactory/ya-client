@@ -11,7 +11,7 @@ edition = "2018"
 [features]
 default = []
 cli = ['structopt']
-sgx = ['secp256k1', 'openssl', 'secp256k1/serde', 'secp256k1/rand', 'ya-client-model/sgx']
+sgx = ['openssl', 'secp256k1/serde', 'secp256k1/rand', 'sha3', 'ya-client-model/sgx']
 
 [workspace]
 members = [
@@ -36,6 +36,7 @@ thiserror = "1.0"
 url = "2.1"
 
 secp256k1 = { version = "0.17.2", optional = true }
+sha3 = { version = "0.8", optional = true }
 structopt = { version = "0.3.12", optional = true }
 openssl = { version = "0.10", optional = true }
 

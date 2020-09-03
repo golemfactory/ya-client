@@ -101,7 +101,8 @@ pub mod sgx {
     use crate::model::activity::encrypted as enc;
     use crate::model::activity::{Credentials, ExeScriptCommand, SgxCredentials};
     use crate::Error as AppError;
-    use secp256k1::{PublicKey, SecretKey};
+    use secp256k1::{Message, PublicKey, Secp256k1, SecretKey, Signature};
+    use sha3::Digest;
     use std::sync::Arc;
     use ya_client_model::activity::encrypted::EncryptionCtx;
     use ya_client_model::activity::ExeScriptCommandState;
@@ -112,6 +113,8 @@ pub mod sgx {
         MissingKeys,
         #[error("activity with unknown keys")]
         InvalidKeys,
+        #[error("activity with invalid session key: {0}")]
+        InvalidSessionKey(#[from] secp256k1::Error),
     }
 
     struct Session {
@@ -133,6 +136,19 @@ pub mod sgx {
         format!("{:032x}", v)
     }
 
+    pub(super) fn verify_session_key(
+        enclave_key: &PublicKey,
+        session_key: &Vec<u8>,
+    ) -> std::result::Result<(), secp256k1::Error> {
+        let (key, sig) = session_key.split_at(32 as usize);
+        let hash = sha3::Sha3_256::digest(key);
+        let msg = Message::from_slice(hash.as_slice())?;
+        let sig = Signature::from_der(sig)?;
+
+        let secp = Secp256k1::new();
+        secp.verify(&msg, &sig, &enclave_key)
+    }
+
     impl SecureActivityRequestorApi {
         pub fn from_response(
             client: WebClient,
@@ -145,6 +161,9 @@ pub mod sgx {
                 None => return Err(SgxError::MissingKeys),
                 Some(_) => return Err(SgxError::InvalidKeys),
             };
+
+            verify_session_key(&sgx.enclave_pub_key, &sgx.session_key)?;
+
             let enclave_key = sgx.enclave_pub_key;
             let ctx = EncryptionCtx::new(&enclave_key, &requestor_key);
             let session = Arc::new(Session {
@@ -235,11 +254,23 @@ pub mod sgx {
     }
 }
 
+#[cfg(feature = "sgx")]
 #[cfg(test)]
 mod test {
 
+    use super::sgx::verify_session_key;
+    use secp256k1::*;
+    use sha3::Digest;
+
+    fn sign<T: AsRef<[u8]>>(sec_key: &SecretKey, data: T) -> Result<Vec<u8>, Error> {
+        let ec = Secp256k1::new();
+        let hash = sha3::Sha3_256::digest(data.as_ref());
+        let msg = Message::from_slice(hash.as_slice())?;
+        let sig = ec.sign(&msg, sec_key).serialize_der();
+        Ok(sig.as_ref().to_vec())
+    }
+
     #[test]
-    #[cfg(feature = "sgx")]
     fn test_encdec() {
         use crate::model::activity::encrypted::EncryptionCtx;
         use rand::Rng;
@@ -256,5 +287,15 @@ mod test {
             .decrypt_bytes(&ctx1.encrypt_bytes(&data).unwrap())
             .unwrap();
         assert_eq!(data2.as_slice(), data.as_ref())
+    }
+
+    #[test]
+    fn test_verify_sig() {
+        let ec = secp256k1::Secp256k1::new();
+        let (s, p) = ec.generate_keypair(&mut rand::thread_rng());
+        let shared_secret: [u8; 32] = rand::random();
+        let mut session_key = Vec::from(shared_secret.clone());
+        session_key.extend(sign(&s, &shared_secret).unwrap().into_iter());
+        verify_session_key(&p, &session_key).unwrap()
     }
 }
