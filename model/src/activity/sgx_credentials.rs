@@ -15,8 +15,6 @@ pub struct SgxCredentials {
     pub ias_report: String,
     #[serde(rename = "iasSig", with = "binenc")]
     pub ias_sig: Vec<u8>,
-    #[serde(rename = "sessionKey", with = "binenc")]
-    pub session_key: Vec<u8>,
 }
 
 impl SgxCredentials {
@@ -27,7 +25,6 @@ impl SgxCredentials {
         enclave_hash: String,
         ias_report: String,
         ias_sig: Vec<u8>,
-        session_key: Vec<u8>,
     ) -> SgxCredentials {
         SgxCredentials {
             enclave_pub_key,
@@ -36,7 +33,6 @@ impl SgxCredentials {
             enclave_hash,
             ias_report,
             ias_sig,
-            session_key,
         }
     }
 
@@ -47,7 +43,6 @@ impl SgxCredentials {
         enclave_hash: String,
         ias_report: String,
         ias_sig: Vec<u8>,
-        session_key: Vec<u8>,
     ) -> Result<Self, secp256k1::Error> {
         Ok(Self::new(
             PublicKey::from_slice(enclave_pub_key.as_slice())?,
@@ -56,7 +51,6 @@ impl SgxCredentials {
             enclave_hash,
             ias_report,
             ias_sig,
-            session_key,
         ))
     }
 }
