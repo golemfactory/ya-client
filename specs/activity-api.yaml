@@ -467,20 +467,20 @@ components:
       properties:
         enclavePubKey:
           type: string
-          format: base64
+          format: hex
         requestorPubKey:
           type: string
-          format: byte
+          format: hex
         payloadHash:
           type: string
         iasReport:
           type: string
         iasSig:
           type: string
-          format: byte
+          format: hex
         sessionKey:
           type: string
-          format: byte
+          format: hex
 
     ExeScriptRequest:
       required:
