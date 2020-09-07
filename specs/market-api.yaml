@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 1.5.2
+  version: 1.6.0
   title: Yagna Market API
   description: '
     ## Yagna Market
@@ -44,10 +44,8 @@ paths:
     get:
       tags:
         - provider
-      summary: Fetches all active Offers which have been published by the Provider.
-      description: >
-
       operationId: getOffers
+      summary: Fetches all active Offers which have been published by the Provider.
       responses:
         '200':
           description: Offer list.
@@ -68,6 +66,7 @@ paths:
     post:
       tags:
         - provider
+      operationId: subscribeOffer
       summary: Publishes Provider capabilities via Offer.
       description: >
         Offer object can be considered an "open" or public Offer, as it is not directed
@@ -77,7 +76,6 @@ paths:
 
         **Note**: it is an "atomic" operation, ie. as soon as Subscription is placed,
         the Offer is published on the market.
-      operationId: subscribeOffer
       requestBody:
         $ref: '#/components/requestBodies/Offer'
       responses:
@@ -98,6 +96,7 @@ paths:
     delete:
       tags:
         - provider
+      operationId: unsubscribeOffer
       summary: Stop subscription for previously published Offer.
       description: >
         Stop receiving Proposals.
@@ -106,7 +105,6 @@ paths:
         **Note**: this will terminate all pending `collectDemands` calls on this subscription.
         This implies, that client code should not `unsubscribeOffer` before it has received
         all expected/useful inputs from `collectDemands`.
-      operationId: unsubscribeOffer
       responses:
         '204':
           description: Offer revoked.
@@ -128,6 +126,7 @@ paths:
     get:
       tags:
         - provider
+      operationId: collectDemands
       summary: Reads Market responses to published Offer.
       description: >
         This is a blocking operation. It will not return until there is at least one new event.
@@ -140,7 +139,6 @@ paths:
 
         **Note**: Specification requires this endpoint to support list of specific Proposal Ids
         to listen for messages related only to specific Proposals. This is not covered yet.
-      operationId: collectDemands
       responses:
         '200':
           description: Proposal or Agreement event list.
@@ -168,6 +166,7 @@ paths:
     post:
       tags:
         - provider
+      operationId: queryReplyOffers
       summary: Handles dynamic property query.
       description: >
         The Market Matching Mechanism, when resolving the match relation for the
@@ -185,7 +184,6 @@ paths:
 
 
         **Note**: This method must be implemented for Market API Capability Level 2.
-      operationId: postQueryReplyOffers
       requestBody:
         $ref: '#/components/requestBodies/PropertyQueryReply'
       responses:
@@ -207,8 +205,8 @@ paths:
     get:
       tags:
         - provider
-      summary: Fetches Proposal (Demand) with given id.
       operationId: getProposalDemand
+      summary: Fetches Proposal (Demand) with given id.
       responses:
         '200':
           $ref: '#/components/responses/Proposal'
@@ -223,11 +221,11 @@ paths:
     delete:
       tags:
         - provider
+      operationId: rejectProposalDemand
       summary: Rejects Proposal (Demand).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
-      operationId: rejectProposalDemand
       responses:
         '204':
           description: Proposal rejected.
@@ -242,12 +240,12 @@ paths:
     post:
       tags:
         - provider
+      operationId: counterProposalOffer
       summary: Responds with a bespoke Offer to received Demand.
       description: >
         Creates and sends a modified version of original Offer (a
         counter-proposal) adjusted to previously received Proposal (ie. Demand).
         Changes Proposal state to `Draft`. Returns created Proposal id.
-      operationId: counterProposalOffer
       requestBody:
         $ref: '#/components/requestBodies/Proposal'
       responses:
@@ -269,10 +267,8 @@ paths:
     get:
       tags:
         - requestor
-      summary: Fetches all active Demands which have been published by the Requestor.
-      description: >
-
       operationId: getDemands
+      summary: Fetches all active Demands which have been published by the Requestor.
       responses:
         '200':
           description: Demand list.
@@ -293,6 +289,7 @@ paths:
     post:
       tags:
         - requestor
+      operationId: subscribeDemand
       summary: Publishes Requestor capabilities via Demand.
       description: >
         Demand object can be considered an "open" or public Demand, as it is not directed
@@ -302,7 +299,6 @@ paths:
 
         **Note**: it is an "atomic" operation, ie. as soon as Subscription is placed,
         the Demand is published on the market.
-      operationId: subscribeDemand
       requestBody:
         $ref: '#/components/requestBodies/Demand'
       responses:
@@ -323,6 +319,7 @@ paths:
     delete:
       tags:
         - requestor
+      operationId: unsubscribeDemand
       summary: Stop subscription for previously published Demand.
       description: >
         Stop receiving Proposals.
@@ -331,7 +328,6 @@ paths:
         **Note**: this will terminate all pending `collectOffers` calls on this subscription.
         This implies, that client code should not `unsubscribeDemand` before it has received
         all expected/useful inputs from `collectOffers`.
-      operationId: unsubscribeDemand
       responses:
         '204':
           description: Demand revoked.
@@ -353,6 +349,7 @@ paths:
     get:
       tags:
         - requestor
+      operationId: collectOffers
       summary: Reads Market responses to published Demand.
       description: >
         This is a blocking operation. It will not return until there is at least one new event.
@@ -365,7 +362,6 @@ paths:
 
         **Note**: Specification requires this endpoint to support list of specific Proposal Ids
         to listen for messages related only to specific Proposals. This is not covered yet.
-      operationId: collectOffers
       responses:
         '200':
           description: Proposal event list.
@@ -393,6 +389,7 @@ paths:
     post:
       tags:
         - requestor
+      operationId: queryReplyDemands
       summary: Handles dynamic property query.
       description: >
         The Market Matching Mechanism, when resolving the match relation for the
@@ -410,7 +407,6 @@ paths:
 
 
         **Note**: This method must be implemented for Market API Capability Level 2.
-      operationId: postQueryReplyDemands
       requestBody:
         $ref: '#/components/requestBodies/PropertyQueryReply'
       responses:
@@ -432,8 +428,8 @@ paths:
     get:
       tags:
         - requestor
-      summary: Fetches Proposal (Offer) with given id.
       operationId: getProposalOffer
+      summary: Fetches Proposal (Offer) with given id.
       responses:
         '200':
           $ref: '#/components/responses/Proposal'
@@ -448,11 +444,11 @@ paths:
     delete:
       tags:
         - requestor
+      operationId: rejectProposalOffer
       summary: Rejects Proposal (Offer).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
-      operationId: rejectProposalOffer
       responses:
         '204':
           description: Proposal rejected.
@@ -467,12 +463,12 @@ paths:
     post:
       tags:
         - requestor
+      operationId: counterProposalDemand
       summary: Responds with a bespoke Demand to received Offer.
       description: >
         Creates and sends a modified version of original Demand (a
         counter-proposal) adjusted to previously received Proposal (ie. Offer).
         Changes Proposal state to `Draft`. Returns created Proposal id.
-      operationId: counterProposalDemand
       requestBody:
         $ref: '#/components/requestBodies/Proposal'
       responses:
@@ -495,13 +491,14 @@ paths:
     post:
       tags:
         - requestor
+      operationId: createAgreement
       summary: Creates Agreement from selected Proposal.
       description: >
         Initiates the Agreement handshake phase.
 
 
         Formulates an Agreement artifact from the Proposal indicated by the
-        received Proposal Id.
+        received Proposal Id. Created Agreement is in `Proposal` state.
 
 
         The Approval Expiry Date is added to Agreement artifact and implies
@@ -514,7 +511,6 @@ paths:
 
 
         **Note**: Moves given Proposal to `Approved` state.
-      operationId: createAgreement
       requestBody:
         $ref: '#/components/requestBodies/AgreementProposal'
       responses:
@@ -527,7 +523,7 @@ paths:
                 description: Agreement Id
           links:
             GetAgreementById:
-              description: The response value can be used to fetch Agreement in `GET /agreement/{agreementId}`
+              description: The response value can be used to fetch Agreement in `GET /agreements/{agreementId}`
               operationId: getAgreement
               #operationRef: '#/paths/~1agreements~1{agreementId}/get'
               parameters:
@@ -537,6 +533,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Proposal not in `Draft` state.
+        '410':
+          $ref: '#/components/responses/Expired'
         default:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -548,8 +548,8 @@ paths:
       tags:
         - requestor
         - provider
-      summary: Fetches agreement with given agreement id.
       operationId: getAgreement
+      summary: Fetches agreement with given agreement id.
       responses:
         '200':
           description: Agreement.
@@ -566,10 +566,12 @@ paths:
     delete:
       tags:
         - requestor
+      operationId: cancelAgreement
       summary: Cancels agreement.
       description: >
-        Causes the awaiting `waitForApproval` call to return with `Cancelled` response.
-      operationId: cancelAgreement
+        Causes:
+          - the awaiting `approveAgreement` on Provider side to return with `Cancelled` response.
+          - the awaiting `waitForApproval` local call to return with `Cancelled` response.
       responses:
         '204':
           description: Agreement cancelled.
@@ -578,7 +580,9 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Agreement already approved.
+          description: Agreement not in `Proposal` nor `Pending` state.
+        '410':
+          $ref: '#/components/responses/Expired'
         default:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -589,10 +593,12 @@ paths:
     post:
       tags:
         - requestor
-      summary: Sends Agreement draft to the Provider.
-      description: >
-        Signs Agreement self-created via `createAgreement` and sends it to the Provider.
       operationId: confirmAgreement
+      summary: Sends Agreement proposal to the Provider.
+      description: >
+        Signs self-created Agreement and sends it to the Provider.
+
+        This call should immediately follow `createAgreement`.
       responses:
         '204':
           description: Agreement confirmed.
@@ -600,8 +606,10 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          description: Agreement not in `Proposal` state.
         '410':
-          description: Agreement cancelled.
+          $ref: '#/components/responses/Expired'
         default:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -613,19 +621,19 @@ paths:
     post:
       tags:
         - requestor
+      operationId: waitForApproval
       summary: Waits for Agreement approval by the Provider.
       description: >
         This is a blocking operation. The call may be aborted by Requestor caller
         code. After the call is aborted, another `waitForApproval` call can be
         raised on the same Agreement Id.
 
-
         It returns one of the following options:
 
-        * `Ok` - Indicates that the Agreement has been approved by the Provider.
+        * `Approved` - Indicates that the Agreement has been approved by the Provider.
           - The Provider is now ready to accept a request to start an Activity
             as described in the negotiated agreement.
-          - The Requestor’s corresponding `waitForApproval` call returns Ok after
+          - The Providers’s corresponding `approveAgreement` call returns `Approved` after
             this on the Provider side.
 
         * `Rejected` - Indicates that the Provider has called `rejectAgreement`,
@@ -635,7 +643,6 @@ paths:
         * `Cancelled` - Indicates that the Requestor himself has called
          `cancelAgreement`, which effectively stops the Agreement handshake.
 
-      operationId: waitForApproval
       responses:
         '200':
           description: Agreement approval result.
@@ -643,11 +650,17 @@ paths:
             application/json:
               schema:
                 type: string
-                enum: [Approved, Rejected, Cancelled, TimedOut]
+                enum: [Approved, Rejected, Cancelled]
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '408':
+          $ref: '#/components/responses/TimedOut'
+        '409':
+          description: Agreement not in `Pending` state.
+        '410':
+          $ref: '#/components/responses/Expired'
         default:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -659,6 +672,7 @@ paths:
     post:
       tags:
         - provider
+      operationId: approveAgreement
       summary: Approves Agreement proposed by the Reqestor.
       description: >
         This is a blocking operation. The call may be aborted by Provider caller
@@ -667,13 +681,13 @@ paths:
 
         It returns one of the following options:
 
-        * `Ok` - Indicates that the approved Agreement has been successfully
+        * `Approved` - Indicates that the approved Agreement has been successfully
         delivered to the Requestor and acknowledged.
           - The Requestor side has been notified about the Provider’s commitment
             to the Agreement.
           - The Provider is now ready to accept a request to start an Activity
             as described in the negotiated agreement.
-          - The Requestor’s corresponding ConfirmAgreement call returns Ok after
+          - The Requestor’s corresponding `waitForApproval` call returns `Approved` after
             the one on the Provider side.
 
         * `Cancelled` - Indicates that before delivering the approved Agreement,
@@ -684,23 +698,29 @@ paths:
 
         **Note**: It is expected from the Provider node implementation to “ring-fence”
         the resources required to fulfill the Agreement before the ApproveAgreement
-        is sent. However, the resources should not be fully committed until `Ok`
+        is sent. However, the resources should not be fully committed until `Approved`
         response is received from the `approveAgreement` call.
 
 
         **Note**: Mutually exclusive with `rejectAgreement`.
-      operationId: approveAgreement
       responses:
-        '204':
-          description: Agreement approved.
+        '200':
+          description: Agreement approval result.
+          content:
+            application/json:
+              schema:
+                type: string
+                enum: [Approved, Cancelled]
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '408':
+          $ref: '#/components/responses/TimedOut'
         '409':
-          description: Agreement already rejected.
+          description: Agreement not in `Proposal` state.
         '410':
-          description: Agreement cancelled by the Requstor.
+          $ref: '#/components/responses/Expired'
         default:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -711,6 +731,7 @@ paths:
     post:
       tags:
         - provider
+      operationId: rejectAgreement
       summary: Rejects Agreement proposed by the Requestor.
       description: >
         The Requestor side is notified about the Provider’s decision to reject
@@ -718,7 +739,6 @@ paths:
 
 
         **Note**: Mutually exclusive with `approveAgreement`.
-      operationId: rejectAgreement
       responses:
         '204':
           description: Agreement rejected.
@@ -727,9 +747,9 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Agreement already approved.
+          description: Agreement not in `Proposal` state.
         '410':
-          description: Agreement cancelled by the Requstor.
+          $ref: '#/components/responses/Expired'
         default:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -741,8 +761,15 @@ paths:
       tags:
         - provider
         - requestor
-      summary: Terminates approved Agreement.
       operationId: terminateAgreement
+      summary: Terminates approved Agreement.
+      description: >
+        Method to finish/close the Agreement while in `Approved` state.
+
+        The other party gets notified about calling party decision to terminate a "running" agreement.
+
+        **Note**: Can be invoked at any time after Agreement was approved by both sides.
+        Financial and reputational consequences are not defined by this specification.
       responses:
         '204':
           description: Agreement terminated.
@@ -751,9 +778,9 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Agreement not in Approved state.
+          description: Agreement not in `Approved` state.
         '410':
-          description: Agreement cancelled by the Requstor.
+          $ref: '#/components/responses/Expired'
         default:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -884,6 +911,20 @@ components:
           schema:
             $ref: 'common.yaml#/schemas/ErrorMessage'
 
+    TimedOut:
+      description: Timeout occured while processing the request.
+      content:
+        application/json:
+          schema:
+            $ref: 'common.yaml#/schemas/ErrorMessage'
+
+    Expired:
+      description: The specified Proposal or Agreement has expired.
+      content:
+        application/json:
+          schema:
+            $ref: 'common.yaml#/schemas/ErrorMessage'
+
     UnexpectedError:
       description: Unexpected error.
       content:
@@ -928,7 +969,6 @@ components:
               type: string
               readOnly: true
 
-    # TODO: add specified OfferProposal and DemandProposal to disabiguate API
     Proposal:
       allOf:
         - $ref: '#/components/schemas/DemandOfferBase'

@@ -19,6 +19,7 @@ use url::{form_urlencoded, Url};
 
 pub const YAGNA_API_URL_ENV_VAR: &str = "YAGNA_API_URL";
 pub const DEFAULT_YAGNA_API_URL: &str = "http://127.0.0.1:7465";
+const MAX_BODY_SIZE: usize = 10 * 1024 * 1024;
 
 pub fn rest_api_url() -> Url {
     let api_url = env::var(YAGNA_API_URL_ENV_VAR).unwrap_or(DEFAULT_YAGNA_API_URL.into());
@@ -191,10 +192,13 @@ impl WebRequest<SendClientRequest> {
                 response.status()
             ))?);
         }
-        let raw_body = response.body().await?;
+        let raw_body = response.body().limit(MAX_BODY_SIZE).await?;
         let body = std::str::from_utf8(&raw_body)?;
-        log::debug!("WebRequest.json(). url={}, resp={}", self.url, body);
-
+        log::debug!(
+            "WebRequest.json(). url={}, resp={}",
+            self.url,
+            body.split_at(512.min(body.len())).0
+        );
         Ok(serde_json::from_str(body)?)
     }
 }

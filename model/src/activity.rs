@@ -9,7 +9,7 @@ pub mod runtime_event;
 
 pub use self::activity_state::{ActivityState, State, StatePair};
 pub use self::activity_usage::ActivityUsage;
-pub use self::exe_script_command::ExeScriptCommand;
+pub use self::exe_script_command::{ExeScriptCommand, FileSet, SetEntry, SetObject, TransferArgs};
 pub use self::exe_script_command_result::{ExeScriptCommandResult, Result as CommandResult};
 pub use self::exe_script_command_state::ExeScriptCommandState;
 pub use self::exe_script_request::ExeScriptRequest;
