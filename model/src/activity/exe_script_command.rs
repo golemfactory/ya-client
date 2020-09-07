@@ -98,3 +98,44 @@ impl From<ExeScriptCommand> for ExeScriptCommandState {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+
+    #[test]
+    fn test_transfers_parsing() {
+        let command = r#"
+        [ {"transfer": {
+            "from": "http://some-site/data.zip",
+            "to": "container:/app//in/data.zip"
+          } },
+          {"transfer": {
+            "from": "http://some-site/data.zip",
+            "to": "container:/app//in/",
+            "format": "zip"
+           } },
+          {"transfer": {
+            "from": "http://some-site/data.zip",
+            "to": "container:/app//in/",
+            "depth": 0,
+            "format": "zip.0",
+            "fileset": "*.o"
+           } },
+           {"transfer": {
+            "from": "http://some-site/data.zip",
+            "to": "container:/app//in/",
+            "format": "zip.0",
+            "fileset": [
+                {"includes": "out/*",
+                 "excludes": ["*.tmp", ".gitignore"]
+                },
+                {"includes": "gen-spec/*"
+                }
+            ]
+           } }
+
+
+        ]"#;
+        let _: Vec<super::ExeScriptCommand> = serde_json::from_str(command).unwrap();
+    }
+}
