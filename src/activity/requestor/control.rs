@@ -101,7 +101,11 @@ pub mod sgx {
     use crate::model::activity::encrypted as enc;
     use crate::model::activity::{Credentials, ExeScriptCommand, SgxCredentials};
     use crate::Error as AppError;
+    use graphene::sgx::SgxMeasurement;
+    use graphene::AttestationResponse;
+    use hex;
     use secp256k1::{PublicKey, SecretKey};
+    use std::convert::TryFrom;
     use std::sync::Arc;
     use ya_client_model::activity::encrypted::EncryptionCtx;
     use ya_client_model::activity::ExeScriptCommandState;
@@ -112,6 +116,27 @@ pub mod sgx {
         MissingKeys,
         #[error("activity with unknown keys")]
         InvalidKeys,
+        #[error("invalid attestation evidence")]
+        AttestationFailed,
+        #[error("invalid credentials: {0}")]
+        InvalidCredentials(String),
+    }
+
+    macro_rules! map_error {
+        ($($type:ty => $error:path)*) => {
+            $(
+                impl From<$type> for SgxError {
+                    fn from(err: $type) -> Self {
+                        $error(err.to_string())
+                    }
+                }
+            )*
+        };
+    }
+
+    map_error! {
+        std::array::TryFromSliceError => SgxError::InvalidCredentials
+        hex::FromHexError => SgxError::InvalidCredentials
     }
 
     struct Session {
@@ -153,9 +178,23 @@ pub mod sgx {
                 ctx,
             });
 
-            // TODO: Add attestation here!
+            let evidence = AttestationResponse::new(sgx.ias_report, &sgx.ias_sig);
+            let mr_enclave = // TODO: compare with known enclave hash
+                <SgxMeasurement>::try_from(hex::decode(sgx.enclave_hash)?.as_ref())?;
+            let valid = evidence
+                .verifier()
+                .data(&sgx.requestor_pub_key.serialize())
+                .data(&sgx.enclave_pub_key.serialize())
+                .data(&[0u8; 32]) // TODO: use known payload hash
+                .mr_enclave(mr_enclave)
+                //.not_outdated()
+                .check();
 
-            Ok(SecureActivityRequestorApi { client, session })
+            if valid {
+                Ok(SecureActivityRequestorApi { client, session })
+            } else {
+                Err(SgxError::AttestationFailed)
+            }
         }
 
         pub fn activity_id(&self) -> String {
