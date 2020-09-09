@@ -54,9 +54,11 @@ impl ActivityRequestorControlApi {
         let api = sgx::SecureActivityRequestorApi::from_response(
             self.client.clone(),
             result.activity_id.clone(),
+            agreement_id,
             result,
             secret,
         )
+        .await
         .map_err(|e| crate::Error::InternalError(e.to_string()))?;
         Ok(api)
     }
@@ -98,6 +100,7 @@ impl ActivityRequestorControlApi {
 #[cfg(feature = "sgx")]
 pub mod sgx {
     use super::*;
+    use crate::market::MarketRequestorApi;
     use crate::model::activity::encrypted as enc;
     use crate::model::activity::{Credentials, ExeScriptCommand, SgxCredentials};
     use crate::Error as AppError;
@@ -120,6 +123,12 @@ pub mod sgx {
         AttestationFailed,
         #[error("invalid credentials: {0}")]
         InvalidCredentials(String),
+        #[error("invalid agreement")]
+        InvalidAgreement,
+        #[error("YAGNA_APPKEY variable not set ({0})")]
+        InvalidAppKey(String),
+        #[error("internal error: {0}")]
+        InternalError(String),
     }
 
     macro_rules! map_error {
@@ -135,8 +144,9 @@ pub mod sgx {
     }
 
     map_error! {
-        std::array::TryFromSliceError => SgxError::InvalidCredentials
         hex::FromHexError => SgxError::InvalidCredentials
+        std::array::TryFromSliceError => SgxError::InvalidCredentials
+        std::env::VarError => SgxError::InvalidAppKey
     }
 
     struct Session {
@@ -159,9 +169,10 @@ pub mod sgx {
     }
 
     impl SecureActivityRequestorApi {
-        pub fn from_response(
+        pub async fn from_response(
             client: WebClient,
             activity_id: String,
+            agreement_id: &str,
             response: CreateActivityResult,
             requestor_key: SecretKey,
         ) -> std::result::Result<Self, SgxError> {
@@ -178,6 +189,25 @@ pub mod sgx {
                 ctx,
             });
 
+            let agreement = WebClient::builder()
+                .auth_token(&std::env::var("YAGNA_APPKEY")?)
+                .build()
+                .interface::<MarketRequestorApi>()
+                .map_err(|e| SgxError::InternalError(e.to_string()))?
+                .get_agreement(agreement_id)
+                .await
+                .map_err(|e| SgxError::InternalError(e.to_string()))?;
+
+            log::debug!("Agreement: {:#?}", &agreement);
+
+            let task_package = agreement
+                .demand
+                .properties
+                .get("golem.srv.comp.task_package")
+                .ok_or(SgxError::InvalidAgreement)?
+                .as_str()
+                .ok_or(SgxError::InvalidAgreement)?;
+
             let evidence = AttestationResponse::new(sgx.ias_report, &sgx.ias_sig);
             let mr_enclave = // TODO: compare with known enclave hash
                 <SgxMeasurement>::try_from(hex::decode(sgx.enclave_hash)?.as_ref())?;
@@ -185,7 +215,7 @@ pub mod sgx {
                 .verifier()
                 .data(&sgx.requestor_pub_key.serialize())
                 .data(&sgx.enclave_pub_key.serialize())
-                .data(&[0u8; 32]) // TODO: use known payload hash
+                .data(task_package.as_bytes())
                 .mr_enclave(mr_enclave)
                 //.not_outdated()
                 .check();
