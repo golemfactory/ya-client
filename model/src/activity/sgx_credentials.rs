@@ -7,8 +7,6 @@ pub struct SgxCredentials {
     pub enclave_pub_key: PublicKey,
     #[serde(rename = "requestorPubKey")]
     pub requestor_pub_key: PublicKey,
-    #[serde(rename = "payloadHash")]
-    pub payload_hash: String,
     #[serde(rename = "enclaveHash")]
     pub enclave_hash: String,
     #[serde(rename = "iasReport")]
@@ -21,7 +19,6 @@ impl SgxCredentials {
     pub fn new(
         enclave_pub_key: PublicKey,
         requestor_pub_key: PublicKey,
-        payload_hash: String,
         enclave_hash: String,
         ias_report: String,
         ias_sig: Vec<u8>,
@@ -29,7 +26,6 @@ impl SgxCredentials {
         SgxCredentials {
             enclave_pub_key,
             requestor_pub_key,
-            payload_hash,
             enclave_hash,
             ias_report,
             ias_sig,
@@ -39,7 +35,6 @@ impl SgxCredentials {
     pub fn try_with(
         enclave_pub_key: Vec<u8>,
         requestor_pub_key: Vec<u8>,
-        payload_hash: String,
         enclave_hash: String,
         ias_report: String,
         ias_sig: Vec<u8>,
@@ -47,7 +42,6 @@ impl SgxCredentials {
         Ok(Self::new(
             PublicKey::from_slice(enclave_pub_key.as_slice())?,
             PublicKey::from_slice(requestor_pub_key.as_slice())?,
-            payload_hash,
             enclave_hash,
             ias_report,
             ias_sig,

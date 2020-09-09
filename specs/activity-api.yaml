@@ -460,7 +460,6 @@ components:
       required:
         - enclavePubKey
         - requestorPubKey
-        - payloadHash
         - iasReport
         - iasSig
       properties:
@@ -470,8 +469,6 @@ components:
         requestorPubKey:
           type: string
           format: hex
-        payloadHash:
-          type: string
         iasReport:
           type: string
         iasSig:
