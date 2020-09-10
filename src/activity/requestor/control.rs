@@ -104,11 +104,10 @@ pub mod sgx {
     use crate::model::activity::encrypted as enc;
     use crate::model::activity::{Credentials, ExeScriptCommand, SgxCredentials};
     use crate::Error as AppError;
-    use graphene::sgx::SgxMeasurement;
+    use crate::SGX_CONFIG;
     use graphene::AttestationResponse;
     use hex;
     use secp256k1::{PublicKey, SecretKey};
-    use std::convert::TryFrom;
     use std::sync::Arc;
     use ya_client_model::activity::encrypted::EncryptionCtx;
     use ya_client_model::activity::ExeScriptCommandState;
@@ -209,16 +208,23 @@ pub mod sgx {
                 .ok_or(SgxError::InvalidAgreement)?;
 
             let evidence = AttestationResponse::new(sgx.ias_report, &sgx.ias_sig);
-            let mr_enclave = // TODO: compare with known enclave hash
-                <SgxMeasurement>::try_from(hex::decode(sgx.enclave_hash)?.as_ref())?;
-            let valid = evidence
-                .verifier()
+            let mut verifier = evidence.verifier();
+            verifier = verifier
                 .data(&sgx.requestor_pub_key.serialize())
                 .data(&sgx.enclave_pub_key.serialize())
                 .data(task_package.as_bytes())
-                .mr_enclave(mr_enclave)
-                //.not_outdated()
-                .check();
+                .mr_enclave(SGX_CONFIG.exeunit_hash)
+                .max_age(SGX_CONFIG.max_evidence_age);
+
+            if !SGX_CONFIG.allow_debug {
+                verifier = verifier.not_debug();
+            }
+
+            if !SGX_CONFIG.allow_outdated_tcb {
+                verifier = verifier.not_outdated();
+            }
+
+            let valid = verifier.check();
 
             if valid {
                 Ok(SecureActivityRequestorApi { client, session })

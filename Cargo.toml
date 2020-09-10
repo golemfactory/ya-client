@@ -11,7 +11,7 @@ edition = "2018"
 [features]
 default = []
 cli = ['structopt']
-sgx = ['graphene', 'secp256k1', 'openssl', 'secp256k1/serde', 'secp256k1/rand', 'ya-client-model/sgx']
+sgx = ['graphene', 'lazy_static', 'secp256k1', 'openssl', 'secp256k1/serde', 'secp256k1/rand', 'ya-client-model/sgx']
 
 [workspace]
 members = [
@@ -28,7 +28,6 @@ chrono = "0.4"
 envy = "0.4"
 failure = "0.1.6"
 futures = "0.3"
-graphene = { version = "0.3", git = "https://github.com/golemfactory/graphene-rust.git", optional = true }
 hex = "0.4"
 log = "0.4"
 rand = "0.6"
@@ -37,6 +36,8 @@ serde_json = "1.0"
 thiserror = "1.0"
 url = "2.1"
 
+graphene = { version = "0.3.1", git = "https://github.com/golemfactory/graphene-rust.git", optional = true }
+lazy_static = { version = "1.4", optional = true }
 secp256k1 = { version = "0.17.2", optional = true }
 structopt = { version = "0.3.12", optional = true }
 openssl = { version = "0.10", optional = true }
