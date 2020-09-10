@@ -1,4 +1,5 @@
 pub mod acceptance;
+pub mod account;
 pub mod activity_payment;
 pub mod agreement_payment;
 pub mod allocation;
@@ -13,6 +14,7 @@ pub mod rejection;
 pub mod rejection_reason;
 
 pub use self::acceptance::Acceptance;
+pub use self::account::Account;
 pub use self::activity_payment::ActivityPayment;
 pub use self::agreement_payment::AgreementPayment;
 pub use self::allocation::Allocation;
