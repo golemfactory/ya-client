@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ExeScriptCommand {
+    Sign {},
     Deploy {},
     Start {
         #[serde(default)]
@@ -34,6 +35,11 @@ pub enum ExeScriptCommand {
 impl From<ExeScriptCommand> for ExeScriptCommandState {
     fn from(cmd: ExeScriptCommand) -> Self {
         match cmd {
+            ExeScriptCommand::Sign { .. } => ExeScriptCommandState {
+                command: "Sign".to_string(),
+                progress: None,
+                params: None,
+            },
             ExeScriptCommand::Deploy { .. } => ExeScriptCommandState {
                 command: "Deploy".to_string(),
                 progress: None,
