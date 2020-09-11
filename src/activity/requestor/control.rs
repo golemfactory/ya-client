@@ -182,6 +182,7 @@ pub mod sgx {
             };
             let enclave_key = sgx.enclave_pub_key;
             let ctx = EncryptionCtx::new(&enclave_key, &requestor_key);
+            let nonce = &activity_id.to_owned();
             let session = Arc::new(Session {
                 activity_id,
                 enclave_key,
@@ -214,6 +215,7 @@ pub mod sgx {
                 .data(&sgx.enclave_pub_key.serialize())
                 .data(task_package.as_bytes())
                 .mr_enclave(SGX_CONFIG.exeunit_hash)
+                .nonce(nonce)
                 .max_age(SGX_CONFIG.max_evidence_age);
 
             if !SGX_CONFIG.allow_debug {
