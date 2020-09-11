@@ -9,6 +9,7 @@ const CONFIG: &str = include_str!("sgx_config.json");
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SgxConfigJson {
+    pub enable_attestation: bool,
     pub exeunit_hash: String,
     pub allow_debug: bool,
     pub allow_outdated_tcb: bool,
@@ -17,6 +18,7 @@ struct SgxConfigJson {
 
 #[derive(Clone, Debug)]
 pub struct SgxConfig {
+    pub enable_attestation: bool,
     pub exeunit_hash: SgxMeasurement,
     pub allow_debug: bool,
     pub allow_outdated_tcb: bool,
@@ -30,6 +32,7 @@ lazy_static! {
         let mut mr = SgxMeasurement::default();
         mr.copy_from_slice(&hex::decode(cfg.exeunit_hash).unwrap());
         SgxConfig {
+            enable_attestation: cfg.enable_attestation,
             exeunit_hash: mr,
             allow_debug: cfg.allow_debug,
             allow_outdated_tcb: cfg.allow_outdated_tcb,

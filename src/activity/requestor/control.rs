@@ -189,49 +189,54 @@ pub mod sgx {
                 ctx,
             });
 
-            let agreement = WebClient::builder()
-                .auth_token(&std::env::var("YAGNA_APPKEY")?)
-                .build()
-                .interface::<MarketRequestorApi>()
-                .map_err(|e| SgxError::InternalError(e.to_string()))?
-                .get_agreement(agreement_id)
-                .await
-                .map_err(|e| SgxError::InternalError(e.to_string()))?;
+            if SGX_CONFIG.enable_attestation {
+                let agreement = WebClient::builder()
+                    .auth_token(&std::env::var("YAGNA_APPKEY")?)
+                    .build()
+                    .interface::<MarketRequestorApi>()
+                    .map_err(|e| SgxError::InternalError(e.to_string()))?
+                    .get_agreement(agreement_id)
+                    .await
+                    .map_err(|e| SgxError::InternalError(e.to_string()))?;
 
-            log::debug!("Agreement: {:#?}", &agreement);
+                log::debug!("Agreement: {:?}", &agreement);
 
-            let task_package = agreement
-                .demand
-                .properties
-                .get("golem.srv.comp.task_package")
-                .ok_or(SgxError::InvalidAgreement)?
-                .as_str()
-                .ok_or(SgxError::InvalidAgreement)?;
+                let task_package = agreement
+                    .demand
+                    .properties
+                    .get("golem.srv.comp.task_package")
+                    .ok_or(SgxError::InvalidAgreement)?
+                    .as_str()
+                    .ok_or(SgxError::InvalidAgreement)?;
 
-            let evidence = AttestationResponse::new(sgx.ias_report, &sgx.ias_sig);
-            let mut verifier = evidence.verifier();
-            verifier = verifier
-                .data(&sgx.requestor_pub_key.serialize())
-                .data(&sgx.enclave_pub_key.serialize())
-                .data(task_package.as_bytes())
-                .mr_enclave(SGX_CONFIG.exeunit_hash)
-                .nonce(nonce)
-                .max_age(SGX_CONFIG.max_evidence_age);
+                let evidence = AttestationResponse::new(sgx.ias_report, &sgx.ias_sig);
+                let mut verifier = evidence.verifier();
+                verifier = verifier
+                    .data(&sgx.requestor_pub_key.serialize())
+                    .data(&sgx.enclave_pub_key.serialize())
+                    .data(task_package.as_bytes())
+                    .mr_enclave(SGX_CONFIG.exeunit_hash)
+                    .nonce(nonce)
+                    .max_age(SGX_CONFIG.max_evidence_age);
 
-            if !SGX_CONFIG.allow_debug {
-                verifier = verifier.not_debug();
-            }
+                if !SGX_CONFIG.allow_debug {
+                    verifier = verifier.not_debug();
+                }
 
-            if !SGX_CONFIG.allow_outdated_tcb {
-                verifier = verifier.not_outdated();
-            }
+                if !SGX_CONFIG.allow_outdated_tcb {
+                    verifier = verifier.not_outdated();
+                }
 
-            let valid = verifier.check();
-
-            if valid {
-                Ok(SecureActivityRequestorApi { client, session })
+                if verifier.check() {
+                    log::info!("Attestation OK");
+                    Ok(SecureActivityRequestorApi { client, session })
+                } else {
+                log::warn!("Attestation failed");
+                    Err(SgxError::AttestationFailed)
+                }
             } else {
-                Err(SgxError::AttestationFailed)
+                log::info!("Attestation disabled");
+                Ok(SecureActivityRequestorApi { client, session })
             }
         }
 
