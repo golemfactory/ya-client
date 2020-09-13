@@ -9,9 +9,13 @@
  */
 
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 use crate::market::{Demand, Offer};
 use crate::ErrorMessage;
+
+const PAYMENT_PLATFORM_PREFIX: &str = "payment.platform.";
+const CHOSEN_PAYMENT_PLATFORM: &str = "payment.chosen-platform";
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Proposal {
@@ -35,6 +39,50 @@ pub struct Proposal {
     pub prev_proposal_id: Option<String>,
 }
 
+fn choose_payment_platform(
+    demand_platforms: Vec<String>,
+    offer_platforms: Vec<String>,
+) -> Result<String, ErrorMessage> {
+    let mut platforms = HashSet::new();
+    for platform in demand_platforms {
+        platforms.insert(platform);
+    }
+
+    // Choose first matching
+    for platform in offer_platforms {
+        if platforms.contains(&platform) {
+            return Ok(platform);
+        }
+    }
+
+    Err(ErrorMessage::new("No common payment platforms".into()))
+}
+
+fn parse_payment_platforms(properties: &serde_json::value::Value) -> Vec<String> {
+    let mut platforms: Vec<String> = vec![];
+    for prop in properties.as_object().unwrap().keys() {
+        match extract_payment_platform(prop) {
+            Some(payment_platform) => platforms.push(payment_platform),
+            None => {}
+        }
+    }
+    platforms
+}
+
+fn extract_payment_platform(property: &str) -> Option<String> {
+    match property.rfind(PAYMENT_PLATFORM_PREFIX) {
+        Some(prefix_start) => {
+            let start_position = prefix_start + PAYMENT_PLATFORM_PREFIX.len();
+            let prop = &property[start_position..property.len()];
+            match prop.find(".") {
+                Some(suffix_start) => Some((&prop[..suffix_start]).into()),
+                None => Some(prop.into()),
+            }
+        }
+        None => None,
+    }
+}
+
 impl Proposal {
     pub fn new(properties: serde_json::Value, constraints: String) -> Proposal {
         Proposal {
@@ -48,19 +96,45 @@ impl Proposal {
     }
 
     pub fn counter_demand(&self, demand: Demand) -> Result<Proposal, ErrorMessage> {
-        Ok(Proposal {
-            properties: demand.properties,
-            constraints: demand.constraints,
-            proposal_id: None,
-            issuer_id: None,
-            state: None,
-            prev_proposal_id: Some(self.proposal_id()?.clone()),
-        })
+        let mut properties = demand.properties.clone();
+        let demand_platforms = parse_payment_platforms(
+            &properties
+                .get("golem")
+                .unwrap_or(&serde_json::json!({}))
+                .get("com")
+                .unwrap_or(&serde_json::json!({})),
+        );
+        let offer_platforms = parse_payment_platforms(&self.properties);
+
+        match choose_payment_platform(demand_platforms, offer_platforms) {
+            Ok(chosen_payment_platform) => {
+                properties["golem"]["com"].as_object_mut().unwrap().insert(
+                    CHOSEN_PAYMENT_PLATFORM.to_string(),
+                    serde_json::Value::String(chosen_payment_platform),
+                );
+
+                Ok(Proposal {
+                    properties: properties,
+                    constraints: demand.constraints,
+                    proposal_id: None,
+                    issuer_id: None,
+                    state: None,
+                    prev_proposal_id: Some(self.proposal_id()?.clone()),
+                })
+            }
+            Err(err) => Err(err),
+        }
     }
 
     pub fn counter_offer(&self, offer: Offer) -> Result<Proposal, ErrorMessage> {
+        let mut properties = offer.properties.clone();
+        let chosen_payment_platform = self.chosen_payment_platform()?;
+        properties.as_object_mut().unwrap().insert(
+            format!("golem.com.{}", CHOSEN_PAYMENT_PLATFORM).to_string(),
+            serde_json::Value::String(chosen_payment_platform),
+        );
         Ok(Proposal {
-            properties: offer.properties,
+            properties: properties,
             constraints: offer.constraints,
             proposal_id: None,
             issuer_id: None,
@@ -86,6 +160,28 @@ impl Proposal {
             .as_ref()
             .ok_or("no previous proposal id".into())
     }
+
+    pub fn chosen_payment_platform(&self) -> Result<String, ErrorMessage> {
+        match self
+            .properties
+            .get(format!("golem.com.{}", CHOSEN_PAYMENT_PLATFORM))
+        {
+            Some(chosen_payment_platform) => Ok(chosen_payment_platform.as_str().unwrap().into()),
+            None => {
+                match self
+                    .properties
+                    .get("golem")
+                    .unwrap_or(&serde_json::json!({}))
+                    .get("com")
+                    .unwrap_or(&serde_json::json!({}))
+                    .get(CHOSEN_PAYMENT_PLATFORM)
+                {
+                    Some(chosen_platform) => Ok(chosen_platform.as_str().unwrap().into()),
+                    None => Err(ErrorMessage::new("Payment platform not chosen".into())),
+                }
+            }
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
@@ -105,4 +201,46 @@ pub enum State {
     #[serde(rename = "Expired")]
     /// Not accepted nor rejected before validity period
     Expired,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extract_payment_platform_when_no_platform() {
+        assert_eq!(extract_payment_platform("test"), None);
+    }
+
+    #[test]
+    fn test_extract_payment_platform() {
+        assert_eq!(
+            extract_payment_platform("payment.platform.ngnt"),
+            Some("ngnt".into())
+        );
+    }
+
+    #[test]
+    fn test_extract_payment_platform_with_prefix() {
+        assert_eq!(
+            extract_payment_platform("golem.com.payment.platform.zk-ngnt"),
+            Some("zk-ngnt".into())
+        );
+    }
+
+    #[test]
+    fn test_extract_payment_platform_with_suffix() {
+        assert_eq!(
+            extract_payment_platform("payment.platform.zk-ngnt.address"),
+            Some("zk-ngnt".into())
+        );
+    }
+
+    #[test]
+    fn test_extract_payment_platform_with_prefix_and_suffix() {
+        assert_eq!(
+            extract_payment_platform("golem.com.payment.platform.zk-ngnt.address"),
+            Some("zk-ngnt".into())
+        );
+    }
 }
