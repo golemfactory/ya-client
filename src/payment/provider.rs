@@ -211,4 +211,8 @@ impl PaymentProviderApi {
         let url = url_format!("provider/payments/{payment_id}", payment_id);
         self.client.get(&url).send().json().await
     }
+
+    pub async fn get_accounts(&self) -> Result<Vec<Account>> {
+        self.client.get("provider/accounts").send().json().await
+    }
 }
