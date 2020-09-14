@@ -463,7 +463,6 @@ components:
         - payloadHash
         - iasReport
         - iasSig
-        - sessionKey
       properties:
         enclavePubKey:
           type: string
@@ -476,9 +475,6 @@ components:
         iasReport:
           type: string
         iasSig:
-          type: string
-          format: hex
-        sessionKey:
           type: string
           format: hex
 

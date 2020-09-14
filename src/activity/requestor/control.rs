@@ -54,9 +54,11 @@ impl ActivityRequestorControlApi {
         let api = sgx::SecureActivityRequestorApi::from_response(
             self.client.clone(),
             result.activity_id.clone(),
+            agreement_id,
             result,
             secret,
         )
+        .await
         .map_err(|e| crate::Error::InternalError(e.to_string()))?;
         Ok(api)
     }
@@ -98,9 +100,13 @@ impl ActivityRequestorControlApi {
 #[cfg(feature = "sgx")]
 pub mod sgx {
     use super::*;
+    use crate::market::MarketRequestorApi;
     use crate::model::activity::encrypted as enc;
     use crate::model::activity::{Credentials, ExeScriptCommand, SgxCredentials};
     use crate::Error as AppError;
+    use crate::SGX_CONFIG;
+    use graphene::AttestationResponse;
+    use hex;
     use secp256k1::{PublicKey, SecretKey};
     use std::sync::Arc;
     use ya_client_model::activity::encrypted::EncryptionCtx;
@@ -112,6 +118,34 @@ pub mod sgx {
         MissingKeys,
         #[error("activity with unknown keys")]
         InvalidKeys,
+        #[error("invalid attestation evidence")]
+        AttestationFailed,
+        #[error("invalid credentials: {0}")]
+        InvalidCredentials(String),
+        #[error("invalid agreement")]
+        InvalidAgreement,
+        #[error("YAGNA_APPKEY variable not set ({0})")]
+        InvalidAppKey(String),
+        #[error("internal error: {0}")]
+        InternalError(String),
+    }
+
+    macro_rules! map_error {
+        ($($type:ty => $error:path)*) => {
+            $(
+                impl From<$type> for SgxError {
+                    fn from(err: $type) -> Self {
+                        $error(err.to_string())
+                    }
+                }
+            )*
+        };
+    }
+
+    map_error! {
+        hex::FromHexError => SgxError::InvalidCredentials
+        std::array::TryFromSliceError => SgxError::InvalidCredentials
+        std::env::VarError => SgxError::InvalidAppKey
     }
 
     struct Session {
@@ -134,9 +168,10 @@ pub mod sgx {
     }
 
     impl SecureActivityRequestorApi {
-        pub fn from_response(
+        pub async fn from_response(
             client: WebClient,
             activity_id: String,
+            agreement_id: &str,
             response: CreateActivityResult,
             requestor_key: SecretKey,
         ) -> std::result::Result<Self, SgxError> {
@@ -147,15 +182,62 @@ pub mod sgx {
             };
             let enclave_key = sgx.enclave_pub_key;
             let ctx = EncryptionCtx::new(&enclave_key, &requestor_key);
+            let nonce = &activity_id.to_owned();
             let session = Arc::new(Session {
                 activity_id,
                 enclave_key,
                 ctx,
             });
 
-            // TODO: Add attestation here!
+            if SGX_CONFIG.enable_attestation {
+                let agreement = WebClient::builder()
+                    .auth_token(&std::env::var("YAGNA_APPKEY")?)
+                    .build()
+                    .interface::<MarketRequestorApi>()
+                    .map_err(|e| SgxError::InternalError(e.to_string()))?
+                    .get_agreement(agreement_id)
+                    .await
+                    .map_err(|e| SgxError::InternalError(e.to_string()))?;
 
-            Ok(SecureActivityRequestorApi { client, session })
+                log::debug!("Agreement: {:?}", &agreement);
+
+                let task_package = agreement
+                    .demand
+                    .properties
+                    .get("golem.srv.comp.task_package")
+                    .ok_or(SgxError::InvalidAgreement)?
+                    .as_str()
+                    .ok_or(SgxError::InvalidAgreement)?;
+
+                let evidence = AttestationResponse::new(sgx.ias_report, &sgx.ias_sig);
+                let mut verifier = evidence.verifier();
+                verifier = verifier
+                    .data(&sgx.requestor_pub_key.serialize())
+                    .data(&sgx.enclave_pub_key.serialize())
+                    .data(task_package.as_bytes())
+                    .mr_enclave(SGX_CONFIG.exeunit_hash)
+                    .nonce(nonce)
+                    .max_age(SGX_CONFIG.max_evidence_age);
+
+                if !SGX_CONFIG.allow_debug {
+                    verifier = verifier.not_debug();
+                }
+
+                if !SGX_CONFIG.allow_outdated_tcb {
+                    verifier = verifier.not_outdated();
+                }
+
+                if verifier.check() {
+                    log::info!("Attestation OK");
+                    Ok(SecureActivityRequestorApi { client, session })
+                } else {
+                log::warn!("Attestation failed");
+                    Err(SgxError::AttestationFailed)
+                }
+            } else {
+                log::info!("Attestation disabled");
+                Ok(SecureActivityRequestorApi { client, session })
+            }
         }
 
         pub fn activity_id(&self) -> String {
