@@ -366,6 +366,22 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
+  /receiveAccounts:
+    get:
+      tags:
+        - provider
+      summary: Get available accounts for receiving payments.
+      operationId: getReceiveAccounts
+      responses:
+        200:
+          $ref: '#/components/responses/AccountList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        500:
+          $ref: 'common.yaml#/responses/ServerError'
+
   /debitNotes/{debitNodeId}/accept:
     post:
       tags:
@@ -644,6 +660,20 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
+  /sendAccounts:
+    get:
+      tags:
+        - requestor
+      summary: Get available accounts for sending payments.
+      operationId: getSendAccounts
+      responses:
+        200:
+          $ref: '#/components/responses/AccountList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        500:
+          $ref: 'common.yaml#/responses/ServerError'
+
 components:
   securitySchemes:
     app_key:
@@ -816,6 +846,15 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/InvoiceEvent'
+
+    AccountList:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Account'
 
   schemas:
 
@@ -1261,3 +1300,16 @@ components:
       properties:
         paymentId:
           type: string
+
+    Account:
+      description: Payment account (wallet)
+      type: object
+      readOnly: true
+      properties:
+        platform:
+          type: string
+        address:
+          type: string
+      required:
+        - platform
+        - address
