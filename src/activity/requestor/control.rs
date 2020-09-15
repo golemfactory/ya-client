@@ -153,7 +153,7 @@ pub mod sgx {
         #[allow(unused)]
         enclave_key: PublicKey,
         ctx: EncryptionCtx,
-        proof : SgxCredentials
+        proof: SgxCredentials,
     }
 
     #[derive(Clone)]
@@ -188,7 +188,7 @@ pub mod sgx {
                 activity_id,
                 enclave_key,
                 ctx,
-                proof: sgx.clone()
+                proof: sgx.clone(),
             });
 
             if SGX_CONFIG.enable_attestation {
@@ -233,7 +233,7 @@ pub mod sgx {
                     log::info!("Attestation OK");
                     Ok(SecureActivityRequestorApi { client, session })
                 } else {
-                log::warn!("Attestation failed");
+                    log::warn!("Attestation failed");
                     Err(SgxError::AttestationFailed)
                 }
             } else {
