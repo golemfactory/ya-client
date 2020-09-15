@@ -142,7 +142,34 @@ where
     if response.status().is_success() {
         Ok(response)
     } else {
-        Err((response.status(), url, response.json().await).into())
+        if response
+            .headers()
+            .get("content-type")
+            .map(|v| v.as_bytes() == b"application/json")
+            .unwrap_or_default()
+        {
+            Err((response.status(), url, response.json().await).into())
+        } else {
+            match response.body().await {
+                Ok(ref bytes) => {
+                    let message = String::from_utf8_lossy(&bytes);
+                    Err(Error::HttpStatusCode {
+                        code: response.status(),
+                        url,
+                        msg: message.to_string(),
+                        bt: Default::default(),
+                    })
+                }
+                Err(_e) => {
+                    Err(Error::HttpStatusCode {
+                        code: response.status(),
+                        url,
+                        msg: response.status().as_str().to_string(),
+                        bt: Default::default(),
+                    })
+                }
+            }
+        }
     }
 }
 
