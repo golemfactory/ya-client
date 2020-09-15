@@ -119,6 +119,7 @@ pub mod sgx {
         #[allow(unused)]
         enclave_key: PublicKey,
         ctx: EncryptionCtx,
+        proof : SgxCredentials
     }
 
     #[derive(Clone)]
@@ -151,11 +152,16 @@ pub mod sgx {
                 activity_id,
                 enclave_key,
                 ctx,
+                proof: sgx
             });
 
             // TODO: Add attestation here!
 
             Ok(SecureActivityRequestorApi { client, session })
+        }
+
+        pub fn proof(&self) -> Credentials {
+            Credentials::Sgx(self.session.proof.clone())
         }
 
         pub fn activity_id(&self) -> String {
