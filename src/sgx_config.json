@@ -1,0 +1,7 @@
+{
+    "enableAttestation": false,
+    "exeunitHash": "2712c8e0f65e8962fd935091c648b89ff89757bf8793ab7cea1927d6a39b0667",
+    "allowDebug": true,
+    "allowOutdatedTcb": true,
+    "maxEvidenceAge": 60
+}
