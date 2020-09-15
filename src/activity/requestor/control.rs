@@ -188,7 +188,7 @@ pub mod sgx {
                 activity_id,
                 enclave_key,
                 ctx,
-                proof: sgx
+                proof: sgx.clone()
             });
 
             if SGX_CONFIG.enable_attestation {
