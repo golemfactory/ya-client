@@ -191,7 +191,7 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         500:
           $ref: 'common.yaml#/responses/ServerError'
-            
+
   /invoices:
     post:
       tags:
@@ -346,7 +346,7 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         500:
           $ref: 'common.yaml#/responses/ServerError'
-  
+
   /payments/{paymentId}:
     get:
       tags:
@@ -1242,7 +1242,7 @@ components:
         eventDate:
           type: string
           format: date-time
-      
+
     InvoiceReceivedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'

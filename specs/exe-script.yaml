@@ -5,7 +5,7 @@ info:
   description: '
     The specification of ExeScript commands format as per [Activity API specification]
     (https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM)
-    Including TRANSFER command syntax extension described in 
+    Including TRANSFER command syntax extension described in
     [this specification](https://github.com/golemfactory/golem-architecture/blob/master/GIPS/GIP-PR0001-multifile-transfer.md).
 
     ## Implementation Notes
@@ -40,12 +40,12 @@ info:
     ...
     ]
     ```
-    
+
     ### Rust
 
     For Rust - this format is a default representation of Rust enum types, as serialized by `serde` library.
     Therefore it is recommended to use this yaml specification to manually specify Rust enum types rather than depend on
-    automatically-generated code. 
+    automatically-generated code.
 
 '
 
@@ -64,15 +64,15 @@ paths:
 
 components:
   schemas:
-    
+
     Object:
       type: object
-    
+
     Command:
       allOf:
         - $ref: '#/components/schemas/Object'
         - type: object
-                  
+
     DeployCommand:
       allOf:
         - $ref: '#/components/schemas/Command'
@@ -91,7 +91,7 @@ components:
 
     StartCommandBody:
       type: object
-      properties: 
+      properties:
         args:
             type: array
             items:
@@ -107,7 +107,7 @@ components:
 
     TransferCommandBody:
       type: object
-      properties: 
+      properties:
         from:
           type: string
         to:
@@ -133,7 +133,7 @@ components:
           type: array
           items:
             type: string
-                
+
     RunCommand:
       allOf:
         - $ref: '#/components/schemas/Command'

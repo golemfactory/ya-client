@@ -349,7 +349,7 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
- 
+
   /demands/{subscriptionId}/propertyQuery/{queryId}:
     parameters:
       - $ref: '#/components/parameters/subscriptionId'
@@ -587,7 +587,7 @@ paths:
       operationId: collectAgreementEvents
       summary: CollectAgreementEvents - Collects events related to an Agreement.
       description: >
-        This is a blocking operation. 
+        This is a blocking operation.
 
         It returns events such as:
 
@@ -857,7 +857,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Offer'
-    
+
     EventList:
       description: Proposal or Agreement event list.
       content:
@@ -876,7 +876,7 @@ components:
             items:
               $ref: '#/components/schemas/AgreementEvent'
 
-          
+
   schemas:
 
     DemandOfferBase:
@@ -1052,9 +1052,9 @@ components:
         proposal:
           $ref: '#/components/schemas/Proposal'
 
-    # note this should be specified as a sub-class of Event, BUT 
+    # note this should be specified as a sub-class of Event, BUT
     # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(
-    AgreementEvent: 
+    AgreementEvent:
       type: object
       required:
         - eventType
@@ -1069,40 +1069,40 @@ components:
           format: date-time
         agreementId:
           type: string
-        
-    AgreementProposalEvent: 
+
+    AgreementProposalEvent:
       allOf:
         - $ref: '#/components/schemas/AgreementEvent'
         - type: object
       properties:
         agreement:
           $ref: '#/components/schemas/Agreement'
-    
-    AgreementAcceptedEvent: 
-      allOf:
-        - $ref: '#/components/schemas/AgreementEvent'
-        - type: object
-                              
-    AgreementRejectedEvent: 
+
+    AgreementAcceptedEvent:
       allOf:
         - $ref: '#/components/schemas/AgreementEvent'
         - type: object
 
-    AgreementCancelledEvent: 
+    AgreementRejectedEvent:
       allOf:
         - $ref: '#/components/schemas/AgreementEvent'
         - type: object
 
-    AgreementTimeoutEvent: 
+    AgreementCancelledEvent:
       allOf:
         - $ref: '#/components/schemas/AgreementEvent'
         - type: object
 
-    AgreementTerminatedEvent: 
+    AgreementTimeoutEvent:
       allOf:
         - $ref: '#/components/schemas/AgreementEvent'
         - type: object
-        
+
+    AgreementTerminatedEvent:
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+
     PropertyQueryEvent:
       allOf:
         - $ref: '#/components/schemas/Event'

@@ -4,15 +4,15 @@ info:
   version: 1.2.0
   description: '
       The Activity API can be perceived as controls which a Requestor-side application
-      has to steer the execution of an Activity as specified in an Agreement which 
-      has been negotiated via the Market API/Protocol. This defines possible interactions 
-      between the Requestor application (via Activity API) and the generic components 
-      running on the Provider node, which host the Provider-side application code. 
+      has to steer the execution of an Activity as specified in an Agreement which
+      has been negotiated via the Market API/Protocol. This defines possible interactions
+      between the Requestor application (via Activity API) and the generic components
+      running on the Provider node, which host the Provider-side application code.
 
-      The possible interactions imply a logical “execution environment” component, which 
-      is the host/container for the “payload” code. The “execution environment” is specified 
-      as an ExeUnit, with a generic interface via which a Provider node’s Activity Controller 
-      can operate the hosted code. 
+      The possible interactions imply a logical “execution environment” component, which
+      is the host/container for the “payload” code. The “execution environment” is specified
+      as an ExeUnit, with a generic interface via which a Provider node’s Activity Controller
+      can operate the hosted code.
 
       It conforms with capability level 1 of the [Activity API specification]
       (https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM).
@@ -113,9 +113,9 @@ paths:
         - requestor_control
       summary: Queries for ExeScript batch results.
       description: 'This call shall collect ExeScriptCommand result objects
-        received directly from ExeUnit (via the long polling pattern). 
+        received directly from ExeUnit (via the long polling pattern).
         The events are persistent, ie. the API can be called repeatedly
-        to receive the same events (the calls don’t remove the event records 
+        to receive the same events (the calls don’t remove the event records
         from the receiving queue).
         **Note:** two formats of response are specified (as indicated by the Accept header):
           - application/json - standard JSON response
@@ -211,7 +211,7 @@ paths:
           $ref: 'common.yaml#/responses/Forbidden'
         500:
           $ref: 'common.yaml#/responses/ServerError'
-            
+
   /activity/{activityId}/state:
 
     get:
@@ -237,7 +237,7 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         500:
           $ref: 'common.yaml#/responses/ServerError'
-        
+
     put:
       tags:
         - provider
@@ -263,7 +263,7 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         500:
           $ref: 'common.yaml#/responses/ServerError'
-  
+
   /activity/{activityId}/usage:
 
     get:
@@ -297,7 +297,7 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         500:
           $ref: 'common.yaml#/responses/ServerError'
-          
+
   /activity/{activityId}/command:
 
     get:
@@ -319,7 +319,7 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         500:
           $ref: 'common.yaml#/responses/ServerError'
-        
+
 
 components:
   securitySchemes:
@@ -344,7 +344,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/ProviderEvent'
-          
+
   schemas:
     ExeScriptRequest:
       required:
@@ -394,7 +394,7 @@ components:
           type: string
         isBatchFinished:
           type: boolean
-        
+
     ActivityUsage:
       type: object
       properties:

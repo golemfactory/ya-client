@@ -17,7 +17,7 @@ parameters:
     name: ackTimeout
     description: >
         Timeout used in blocking calls waiting for eg. acknowledgement.
-        How many seconds server should wait for response/acknowledgement of an action 
+        How many seconds server should wait for response/acknowledgement of an action
         (0.0 means it should wait for other party's response indefinitely)
     required: false
     in: query
@@ -37,7 +37,7 @@ parameters:
       type: integer
       format: int32
       minimum: 0
-    
+
   maxEvents:
     name: maxEvents
     description: >
@@ -49,7 +49,7 @@ parameters:
       type: integer
       format: int32
       minimum: 0
-  
+
   afterTimestamp:
     name: afterTimestamp
     description: Apply only to events later than specified timestamp
@@ -61,14 +61,14 @@ parameters:
 
   appSessionId:
     name: appSessionId
-    description: A correlation/session identifier used for querying events related to an action 
+    description: A correlation/session identifier used for querying events related to an action
         where this appSessionId has been specified
     in: query
     required: false
     schema:
       type: string
-          
-responses: 
+
+responses:
   BadRequest:
     description: (400) Bad request
     content:
@@ -103,7 +103,7 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/ErrorMessage'
-        
+
   Conflict:
     description: (409) Conflict.
     content:
@@ -117,7 +117,7 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/ErrorMessage'
-        
+
   ServerError:
     description: (500) Server error.
     content:
@@ -131,7 +131,7 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/ErrorMessage'
-        
+
   UnexpectedError:
     description: Unexpected error.
     content:
@@ -139,7 +139,7 @@ responses:
         schema:
           $ref: '#/components/schemas/ErrorMessage'
 
-              
+
 components:
   securitySchemes:
     app_key:
