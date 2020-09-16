@@ -889,6 +889,37 @@ components:
           type: string
           format: date-time
         properties:
+          description: > 
+            The object which includes all the Demand/Offer properties. 
+            
+            This is a JSON object in "flat convention" - where keys are full property names and their values indicate properties. 
+            
+            
+            The value's Javascript type shall conform with the type of the property (as indicated in Golem Standards). 
+            
+            ### Example property object:
+
+            ```
+            
+            {
+              "golem.com.pricing.model":"linear",
+              "golem.com.pricing.model.linear.coeffs":[0.001, 0.002, 0.0],
+              "golem.com.scheme":"payu",
+              "golem.com.scheme.payu.interval_sec":6.0,
+              "golem.com.usage.vector":["golem.usage.duration_sec","golem.usage.cpu_sec"],
+              "golem.inf.cpu.architecture":"x86_64",
+              "golem.inf.cpu.cores":4,
+              "golem.inf.cpu.threads":7,
+              "golem.inf.mem.gib":10.612468048930168,
+              "golem.inf.storage.gib":81.7227783203125,
+              "golem.node.debug.subnet":"market-devnet",
+              "golem.node.id.name":"tworec@mf-market-devnet",
+              "golem.runtime.name":"vm",
+              "golem.runtime.version@v":"0.1.0"
+            }
+            
+            ```
+
           type: object
         constraints:
           type: string
