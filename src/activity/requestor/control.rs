@@ -153,7 +153,7 @@ pub mod sgx {
         #[allow(unused)]
         enclave_key: PublicKey,
         ctx: EncryptionCtx,
-        proof : SgxCredentials
+        proof: SgxCredentials,
     }
 
     #[derive(Clone)]
@@ -181,14 +181,14 @@ pub mod sgx {
                 None => return Err(SgxError::MissingKeys),
                 Some(_) => return Err(SgxError::InvalidKeys),
             };
-            let enclave_key = sgx.enclave_pub_key;
+            let enclave_key = sgx.enclave_pub_key.clone();
             let ctx = EncryptionCtx::new(&enclave_key, &requestor_key);
             let nonce = &activity_id.to_owned();
             let session = Arc::new(Session {
                 activity_id,
                 enclave_key,
                 ctx,
-                proof: sgx
+                proof: sgx.clone(),
             });
 
             if SGX_CONFIG.enable_attestation {
@@ -211,7 +211,7 @@ pub mod sgx {
                     .as_str()
                     .ok_or(SgxError::InvalidAgreement)?;
 
-                let evidence = AttestationResponse::new(sgx.ias_report, &sgx.ias_sig);
+                let evidence = AttestationResponse::new(sgx.ias_report.clone(), &sgx.ias_sig);
                 let mut verifier = evidence.verifier();
                 verifier = verifier
                     .data(&sgx.requestor_pub_key.serialize())
@@ -233,7 +233,7 @@ pub mod sgx {
                     log::info!("Attestation OK");
                     Ok(SecureActivityRequestorApi { client, session })
                 } else {
-                log::warn!("Attestation failed");
+                    log::warn!("Attestation failed");
                     Err(SgxError::AttestationFailed)
                 }
             } else {

@@ -169,14 +169,12 @@ where
                         bt: Default::default(),
                     })
                 }
-                Err(_e) => {
-                    Err(Error::HttpStatusCode {
-                        code: response.status(),
-                        url,
-                        msg: response.status().as_str().to_string(),
-                        bt: Default::default(),
-                    })
-                }
+                Err(_e) => Err(Error::HttpStatusCode {
+                    code: response.status(),
+                    url,
+                    msg: response.status().as_str().to_string(),
+                    bt: Default::default(),
+                }),
             }
         }
     }
