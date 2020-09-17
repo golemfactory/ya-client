@@ -27,7 +27,11 @@ pub struct SgxConfig {
 
 lazy_static! {
     pub static ref SGX_CONFIG: SgxConfig = {
-        let cfg: SgxConfigJson = serde_json::from_str(CONFIG).unwrap();
+        let json_cfg = match std::env::var("YAGNA_SGX_CONFIG") {
+            Ok(cfg) => String::from_utf8(std::fs::read(cfg).unwrap()).unwrap(),
+            Err(_) => CONFIG.to_owned(),
+        };
+        let cfg: SgxConfigJson = serde_json::from_str(&json_cfg).unwrap();
         log::debug!("SGX config: {:?}", &cfg);
         let mut mr = SgxMeasurement::default();
         mr.copy_from_slice(&hex::decode(cfg.exeunit_hash).unwrap());
