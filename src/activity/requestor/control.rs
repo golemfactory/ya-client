@@ -118,8 +118,8 @@ pub mod sgx {
         MissingKeys,
         #[error("activity with unknown keys")]
         InvalidKeys,
-        #[error("invalid attestation evidence")]
-        AttestationFailed,
+        #[error("{0}")]
+        AttestationFailed(String),
         #[error("invalid credentials: {0}")]
         InvalidCredentials(String),
         #[error("invalid agreement")]
@@ -229,12 +229,16 @@ pub mod sgx {
                     verifier = verifier.not_outdated();
                 }
 
-                if verifier.check() {
+                let attestation_result = verifier.check();
+                if attestation_result.is_ok() {
                     log::info!("Attestation OK");
                     Ok(SecureActivityRequestorApi { client, session })
                 } else {
-                    log::warn!("Attestation failed");
-                    Err(SgxError::AttestationFailed)
+                    log::warn!("Attestation failed: {:?}", attestation_result);
+                    Err(SgxError::AttestationFailed(format!(
+                        "{:?}",
+                        attestation_result
+                    )))
                 }
             } else {
                 log::info!("Attestation disabled");
