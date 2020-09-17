@@ -944,15 +944,18 @@ components:
           description: >
             The object which includes all the Demand/Offer properties.
 
-            This is a JSON object in "flat convention" - where keys are full property names and their values indicate properties.
+            - Client and server accepts all JSON formats when submitting Demands/Offers to REST API.
+            - "flat format" is mandatory when returning Demands/Offers from REST API
 
+            By "flat format" we mean single level key-value map, where keys are full property names
+            and their values indicate properties.
 
-            The value's Javascript type shall conform with the type of the property (as indicated in Golem Standards).
+            The value's Javascript type shall conform with the type of the property
+            (as indicated in Golem Standards).
 
             ### Example property object:
 
             ```
-
             {
               "golem.com.pricing.model":"linear",
               "golem.com.pricing.model.linear.coeffs":[0.001, 0.002, 0.0],
@@ -969,9 +972,7 @@ components:
               "golem.runtime.name":"vm",
               "golem.runtime.version@v":"0.1.0"
             }
-
             ```
-
           type: object
         constraints:
           type: string
