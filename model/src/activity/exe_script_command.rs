@@ -23,6 +23,9 @@ pub enum ExeScriptCommand {
         entry_point: String,
         #[serde(default)]
         args: Vec<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        capture: Option<Capture>,
     },
     Transfer {
         from: String,
@@ -31,6 +34,56 @@ pub enum ExeScriptCommand {
         args: TransferArgs,
     },
     Terminate {},
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Capture {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stdout: Option<CaptureMode>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stderr: Option<CaptureMode>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum CaptureMode {
+    AtEnd {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(flatten)]
+        part: Option<CapturePart>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        format: Option<CaptureFormat>,
+    },
+    Stream {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        limit: Option<usize>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        format: Option<CaptureFormat>,
+    },
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CaptureFormat {
+    #[serde(alias = "string")]
+    Str,
+    #[serde(alias = "binary")]
+    Bin,
+}
+
+impl Default for CaptureFormat {
+    fn default() -> Self {
+        CaptureFormat::Str
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum CapturePart {
+    Head(usize),
+    Tail(usize),
+    HeadTail(usize),
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
@@ -77,6 +130,7 @@ impl From<ExeScriptCommand> for ExeScriptCommandState {
             ExeScriptCommand::Run {
                 entry_point,
                 mut args,
+                capture: _,
             } => ExeScriptCommandState {
                 command: "Run".to_string(),
                 progress: None,
