@@ -105,7 +105,7 @@ pub mod sgx {
     use crate::model::activity::{Credentials, ExeScriptCommand, SgxCredentials};
     use crate::Error as AppError;
     use crate::SGX_CONFIG;
-    use graphene::AttestationResponse;
+    use graphene_sgx::AttestationResponse;
     use hex;
     use secp256k1::{PublicKey, SecretKey};
     use std::sync::Arc;

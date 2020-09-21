@@ -1,5 +1,5 @@
 use chrono::Duration;
-use graphene::sgx::SgxMeasurement;
+use graphene_sgx::sgx::SgxMeasurement;
 use hex;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
