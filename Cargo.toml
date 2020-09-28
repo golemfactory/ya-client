@@ -46,3 +46,7 @@ openssl = { version = "0.10", optional = true }
 actix-rt = "1.0"
 env_logger = "0.7"
 structopt = "0.3"
+
+[package.metadata.release]
+no-dev-version = true
+enable-all-features = true
