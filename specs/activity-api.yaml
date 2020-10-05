@@ -23,7 +23,7 @@ paths:
     get:
       tags:
         - provider
-      summary: Lists all Activities
+      summary: Lists all Activity ids for Provider identified by app_key.
       operationId: ListActivities
       responses:
         200:
