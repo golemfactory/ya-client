@@ -19,6 +19,11 @@ impl WebInterface for ActivityProviderApi {
 
 /// Bindings for Provider part of the Activity API.
 impl ActivityProviderApi {
+    /// Fetch list of activity_ids
+    pub async fn get_activity_ids(&self) -> Result<Vec<String>> {
+        self.client.get(&"activity").send().json().await
+    }
+
     /// Fetch activity state (which may include error details)
     pub async fn get_activity_state(&self, activity_id: &str) -> Result<ActivityState> {
         let uri = url_format!("activity/{activity_id}/state", activity_id);
