@@ -29,4 +29,3 @@ openssl = { version = "0.10", optional = true }
 [package.metadata.release]
 no-dev-version = true
 enable-all-features = true
-
