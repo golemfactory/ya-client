@@ -416,6 +416,10 @@ components:
           enum:
             - Ok
             - Error
+        stdout:
+          type: string
+        stderr:
+          type: string
         message:
           type: string
         isBatchFinished:
