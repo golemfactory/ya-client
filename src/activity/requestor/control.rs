@@ -217,7 +217,7 @@ pub mod sgx {
                     .data(&sgx.requestor_pub_key.serialize())
                     .data(&sgx.enclave_pub_key.serialize())
                     .data(task_package.as_bytes())
-                    .mr_enclave(SGX_CONFIG.exeunit_hash)
+                    .mr_enclave_list(&SGX_CONFIG.exeunit_hashes)
                     .nonce(nonce)
                     .max_age(SGX_CONFIG.max_evidence_age);
 

@@ -1,6 +1,6 @@
 {
-    "enableAttestation": false,
-    "exeunitHash": "2712c8e0f65e8962fd935091c648b89ff89757bf8793ab7cea1927d6a39b0667",
+    "enableAttestation": true,
+    "exeunitHashes": ["5edbb025714683961d4a2cb51b1d0a4ee8225a6ced167f29eb67f639313d9490"],
     "allowDebug": true,
     "allowOutdatedTcb": true,
     "maxEvidenceAge": 60

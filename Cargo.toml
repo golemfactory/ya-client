@@ -36,7 +36,7 @@ serde_json = "1.0"
 thiserror = "1.0"
 url = "2.1"
 
-graphene-sgx = { version = "0.3.2", optional = true }
+graphene-sgx = { version = "0.3.3", optional = true }
 lazy_static = { version = "1.4", optional = true }
 secp256k1 = { version = "0.17.2", optional = true }
 structopt = { version = "0.3.12", optional = true }
