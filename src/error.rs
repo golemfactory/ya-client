@@ -42,6 +42,8 @@ pub enum Error {
     ModelError(#[from] ErrorMessage),
     #[error("Event stream error: {0}")]
     EventStreamError(String),
+    #[error("{0}")]
+    InternalError(String),
 }
 
 impl From<SendRequestError> for Error {
