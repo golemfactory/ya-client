@@ -20,6 +20,26 @@ tags:
 
 paths:
   /activity:
+    get:
+      tags:
+        - provider
+      summary: Lists all Activity ids for Provider identified by app_key.
+      operationId: ListActivities
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
     post:
       tags:
         - requestor_control
