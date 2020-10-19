@@ -11,17 +11,25 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ExeScriptCommandResult {
     pub index: u32,
-    pub result: Result,
-    #[serde(rename = "isBatchFinished")]
-    pub is_batch_finished: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result: CommandResult,
+    pub stdout: Option<CommandOutput>,
+    pub stderr: Option<CommandOutput>,
     pub message: Option<String>,
+    pub is_batch_finished: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CommandOutput {
+    Str(String),
+    Bin(Vec<u8>),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-pub enum Result {
+pub enum CommandResult {
     Ok,
     Error,
 }

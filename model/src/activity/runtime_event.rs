@@ -1,4 +1,4 @@
-use crate::activity::ExeScriptCommand;
+use crate::activity::{CommandOutput, ExeScriptCommand};
 use chrono::{NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -40,11 +40,11 @@ impl RuntimeEvent {
         )
     }
 
-    pub fn stdout(batch_id: String, idx: usize, out: String) -> Self {
+    pub fn stdout(batch_id: String, idx: usize, out: CommandOutput) -> Self {
         Self::new(batch_id, idx, RuntimeEventKind::StdOut(out))
     }
 
-    pub fn stderr(batch_id: String, idx: usize, out: String) -> Self {
+    pub fn stderr(batch_id: String, idx: usize, out: CommandOutput) -> Self {
         Self::new(batch_id, idx, RuntimeEventKind::StdErr(out))
     }
 }
@@ -59,6 +59,6 @@ pub enum RuntimeEventKind {
         return_code: i32,
         message: Option<String>,
     },
-    StdOut(String),
-    StdErr(String),
+    StdOut(CommandOutput),
+    StdErr(CommandOutput),
 }
