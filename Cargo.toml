@@ -1,6 +1,6 @@
 [package]
 name = "ya-client"
-version = "0.3.0"
+version = "0.3.2"
 description = "Yagna REST API client async binding"
 authors = ["Golem Factory <contact@golem.network>"]
 homepage = "https://github.com/golemfactory/ya-client"
@@ -28,6 +28,7 @@ envy = "0.4"
 failure = "0.1.6"
 futures = "0.3"
 log = "0.4"
+mime = "0.3"
 serde = "1.0"
 serde_json = "1.0"
 structopt = { version = "0.3.12", optional = true }
@@ -36,5 +37,6 @@ url = "2.1"
 
 [dev-dependencies]
 actix-rt = "1.0"
+anyhow = "1.0"
 env_logger = "0.7"
 structopt = "0.3"
