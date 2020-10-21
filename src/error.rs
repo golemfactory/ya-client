@@ -29,7 +29,7 @@ pub enum Error {
     #[error("invalid address: {0}")]
     InvalidAddress(std::convert::Infallible),
     #[error("invalid header: {0}")]
-    InvalidHeadeName(#[from] awc::http::header::InvalidHeaderName),
+    InvalidHeaderName(#[from] awc::http::header::InvalidHeaderName),
     #[error("invalid header: {0}")]
     InvalidHeaderValue(#[from] awc::http::header::InvalidHeaderValue),
     #[error("invalid UTF8 string: {0}")]
@@ -42,6 +42,8 @@ pub enum Error {
     ModelError(#[from] ErrorMessage),
     #[error("{0}")]
     InternalError(String),
+    #[error("Event stream error: {0}")]
+    EventStreamError(String),
 }
 
 impl From<SendRequestError> for Error {
