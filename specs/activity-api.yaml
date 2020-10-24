@@ -1,8 +1,22 @@
 openapi: 3.0.1
 info:
   title: Yagna Activity API
-  description: It conforms with capability level 1 of the [Activity API specification](https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM).
-  version: v1
+  version: 1.2.0
+  description: '
+      The Activity API can be perceived as controls which a Requestor-side application
+      has to steer the execution of an Activity as specified in an Agreement which
+      has been negotiated via the Market API/Protocol. This defines possible interactions
+      between the Requestor application (via Activity API) and the generic components
+      running on the Provider node, which host the Provider-side application code.
+
+      The possible interactions imply a logical “execution environment” component, which
+      is the host/container for the “payload” code. The “execution environment” is specified
+      as an ExeUnit, with a generic interface via which a Provider node’s Activity Controller
+      can operate the hosted code.
+
+      It conforms with capability level 1 of the [Activity API specification]
+      (https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM).
+  '
 
 servers:
   - url: /activity-api/v1
@@ -19,27 +33,9 @@ tags:
     description: Provider Part
 
 paths:
+
   /activity:
-    get:
-      tags:
-        - provider
-      summary: Lists all Activity ids for Provider identified by app_key.
-      operationId: ListActivities
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-        500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+
     post:
       tags:
         - requestor_control
@@ -52,6 +48,7 @@ paths:
           application/json:
             schema:
               type: string
+              example: de6673f5-3f16-40ef-a8a3-b7c922092447
         required: true
       responses:
         201:
@@ -62,31 +59,18 @@ paths:
                 type: string
                 example: '"activityId"'
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/BadRequest'
         403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/Forbidden'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
+
       x-codegen-request-body-name: agreementId
+
   /activity/{activityId}/exec:
+
     post:
       tags:
         - requestor_control
@@ -114,37 +98,28 @@ paths:
                 type: string
                 example: '"batchId"'
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/BadRequest'
         403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/Forbidden'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
       x-codegen-request-body-name: script
+
   /activity/{activityId}/exec/{batchId}:
     get:
       tags:
         - requestor_control
       summary: Queries for ExeScript batch results.
-      description: '**Note:** This call shall collect ExeScriptCommand result objects
-        received directly from ExeUnit.'
+      description: 'This call shall collect ExeScriptCommand result objects
+        received directly from ExeUnit (via the long polling pattern).
+        The events are persistent, ie. the API can be called repeatedly
+        to receive the same events (the calls don’t remove the event records
+        from the receiving queue).
+        **Note:** two formats of response are specified (as indicated by the Accept header):
+          - application/json - standard JSON response
+          - text/event-stream - an EventSource implementation (as per https://www.w3.org/TR/eventsource/)'
       operationId: GetExecBatchResults
       parameters:
         - name: activityId
@@ -159,48 +134,40 @@ paths:
             type: string
         - name: commandIndex
           description: >
-            Wait until command with the specified index finishes. Must be accompanied by a valid "timeout" query parameter.
+            Wait until command with the specified index finishes. Must be accompanied by a valid "pollTimeout" query parameter.
           required: false
           in: query
           schema:
             type: number
             format: integer
             minimum: 0
-        - $ref: 'common.yaml#/parameters/timeout'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/pollTimeout'
       responses:
         200:
           description: Success
           content:
-            application/json:
+            application/json: # standard JSON response
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExeScriptCommandResult'
+            text/event-stream: # an EventSource implementation (as per https://www.w3.org/TR/eventsource/)
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/ExeScriptCommandResult'
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/BadRequest'
         403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/Forbidden'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
+
   /activity/{activityId}:
+
     delete:
       tags:
         - requestor_control
@@ -219,23 +186,12 @@ paths:
           description: Success
           content: {}
         403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/Forbidden'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
+
   /events:
     get:
       tags:
@@ -243,35 +199,21 @@ paths:
       summary: Fetch Requestor command events.
       operationId: CollectActivityEvents
       parameters:
-        - $ref: 'common.yaml#/parameters/timeout'
+        - $ref: 'common.yaml#/parameters/appSessionId'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/pollTimeout'
         - $ref: 'common.yaml#/parameters/maxEvents'
 
       responses:
         200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/CreateActivity'
-                    - $ref: '#/components/schemas/DestroyActivity'
-                    - $ref: '#/components/schemas/GetActivityState'
-                    - $ref: '#/components/schemas/GetActivityUsage'
+          $ref: '#/components/responses/ProviderEventList'
         403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/Forbidden'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
+
   /activity/{activityId}/state:
+
     get:
       tags:
         - provider
@@ -292,17 +234,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ActivityState'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
+
     put:
       tags:
         - provider
@@ -325,18 +260,12 @@ paths:
           description: Success
           content: {}
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
+
   /activity/{activityId}/usage:
+
     get:
       tags:
         - provider
@@ -365,22 +294,16 @@ paths:
                   type: number
                   format: double
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
+
   /activity/{activityId}/command:
+
     get:
       tags:
         - requestor_state
-      summary: Get running command for a specified Activity.
+      summary: Get running commands for a specified Activity.
       description: '**Note:** This call shall get routed directly to ExeUnit.'
       operationId: GetRunningCommand
       parameters:
@@ -391,27 +314,37 @@ paths:
             type: string
       responses:
         200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExeScriptCommandState'
+          $ref: '#/components/responses/ExeScriptCommandStateList'
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          description: Server Error
-          content:
-            application/json:
-              schema:
-                $ref: 'common.yaml#/schemas/ErrorMessage'
+          $ref: 'common.yaml#/responses/ServerError'
+
+
 components:
   securitySchemes:
     app_key:
       $ref: 'common.yaml#/components/securitySchemes/app_key'
+
+  responses:
+    ExeScriptCommandStateList:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ExeScriptCommandState'
+
+    ProviderEventList:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ProviderEvent'
+
   schemas:
     ExeScriptRequest:
       required:
@@ -421,35 +354,14 @@ components:
         text:
           type: string
 
-    ExeScriptCommandResult:
-      required:
-        - index
-        - result
-      type: object
-      properties:
-        index:
-          type: integer
-          format: int32
-          minimum: 0
-        result:
-          type: string
-          enum:
-            - Ok
-            - Error
-        stdout:
-          type: string
-        stderr:
-          type: string
-        message:
-          type: string
-        isBatchFinished:
-          type: boolean
-
     ExeScriptCommandState:
       required:
+        - batchId
         - command
       type: object
       properties:
+        batchId:
+          type: string
         command:
           type: string
         progress:
@@ -458,6 +370,30 @@ components:
           type: array
           items:
             type: string
+
+    ExeScriptCommandResult:
+      required:
+        - index
+        - eventDate
+        - result
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+          minimum: 0
+        eventDate:
+          type: string
+          format: date-time
+        result:
+          type: string
+          enum:
+            - Ok
+            - Error
+        message:
+          type: string
+        isBatchFinished:
+          type: boolean
 
     ActivityUsage:
       type: object
@@ -502,11 +438,15 @@ components:
     ProviderEvent:
       required:
         - eventType
+        - eventDate
         - activityId
       type: object
       properties:
         eventType:
           type: string
+        eventDate:
+          type: string
+          format: date-time
         activityId:
           type: string
       discriminator:

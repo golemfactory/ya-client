@@ -1,14 +1,3 @@
-## Obsolete, kept temporarily for backwards compatibility
-schemas:
-  ErrorMessage:
-    type: object
-    description: >
-      Generic Error Message structure.
-    properties:
-      message:
-        type: string
-## End Obsolete
-
 parameters:
   pollTimeout:
     name: pollTimeout
@@ -77,20 +66,6 @@ parameters:
     required: false
     schema:
       type: string
-
-## Obsolete, kept temporarily for backward compatibility of yamls
-  timeout:
-    name: timeout
-    description: >
-      How many seconds server should wait for new events (0.0 means it should
-      return immediately if there are no events)
-    required: false
-    in: query
-    schema:
-      type: number
-      format: float
-      minimum: 0.0
-## End Obsolete
 
 responses:
   BadRequest:

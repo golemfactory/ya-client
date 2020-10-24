@@ -1,0 +1,153 @@
+openapi: 3.0.2
+info:
+  version: 0.1.0
+  title: Yagna ExeScript
+  description: '
+    The specification of ExeScript commands format as per [Activity API specification]
+    (https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM)
+    Including TRANSFER command syntax extension described in
+    [this specification](https://github.com/golemfactory/golem-architecture/blob/master/GIPS/GIP-PR0001-multifile-transfer.md).
+
+    ## Implementation Notes
+
+    The schemas have been defined to accept a following format of JSON command collections:
+
+    ```
+    [
+    {
+        "deploy": {}
+    },
+    {
+        "start": {
+            "args": []
+        }
+    },
+    {
+        "transfer": {
+            "from": "http://34.244.4.185:8000/LICENSE",
+            "to": "container:/input/file_in",
+            "format": "zip",
+            "depth": 2,
+            "fileset": [{"desc":"all images", "includes": ["*.jpg"], "excludes": ["db*.*"] }]
+        }
+    },
+    {
+        "run": {
+            "entry_point": "rust-wasi-tutorial",
+            "args": ["/input/file_in", "/output/file_cp"]
+        }
+    },
+    ...
+    ]
+    ```
+
+    ### Rust
+
+    For Rust - this format is a default representation of Rust enum types, as serialized by `serde` library.
+    Therefore it is recommended to use this yaml specification to manually specify Rust enum types rather than depend on
+    automatically-generated code.
+
+'
+
+# Dummy path included to allow generation of model code straight from this yaml file.
+paths:
+  /dummy:
+    get:
+      responses:
+        201:
+          description: Dummy endpoint
+
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/components/schemas/ErrorMessage'
+
+components:
+  schemas:
+
+    Object:
+      type: object
+
+    Command:
+      allOf:
+        - $ref: '#/components/schemas/Object'
+        - type: object
+
+    DeployCommand:
+      allOf:
+        - $ref: '#/components/schemas/Command'
+        - type: object
+      properties:
+        deploy:
+          type: object
+
+    StartCommand:
+      allOf:
+        - $ref: '#/components/schemas/Command'
+        - type: object
+      properties:
+        start:
+          $ref: '#/components/schemas/StartCommandBody'
+
+    StartCommandBody:
+      type: object
+      properties:
+        args:
+            type: array
+            items:
+              type: string
+
+    TransferCommand:
+      allOf:
+        - $ref: '#/components/schemas/Command'
+        - type: object
+      properties:
+        transfer:
+          $ref: '#/components/schemas/TransferCommandBody'
+
+    TransferCommandBody:
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        format:
+          type: string
+        depth:
+          type: number
+        fileset:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileSet'
+
+    FileSet:
+      properties:
+        desc:
+          type: string
+        includes:
+          type: array
+          items:
+            type: string
+        excludes:
+          type: array
+          items:
+            type: string
+
+    RunCommand:
+      allOf:
+        - $ref: '#/components/schemas/Command'
+        - type: object
+      properties:
+        run:
+          $ref: '#/components/schemas/RunCommandBody'
+
+    RunCommandBody:
+      type: object
+      properties:
+        entry_point:
+          type: string
+        args:
+          type: array
+          items:
+            type: string
