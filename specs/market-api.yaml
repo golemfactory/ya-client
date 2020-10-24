@@ -17,11 +17,9 @@ info:
     respectively, find matching counterparty, conduct negotiations
     and make an agreement.
 
-
     This version of Market API conforms with capability level 1 of the
     <a href="https://docs.google.com/document/d/1Zny_vfgWV-hcsKS7P-Kdr3Fb0dwfl-6T_cYKVQ9mkNg">
     Market API specification</a>.
-
 
     Market API contains two roles: Requestors and Providers which are
     symmetrical most of the time (excluding agreement phase).
@@ -45,29 +43,25 @@ paths:
       tags:
         - provider
       operationId: getOffers
-      summary: Fetches all active Offers which have been published by the Provider.
+      summary: GetOffers - Fetches all active Offers which have been published by the Provider.
+      parameters:
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxItems'
       responses:
-        '200':
-          description: Offer list.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/Offer'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        200:
+          $ref: '#/components/responses/OfferList'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
     post:
       tags:
         - provider
       operationId: subscribeOffer
-      summary: Publishes Provider capabilities via Offer.
+      summary: SubscribeOffer - Publishes Provider capabilities via Offer.
       description: >
         Offer object can be considered an "open" or public Offer, as it is not directed
         at a specific Requestor, but rather is sent to the market so that the matching
@@ -79,16 +73,14 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Offer'
       responses:
-        '201':
+        201:
           $ref: '#/components/responses/SubscriptionId'
-          # links: TODO
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /offers/{subscriptionId}:
     parameters:
@@ -97,7 +89,7 @@ paths:
       tags:
         - provider
       operationId: unsubscribeOffer
-      summary: Stop subscription for previously published Offer.
+      summary: UnsubscribeOffer - Stop subscription for previously published Offer.
       description: >
         Stop receiving Proposals.
 
@@ -106,58 +98,45 @@ paths:
         This implies, that client code should not `unsubscribeOffer` before it has received
         all expected/useful inputs from `collectDemands`.
       responses:
-        '204':
+        204:
           description: Offer revoked.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Already unsubscribed.
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /offers/{subscriptionId}/events:
     parameters:
       - $ref: '#/components/parameters/subscriptionId'
-      - $ref: 'common.yaml#/parameters/timeout'
+      - $ref: 'common.yaml#/parameters/pollTimeout'
       - $ref: 'common.yaml#/parameters/maxEvents'
     get:
       tags:
         - provider
       operationId: collectDemands
-      summary: Reads Market responses to published Offer.
+      summary: CollectDemands - Reads Market responses to published Offer.
       description: >
         This is a blocking operation. It will not return until there is at least one new event.
-
 
         **Note**: When `collectDemands` is waiting, simultaneous call to `unsubscribeOffer` on the
         same `subscriptionId` should result in "Subscription does not exist" error returned from
         `collectDemands`.
 
-
         **Note**: Specification requires this endpoint to support list of specific Proposal Ids
         to listen for messages related only to specific Proposals. This is not covered yet.
       responses:
-        '200':
-          description: Proposal or Agreement event list.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/AgreementEvent'
-                    - $ref: '#/components/schemas/ProposalEvent'
-                    - $ref: '#/components/schemas/PropertyQueryEvent'
-              # links: TODO
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        200:
+          $ref: '#/components/responses/EventList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /offers/{subscriptionId}/propertyQuery/{queryId}:
     parameters:
@@ -167,14 +146,15 @@ paths:
       tags:
         - provider
       operationId: queryReplyOffers
-      summary: Handles dynamic property query.
+      summary: QueryReplyOffers - Handles dynamic property query.
       description: >
+        Sends a response to a received property value query.
+
         The Market Matching Mechanism, when resolving the match relation for the
         specific Demand-Offer pair, is to detect the “dynamic” properties required
         (via constraints) by the other side. At this point, it is able to query the
         issuing node for those properties and submit the other side’s requested
         properties as the context of the query.
-
 
         **Note**: The property query responses may be submitted in “chunks”, ie. the
         responder may choose to resolve ‘quick’/lightweight’ properties faster and
@@ -182,21 +162,20 @@ paths:
         in the background. Therefore the response contains both the resolved properties,
         as well as list of properties which responder knows still require resolution.
 
-
         **Note**: This method must be implemented for Market API Capability Level 2.
       requestBody:
         $ref: '#/components/requestBodies/PropertyQueryReply'
       responses:
-        '204':
+        204:
           description: OK, query reply posted.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /offers/{subscriptionId}/proposals/{proposalId}:
     parameters:
@@ -206,42 +185,42 @@ paths:
       tags:
         - provider
       operationId: getProposalDemand
-      summary: Fetches Proposal (Demand) with given id.
+      summary: GetProposalDemand - Fetches Proposal (Demand) with given id.
       responses:
-        '200':
+        200:
           $ref: '#/components/responses/Proposal'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     delete:
       tags:
         - provider
       operationId: rejectProposalDemand
-      summary: Rejects Proposal (Demand).
+      summary: RejectProposalDemand - Rejects Proposal (Demand).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
       responses:
-        '204':
+        204:
           description: Proposal rejected.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal already rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - provider
       operationId: counterProposalOffer
-      summary: Responds with a bespoke Offer to received Demand.
+      summary: CounterProposalOffer - Responds with a bespoke Offer to received Demand.
       description: >
         Creates and sends a modified version of original Offer (a
         counter-proposal) adjusted to previously received Proposal (ie. Demand).
@@ -249,48 +228,43 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Proposal'
       responses:
-        '201':
+        201:
           $ref: '#/components/responses/ProposalId'
-          # links: TODO
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /demands:
     get:
       tags:
         - requestor
       operationId: getDemands
-      summary: Fetches all active Demands which have been published by the Requestor.
+      summary: GetDemands - Fetches all active Demands which have been published by the Requestor.
+      parameters:
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxItems'
       responses:
-        '200':
-          description: Demand list.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/Demand'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        200:
+          $ref: '#/components/responses/DemandList'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
     post:
       tags:
         - requestor
       operationId: subscribeDemand
-      summary: Publishes Requestor capabilities via Demand.
+      summary: SubscribeDemand - Publishes Requestor capabilities via Demand.
       description: >
         Demand object can be considered an "open" or public Demand, as it is not directed
         at a specific Provider, but rather is sent to the market so that the matching
@@ -302,16 +276,14 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Demand'
       responses:
-        '201':
+        201:
           $ref: '#/components/responses/SubscriptionId'
-          # links: TODO
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /demands/{subscriptionId}:
     parameters:
@@ -320,67 +292,53 @@ paths:
       tags:
         - requestor
       operationId: unsubscribeDemand
-      summary: Stop subscription for previously published Demand.
+      summary: UnsubscribeDemand - Stop subscription for previously published Demand.
       description: >
         Stop receiving Proposals.
-
 
         **Note**: this will terminate all pending `collectOffers` calls on this subscription.
         This implies, that client code should not `unsubscribeDemand` before it has received
         all expected/useful inputs from `collectOffers`.
       responses:
-        '204':
+        204:
           description: Demand revoked.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Already unsubscribed.
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /demands/{subscriptionId}/events:
     parameters:
       - $ref: '#/components/parameters/subscriptionId'
-      - $ref: 'common.yaml#/parameters/timeout'
+      - $ref: 'common.yaml#/parameters/pollTimeout'
       - $ref: 'common.yaml#/parameters/maxEvents'
     get:
       tags:
         - requestor
       operationId: collectOffers
-      summary: Reads Market responses to published Demand.
+      summary: CollectOffers - Reads Market responses to published Demand.
       description: >
         This is a blocking operation. It will not return until there is at least one new event.
-
 
         **Note**: When `collectOffers` is waiting, simultaneous call to `unsubscribeDemand` on the
         same `subscriptionId` should result in "Subscription does not exist" error returned from
         `collectOffers`.
 
-
         **Note**: Specification requires this endpoint to support list of specific Proposal Ids
         to listen for messages related only to specific Proposals. This is not covered yet.
       responses:
-        '200':
-          description: Proposal event list.
-          content:
-            application/json4:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/ProposalEvent'
-                    - $ref: '#/components/schemas/PropertyQueryEvent'
-
-          # links: TODO
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        200:
+          $ref: '#/components/responses/EventList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /demands/{subscriptionId}/propertyQuery/{queryId}:
     parameters:
@@ -390,14 +348,15 @@ paths:
       tags:
         - requestor
       operationId: queryReplyDemands
-      summary: Handles dynamic property query.
+      summary: QueryReplyDemands - Handles dynamic property query.
       description: >
+        Sends a response to a received property value query.
+
         The Market Matching Mechanism, when resolving the match relation for the
         specific Demand-Offer pair, is to detect the “dynamic” properties required
         (via constraints) by the other side. At this point, it is able to query the
         issuing node for those properties and submit the other side’s requested
         properties as the context of the query.
-
 
         **Note**: The property query responses may be submitted in “chunks”, ie. the
         responder may choose to resolve ‘quick’/lightweight’ properties faster and
@@ -405,21 +364,20 @@ paths:
         in the background. Therefore the response contains both the resolved properties,
         as well as list of properties which responder knows still require resolution.
 
-
         **Note**: This method must be implemented for Market API Capability Level 2.
       requestBody:
         $ref: '#/components/requestBodies/PropertyQueryReply'
       responses:
-        '204':
+        204:
           description: OK, query reply posted.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /demands/{subscriptionId}/proposals/{proposalId}:
     parameters:
@@ -429,18 +387,18 @@ paths:
       tags:
         - requestor
       operationId: getProposalOffer
-      summary: Fetches Proposal (Offer) with given id.
+      summary: GetProposalOffer - Fetches Proposal (Offer) with given id.
       responses:
-        '200':
+        200:
           $ref: '#/components/responses/Proposal'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     delete:
       tags:
         - requestor
@@ -450,21 +408,21 @@ paths:
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
       responses:
-        '204':
+        204:
           description: Proposal rejected.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal already rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - requestor
       operationId: counterProposalDemand
-      summary: Responds with a bespoke Demand to received Offer.
+      summary: CounterProposalDemand - Responds with a bespoke Demand to received Offer.
       description: >
         Creates and sends a modified version of original Demand (a
         counter-proposal) adjusted to previously received Proposal (ie. Offer).
@@ -472,49 +430,43 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Proposal'
       responses:
-        '201':
+        201:
           $ref: '#/components/responses/ProposalId'
-          # links: TODO
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '410':
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
           description: Proposal rejected.
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements:
     post:
       tags:
         - requestor
       operationId: createAgreement
-      summary: Creates Agreement from selected Proposal.
+      summary: CreateAgreement - Creates Agreement from selected Proposal.
       description: >
         Initiates the Agreement handshake phase.
-
 
         Formulates an Agreement artifact from the Proposal indicated by the
         received Proposal Id. Created Agreement is in `Proposal` state.
 
-
         The Approval Expiry Date is added to Agreement artifact and implies
         the effective timeout on the whole Agreement Confirmation sequence.
-
 
         A successful call to `createAgreement` shall immediately be followed
         by a `confirmAgreement` and `waitForApproval` call in order to listen
         for responses from the Provider.
 
-
         **Note**: Moves given Proposal to `Approved` state.
       requestBody:
         $ref: '#/components/requestBodies/AgreementProposal'
       responses:
-        '201':
+        201:
           description: Agreement created.
           content:
             application/json:
@@ -528,18 +480,16 @@ paths:
               #operationRef: '#/paths/~1agreements~1{agreementId}/get'
               parameters:
                 agreementId: '$response.body'
-            # TODO: more links
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '409':
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        409:
           description: Proposal not in `Draft` state.
-        '410':
-          $ref: '#/components/responses/Expired'
+        410:
+          $ref: 'common.yaml#/responses/Gone'
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}:
     parameters:
@@ -549,80 +499,79 @@ paths:
         - requestor
         - provider
       operationId: getAgreement
-      summary: Fetches agreement with given agreement id.
+      summary: GetAgreement - Fetches agreement with given agreement id.
       responses:
-        '200':
+        200:
           description: Agreement.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Agreement'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
     delete:
       tags:
         - requestor
       operationId: cancelAgreement
-      summary: Cancels agreement.
+      summary: CancelAgreement - Cancels agreement.
       description: >
         Causes:
           - the awaiting `approveAgreement` on Provider side to return with `Cancelled` response.
           - the awaiting `waitForApproval` local call to return with `Cancelled` response.
       responses:
-        '204':
+        204:
           description: Agreement cancelled.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
           description: Agreement not in `Proposal` nor `Pending` state.
-        '410':
-          $ref: '#/components/responses/Expired'
+        410:
+          $ref: 'common.yaml#/responses/Gone' # Expired
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}/confirm:
     parameters:
       - $ref: '#/components/parameters/agreementId'
+      - $ref: 'common.yaml#/parameters/appSessionId'
     post:
       tags:
         - requestor
       operationId: confirmAgreement
-      summary: Sends Agreement proposal to the Provider.
+      summary: ConfirmAgreement - Sends Agreement proposal to the Provider.
       description: >
         Signs self-created Agreement and sends it to the Provider.
 
         This call should immediately follow `createAgreement`.
       responses:
-        '204':
+        204:
           description: Agreement confirmed.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
           description: Agreement not in `Proposal` state.
-        '410':
-          $ref: '#/components/responses/Expired'
+        410:
+          $ref: 'common.yaml#/responses/Gone' # Expired
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}/wait:
     parameters:
       - $ref: '#/components/parameters/agreementId'
-      - $ref: 'common.yaml#/parameters/timeout'
+      - $ref: 'common.yaml#/parameters/ackTimeout'
     post:
       tags:
         - requestor
       operationId: waitForApproval
-      summary: Waits for Agreement approval by the Provider.
+      summary: WaitForApproval - Waits for Agreement approval by the Provider.
       description: >
         This is a blocking operation. The call may be aborted by Requestor caller
         code. After the call is aborted, another `waitForApproval` call can be
@@ -641,39 +590,86 @@ paths:
           to return to the Negotiation phase by sending a new Proposal.
 
         * `Cancelled` - Indicates that the Requestor himself has called
-         `cancelAgreement`, which effectively stops the Agreement handshake.
+          `cancelAgreement`, which effectively stops the Agreement handshake.
 
       responses:
-        '200':
+        200:
           description: Agreement approval result.
           content:
             application/json:
               schema:
                 type: string
                 enum: [Approved, Rejected, Cancelled]
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '408':
-          $ref: '#/components/responses/TimedOut'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        408:
+          $ref: 'common.yaml#/responses/Timeout'
+        409:
           description: Agreement not in `Pending` state.
-        '410':
-          $ref: '#/components/responses/Expired'
+        410:
+          $ref: 'common.yaml#/responses/Gone' # Expired
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'common.yaml#/responses/UnexpectedError'
+          
+  /agreements/events:
+    parameters:
+      - $ref: 'common.yaml#/parameters/pollTimeout'
+      - $ref: 'common.yaml#/parameters/maxEvents'
+      - $ref: 'common.yaml#/parameters/appSessionId'
+    get:
+      tags:
+        - requestor
+        - provider
+      operationId: collectAgreementEvents
+      summary: CollectAgreementEvents - Collects events related to an Agreement.
+      description: >
+        This is a blocking operation.
 
+        It returns events such as:
+
+        * `AgreementProposalEvent` - Noew Agreement has been proposed by a Requestor.
+
+        * `AgreementApprovedEvent` - Indicates that the Agreement has been approved by the Provider.
+          - The Provider is now ready to accept a request to start an Activity
+            as described in the negotiated agreement.
+          - The Providers’s corresponding `approveAgreement` call returns `Approved` after
+            this on the Provider side.
+
+        * `AgreementRejectedEvent` - Indicates that the Provider has called `rejectAgreement`,
+          which effectively stops the Agreement handshake. The Requestor may attempt
+          to return to the Negotiation phase by sending a new Proposal.
+
+        * `AgreementCancelledEvent` - Indicates that the Requestor himself has called
+          `cancelAgreement`, which effectively stops the Agreement handshake.
+
+        * `AgreementTerminatedEvent` - Indicates that the Agreement has been terminated.
+
+      responses:
+        200:
+          $ref: '#/components/responses/AgreementEventList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        408:
+          $ref: 'common.yaml#/responses/Timeout'
+        410:
+          $ref: 'common.yaml#/responses/Gone'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}/approve:
     parameters:
       - $ref: '#/components/parameters/agreementId'
-      - $ref: 'common.yaml#/parameters/timeout'
+      - $ref: 'common.yaml#/parameters/appSessionId'
+      - $ref: 'common.yaml#/parameters/ackTimeout'
     post:
       tags:
         - provider
       operationId: approveAgreement
-      summary: Approves Agreement proposed by the Reqestor.
+      summary: ApproveAgreement - Approves Agreement proposed by the Reqestor.
       description: >
         This is a blocking operation. The call may be aborted by Provider caller
         code. After the call is aborted or timed out, another `approveAgreement`
@@ -704,26 +700,25 @@ paths:
 
         **Note**: Mutually exclusive with `rejectAgreement`.
       responses:
-        '200':
+        200:
           description: Agreement approval result.
           content:
             application/json:
               schema:
                 type: string
                 enum: [Approved, Cancelled]
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '408':
-          $ref: '#/components/responses/TimedOut'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        408:
+          $ref: 'common.yaml#/responses/Timeout'
+        409:
           description: Agreement not in `Proposal` state.
-        '410':
-          $ref: '#/components/responses/Expired'
+        410:
+          $ref: 'common.yaml#/responses/Gone'
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}/reject:
     parameters:
@@ -732,7 +727,7 @@ paths:
       tags:
         - provider
       operationId: rejectAgreement
-      summary: Rejects Agreement proposed by the Requestor.
+      summary: RejectAgreement - Rejects Agreement proposed by the Requestor.
       description: >
         The Requestor side is notified about the Provider’s decision to reject
         a negotiated agreement. This effectively stops the Agreement handshake.
@@ -740,19 +735,18 @@ paths:
 
         **Note**: Mutually exclusive with `approveAgreement`.
       responses:
-        '204':
+        204:
           description: Agreement rejected.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
           description: Agreement not in `Proposal` state.
-        '410':
-          $ref: '#/components/responses/Expired'
+        410:
+          $ref: 'common.yaml#/responses/Gone' # Expired
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}/terminate:
     parameters:
@@ -762,7 +756,7 @@ paths:
         - provider
         - requestor
       operationId: terminateAgreement
-      summary: Terminates approved Agreement.
+      summary: TerminateAgreement - Terminates approved Agreement.
       description: >
         Method to finish/close the Agreement while in `Approved` state.
 
@@ -771,20 +765,18 @@ paths:
         **Note**: Can be invoked at any time after Agreement was approved by both sides.
         Financial and reputational consequences are not defined by this specification.
       responses:
-        '204':
+        204:
           description: Agreement terminated.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
           description: Agreement not in `Approved` state.
-        '410':
-          $ref: '#/components/responses/Expired'
+        410:
+          $ref: 'common.yaml#/responses/Gone'
         default:
-          $ref: '#/components/responses/UnexpectedError'
-
-
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
 components:
 
@@ -792,9 +784,7 @@ components:
     app_key:
       $ref: 'common.yaml#/components/securitySchemes/app_key'
 
-
   parameters:
-
 
     subscriptionId:
       name: subscriptionId
@@ -826,7 +816,6 @@ components:
 
 
   requestBodies:
-
 
     Offer:
       required: true
@@ -866,7 +855,6 @@ components:
 
   responses:
 
-
     SubscriptionId:
       description: Subscribed.
       content:
@@ -890,47 +878,42 @@ components:
             type: string
             description: Proposal Id
 
-    BadRequest:
-      description: Bad request.
+    DemandList:
+      description: Demand list.
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            type: array
+            items:
+              $ref: '#/components/schemas/Demand'
 
-    Unauthorized:
-      description: Authorization information is missing or invalid.
+    OfferList:
+      description: Offer list.
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            type: array
+            items:
+              $ref: '#/components/schemas/Offer'
 
-    NotFound:
-      description: The specified resource was not found.
+    EventList:
+      description: Proposal or Agreement event list.
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            type: array
+            items:
+              $ref: '#/components/schemas/Event'
 
-    TimedOut:
-      description: Timeout occured while processing the request.
+    AgreementEventList:
+      description: Agreement-related event list.
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            type: array
+            items:
+              $ref: '#/components/schemas/AgreementEvent'
 
-    Expired:
-      description: The specified Proposal or Agreement has expired.
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    UnexpectedError:
-      description: Unexpected error.
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
 
   schemas:
 
@@ -940,22 +923,22 @@ components:
         - properties
         - constraints
       properties:
+        timestamp:
+          type: string
+          format: date-time
         properties:
-          description: >
-            The object which includes all the Demand/Offer properties.
-
-            - Client and server accepts all JSON formats when submitting Demands/Offers to REST API.
-            - "flat format" is mandatory when returning Demands/Offers from REST API
-
-            By "flat format" we mean single level key-value map, where keys are full property names
-            and their values indicate properties.
-
-            The value's Javascript type shall conform with the type of the property
-            (as indicated in Golem Standards).
-
+          description: > 
+            The object which includes all the Demand/Offer properties. 
+            
+            This is a JSON object in "flat convention" - where keys are full property names and their values indicate properties. 
+            
+            
+            The value's Javascript type shall conform with the type of the property (as indicated in Golem Standards). 
+            
             ### Example property object:
 
             ```
+            
             {
               "golem.com.pricing.model":"linear",
               "golem.com.pricing.model.linear.coeffs":[0.001, 0.002, 0.0],
@@ -972,7 +955,9 @@ components:
               "golem.runtime.name":"vm",
               "golem.runtime.version@v":"0.1.0"
             }
+            
             ```
+
           type: object
         constraints:
           type: string
@@ -981,57 +966,57 @@ components:
       allOf:
         - $ref: '#/components/schemas/DemandOfferBase'
         - type: object
-          properties:
-            demandId:
-              type: string
-              readOnly: true
-            requestorId:
-              type: string
-              readOnly: true
+      properties:
+        demandId:
+          type: string
+          readOnly: true
+        requestorId:
+          type: string
+          readOnly: true
 
     Offer:
       allOf:
         - $ref: '#/components/schemas/DemandOfferBase'
         - type: object
-          properties:
-            offerId:
-              type: string
-              readOnly: true
-            providerId:
-              type: string
-              readOnly: true
+      properties:
+        offerId:
+          type: string
+          readOnly: true
+        providerId:
+          type: string
+          readOnly: true
 
     Proposal:
       allOf:
         - $ref: '#/components/schemas/DemandOfferBase'
         - type: object
-          properties:
-            proposalId:
-              type: string
-              readOnly: true
-            issuerId:
-              type: string
-              readOnly: true
-            state:
-              type: string
-              readOnly: true
-              enum: [Initial, Draft, Rejected, Accepted, Expired]
-              description: >
-                * `Initial` - proposal arrived from the market as response
-                to subscription
+      properties:
+        proposalId:
+          type: string
+          readOnly: true
+        issuerId:
+          type: string
+          readOnly: true
+        state:
+          type: string
+          readOnly: true
+          enum: [Initial, Draft, Rejected, Accepted, Expired]
+          description: >
+            * `Initial` - proposal arrived from the market as response
+            to subscription
 
-                * `Draft` - bespoke counter-proposal issued by one party
-                directly to other party (negotiation phase)
+            * `Draft` - bespoke counter-proposal issued by one party
+            directly to other party (negotiation phase)
 
-                * `Rejected` by other party
+            * `Rejected` by other party
 
-                * `Accepted` - promoted into the Agreement draft
+            * `Accepted` - promoted into the Agreement draft
 
-                * `Expired` - not accepted nor rejected before validity period
-            prevProposalId:
-              type: string
-              description: >
-                id of the proposal from other side which this proposal responds to
+            * `Expired` - not accepted nor rejected before validity period
+        prevProposalId:
+          type: string
+          description: >
+            id of the proposal from other side which this proposal responds to
 
     AgreementProposal:
       type: object
@@ -1114,6 +1099,7 @@ components:
     PropertyQueryReply:
       type: object
 
+
     Event:
       type: object
       required:
@@ -1128,22 +1114,6 @@ components:
           type: string
           format: date-time
 
-    ProposalEvent:
-      allOf:
-        - $ref: '#/components/schemas/Event'
-        - type: object
-          properties:
-            proposal:
-              $ref: '#/components/schemas/Proposal'
-
-    AgreementEvent:
-      allOf:
-        - $ref: '#/components/schemas/Event'
-        - type: object
-          properties:
-            agreement:
-              $ref: '#/components/schemas/Agreement'
-
     PropertyQueryEvent:
       allOf:
         - $ref: '#/components/schemas/Event'
@@ -1151,3 +1121,83 @@ components:
           properties:
             propertyQuery:
               $ref: '#/components/schemas/PropertyQuery'
+      
+    ProposalEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+      properties:
+        proposal:
+          $ref: '#/components/schemas/Proposal'
+
+    ProposalRejectedEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            proposalId:
+              type: string
+              readOnly: true
+            reason:
+              $ref: 'common.yaml#/components/schemas/Reason'
+      
+    AgreementProposalEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            agreement:
+              $ref: '#/components/schemas/Agreement'
+      
+
+    # note this should be specified as a sub-class of Event, BUT
+    # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(
+    AgreementEvent:
+      type: object
+      required:
+        - eventType
+        - eventDate
+      discriminator:
+        propertyName: eventType
+      properties:
+        eventType:
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+        agreementId:
+          type: string
+
+    AgreementAcceptedEvent:
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+
+    AgreementRejectedEvent:
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+          properties:
+            reason:
+              $ref: 'common.yaml#/components/schemas/Reason'
+
+    AgreementCancelledEvent:
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+          properties:
+            reason:
+              $ref: 'common.yaml#/components/schemas/Reason'
+
+    AgreementTimeoutEvent:
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+
+    AgreementTerminatedEvent:
+      allOf:
+        - $ref: '#/components/schemas/AgreementEvent'
+        - type: object
+          properties:
+            reason:
+              $ref: 'common.yaml#/components/schemas/Reason'
