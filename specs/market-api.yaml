@@ -612,7 +612,7 @@ paths:
           $ref: 'common.yaml#/responses/Gone' # Expired
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-          
+
   /agreements/events:
     parameters:
       - $ref: 'common.yaml#/parameters/pollTimeout'
@@ -927,18 +927,18 @@ components:
           type: string
           format: date-time
         properties:
-          description: > 
-            The object which includes all the Demand/Offer properties. 
-            
-            This is a JSON object in "flat convention" - where keys are full property names and their values indicate properties. 
-            
-            
-            The value's Javascript type shall conform with the type of the property (as indicated in Golem Standards). 
-            
+          description: >
+            The object which includes all the Demand/Offer properties.
+
+            This is a JSON object in "flat convention" - where keys are full property names and their values indicate properties.
+
+
+            The value's Javascript type shall conform with the type of the property (as indicated in Golem Standards).
+
             ### Example property object:
 
             ```
-            
+
             {
               "golem.com.pricing.model":"linear",
               "golem.com.pricing.model.linear.coeffs":[0.001, 0.002, 0.0],
@@ -955,7 +955,7 @@ components:
               "golem.runtime.name":"vm",
               "golem.runtime.version@v":"0.1.0"
             }
-            
+
             ```
 
           type: object
@@ -1121,7 +1121,7 @@ components:
           properties:
             propertyQuery:
               $ref: '#/components/schemas/PropertyQuery'
-      
+
     ProposalEvent:
       allOf:
         - $ref: '#/components/schemas/Event'
@@ -1140,7 +1140,7 @@ components:
               readOnly: true
             reason:
               $ref: 'common.yaml#/components/schemas/Reason'
-      
+
     AgreementProposalEvent:
       allOf:
         - $ref: '#/components/schemas/Event'
@@ -1148,7 +1148,7 @@ components:
           properties:
             agreement:
               $ref: '#/components/schemas/Agreement'
-      
+
 
     # note this should be specified as a sub-class of Event, BUT
     # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(
