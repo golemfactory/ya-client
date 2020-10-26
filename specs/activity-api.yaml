@@ -162,7 +162,7 @@ paths:
         200:
           description: Success
           content:
-            application/octen-stream:
+            application/octet-stream:
               schema:
                 type: string
                 format: binary
@@ -472,8 +472,17 @@ components:
         activityId:
           type: string
         credentials:
+          $ref: '#/components/schemas/Credentials'
+
+    Credentials:
+      type: object
+      required:
+        - sgx
+      properties:
+        sgx:
           oneOf:
             - $ref: '#/components/schemas/SgxCredentials'
+            - $ref: '#/components/schemas/AnyCredentials'
 
     SgxCredentials:
       type: object
@@ -497,6 +506,10 @@ components:
         iasSig:
           type: string
           format: hex
+
+    AnyCredentials:
+      type: object
+      additionalProperties: true
 
     ExeScriptRequest:
       required:
