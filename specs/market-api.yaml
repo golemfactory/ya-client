@@ -247,7 +247,7 @@ paths:
           description: Proposal already rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-  
+
   /demands:
     get:
       tags:
@@ -456,7 +456,7 @@ paths:
           description: Proposal already rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-  
+
   /agreements:
     post:
       tags:
@@ -656,10 +656,10 @@ paths:
         * `AgreementCancelledEvent` - Indicates to the Provider that the Requestor has called
           `cancelAgreement`, which effectively stops the Agreement handshake.
 
-        * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated 
+        * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated
           by the other party.
 
-        * `AgreementTimeoutEvent` - Indicates that no Approve or Reject action has been called 
+        * `AgreementTimeoutEvent` - Indicates that no Approve or Reject action has been called
           on the Agreement within Agreement's validity period.
 
       responses:
@@ -863,7 +863,7 @@ components:
         application/json:
           schema:
             $ref: 'common.yaml#/components/schemas/Reason'
-        
+
     AgreementProposal:
       required: true
       content:
@@ -1017,7 +1017,7 @@ components:
       required:
         - offerId
         - providerId
-    
+
     Proposal:
       allOf:
         - $ref: '#/components/schemas/DemandOfferBase'
@@ -1053,7 +1053,7 @@ components:
         - state
         - issuerId
         - proposalId
-      
+
     AgreementProposal:
       type: object
       required:
