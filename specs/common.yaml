@@ -3,7 +3,7 @@ parameters:
     name: pollTimeout
     description: >
         Timeout used in long-polling calls (in seconds).
-        How many seconds server should wait for new events (0.0 means it should
+        How many seconds server should wait for response containing new events (`0.0` means it should
         return immediately if there are no events)
     required: false
     in: query
@@ -47,11 +47,11 @@ parameters:
     schema:
       type: integer
       format: int32
-      minimum: 0
+      minimum: 1
 
   afterTimestamp:
     name: afterTimestamp
-    description: Apply only to events later than specified timestamp
+    description: Apply only to records created later than the specified timestamp
     in: query
     required: false
     schema:

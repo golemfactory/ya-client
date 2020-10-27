@@ -73,7 +73,7 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
-  /debitNotes/{debitNodeId}:
+  /debitNotes/{debitNoteId}:
     get:
       tags:
         - requestor
@@ -81,7 +81,7 @@ paths:
       summary: Get Debit Note.
       operationId: getDebitNote
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
+        - $ref: '#/components/parameters/debitNoteId'
       responses:
         200:
           $ref: '#/components/responses/DebitNote'
@@ -92,7 +92,7 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
-  /debitNotes/{debitNodeId}/payments:
+  /debitNotes/{debitNoteId}/payments:
     get:
       tags:
         - requestor
@@ -102,7 +102,7 @@ paths:
       parameters:
         - $ref: 'common.yaml#/parameters/afterTimestamp'
         - $ref: 'common.yaml#/parameters/maxItems'
-        - $ref: '#/components/parameters/debitNodeId'
+        - $ref: '#/components/parameters/debitNoteId'
       responses:
         200:
           $ref: '#/components/responses/PaymentList'
@@ -111,7 +111,7 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
-  /debitNotes/{debitNodeId}/send:
+  /debitNotes/{debitNoteId}/send:
     post:
       tags:
         - provider
@@ -121,7 +121,7 @@ paths:
         This is a blocking operation. It will not return until the Requestor
         has acknowledged receiving the Debit Note or timeout has passed.
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
+        - $ref: '#/components/parameters/debitNoteId'
         - $ref: 'common.yaml#/parameters/ackTimeout'
       responses:
         200:
@@ -135,7 +135,7 @@ paths:
         504:
           $ref: 'common.yaml#/responses/AckTimeout'
 
-  /debitNotes/{debitNodeId}/cancel:
+  /debitNotes/{debitNoteId}/cancel:
     post:
       tags:
         - provider
@@ -147,7 +147,7 @@ paths:
         The Requestor may refuse to cancel the Debit Note if they have already
         paid it.
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
+        - $ref: '#/components/parameters/debitNoteId'
         - $ref: 'common.yaml#/parameters/ackTimeout'
       responses:
         200:
@@ -382,7 +382,7 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
-  /debitNotes/{debitNodeId}/accept:
+  /debitNotes/{debitNoteId}/accept:
     post:
       tags:
         - requestor
@@ -400,7 +400,7 @@ paths:
 
         NOTE: An Accepted Debit Note cannot be Rejected later.
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
+        - $ref: '#/components/parameters/debitNoteId'
         - $ref: 'common.yaml#/parameters/ackTimeout'
       requestBody:
         $ref: '#/components/requestBodies/Acceptance'
@@ -418,7 +418,7 @@ paths:
         504:
           $ref: 'common.yaml#/responses/AckTimeout'
 
-  /debitNotes/{debitNodeId}/reject:
+  /debitNotes/{debitNoteId}/reject:
     post:
       tags:
         - requestor
@@ -438,7 +438,7 @@ paths:
         result of some arbitrage).
 
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
+        - $ref: '#/components/parameters/debitNoteId'
         - $ref: 'common.yaml#/parameters/ackTimeout'
       requestBody:
         $ref: '#/components/requestBodies/Rejection'
@@ -681,8 +681,8 @@ components:
 
   parameters:
 
-    debitNodeId:
-      name: debitNodeId
+    debitNoteId:
+      name: debitNoteId
       required: true
       in: path
       schema:
