@@ -197,25 +197,6 @@ paths:
           description: Proposal rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-    delete:
-      tags:
-        - provider
-      operationId: rejectProposalDemand
-      summary: RejectProposalDemand - Rejects Proposal (Demand).
-      description: >
-        Effectively ends a Negotiation chain - it explicitly indicates that the sender
-        will not create another counter-Proposal.
-      responses:
-        204:
-          description: Proposal rejected.
-        401:
-          $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
-        410:
-          description: Proposal already rejected.
-        default:
-          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - provider
@@ -241,6 +222,32 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
+  /offers/{subscriptionId}/proposals/{proposalId}/reject:
+    parameters:
+      - $ref: '#/components/parameters/subscriptionId'
+      - $ref: '#/components/parameters/proposalId'
+    post:
+      tags:
+        - provider
+      operationId: rejectProposalDemand
+      summary: RejectProposalDemand - Rejects Proposal (Demand).
+      description: >
+        Effectively ends a Negotiation chain - it explicitly indicates that the sender
+        will not create another counter-Proposal.
+      requestBody:
+        $ref: '#/components/requestBodies/Reason'
+      responses:
+        204:
+          description: Proposal rejected.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
+          description: Proposal already rejected.
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+  
   /demands:
     get:
       tags:
@@ -399,25 +406,6 @@ paths:
           description: Proposal rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-    delete:
-      tags:
-        - requestor
-      operationId: rejectProposalOffer
-      summary: Rejects Proposal (Offer).
-      description: >
-        Effectively ends a Negotiation chain - it explicitly indicates that the sender
-        will not create another counter-Proposal.
-      responses:
-        204:
-          description: Proposal rejected.
-        401:
-          $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
-        410:
-          description: Proposal already rejected.
-        default:
-          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - requestor
@@ -443,6 +431,32 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
+  /demands/{subscriptionId}/proposals/{proposalId}/reject:
+    parameters:
+      - $ref: '#/components/parameters/subscriptionId'
+      - $ref: '#/components/parameters/proposalId'
+    post:
+      tags:
+        - requestor
+      operationId: rejectProposalOffer
+      summary: Rejects Proposal (Offer).
+      description: >
+        Effectively ends a Negotiation chain - it explicitly indicates that the sender
+        will not create another counter-Proposal.
+      requestBody:
+        $ref: '#/components/requestBodies/Reason'
+      responses:
+        204:
+          description: Proposal rejected.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        410:
+          description: Proposal already rejected.
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+  
   /agreements:
     post:
       tags:
@@ -629,22 +643,24 @@ paths:
 
         It returns events such as:
 
-        * `AgreementProposalEvent` - Noew Agreement has been proposed by a Requestor.
-
-        * `AgreementApprovedEvent` - Indicates that the Agreement has been approved by the Provider.
+        * `AgreementApprovedEvent` - Indicates to the Requestor that the Agreement has been approved by the Provider.
           - The Provider is now ready to accept a request to start an Activity
             as described in the negotiated agreement.
           - The Providers’s corresponding `approveAgreement` call returns `Approved` after
-            this on the Provider side.
+            this event is emitted.
 
-        * `AgreementRejectedEvent` - Indicates that the Provider has called `rejectAgreement`,
+        * `AgreementRejectedEvent` - Indicates to the Requestor that the Provider has called `rejectAgreement`,
           which effectively stops the Agreement handshake. The Requestor may attempt
           to return to the Negotiation phase by sending a new Proposal.
 
-        * `AgreementCancelledEvent` - Indicates that the Requestor himself has called
+        * `AgreementCancelledEvent` - Indicates to the Provider that the Requestor has called
           `cancelAgreement`, which effectively stops the Agreement handshake.
 
-        * `AgreementTerminatedEvent` - Indicates that the Agreement has been terminated.
+        * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated 
+          by the other party.
+
+        * `AgreementTimeoutEvent` - Indicates that no Approve or Reject action has been called 
+          on the Agreement within Agreement's validity period.
 
       responses:
         200:
@@ -732,8 +748,9 @@ paths:
         The Requestor side is notified about the Provider’s decision to reject
         a negotiated agreement. This effectively stops the Agreement handshake.
 
-
         **Note**: Mutually exclusive with `approveAgreement`.
+      requestBody:
+        $ref: '#/components/requestBodies/Reason'
       responses:
         204:
           description: Agreement rejected.
@@ -764,6 +781,8 @@ paths:
 
         **Note**: Can be invoked at any time after Agreement was approved by both sides.
         Financial and reputational consequences are not defined by this specification.
+      requestBody:
+        $ref: '#/components/requestBodies/Reason'
       responses:
         204:
           description: Agreement terminated.
@@ -838,6 +857,13 @@ components:
           schema:
             $ref: '#/components/schemas/Proposal'
 
+    Reason:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: 'common.yaml#/components/schemas/Reason'
+        
     AgreementProposal:
       required: true
       content:
@@ -973,6 +999,9 @@ components:
         requestorId:
           type: string
           readOnly: true
+      required:
+        - demandId
+        - requestorId
 
     Offer:
       allOf:
@@ -985,7 +1014,10 @@ components:
         providerId:
           type: string
           readOnly: true
-
+      required:
+        - offerId
+        - providerId
+    
     Proposal:
       allOf:
         - $ref: '#/components/schemas/DemandOfferBase'
@@ -1017,7 +1049,11 @@ components:
           type: string
           description: >
             id of the proposal from other side which this proposal responds to
-
+      required:
+        - state
+        - issuerId
+        - proposalId
+      
     AgreementProposal:
       type: object
       required:
@@ -1168,7 +1204,7 @@ components:
         agreementId:
           type: string
 
-    AgreementAcceptedEvent:
+    AgreementApprovedEvent:
       allOf:
         - $ref: '#/components/schemas/AgreementEvent'
         - type: object
