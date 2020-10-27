@@ -40,6 +40,8 @@ pub enum Error {
     UrlParseError(#[from] url::ParseError),
     #[error("Yagna model error: {0}")]
     ModelError(#[from] ErrorMessage),
+    #[error("{0}")]
+    InternalError(String),
     #[error("Event stream error: {0}")]
     EventStreamError(String),
 }
