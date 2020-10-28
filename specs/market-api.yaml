@@ -659,7 +659,7 @@ paths:
         * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated
           by the other party.
 
-        * `AgreementTimeoutEvent` - Indicates that no Approve or Reject action has been called
+        * `AgreementTimeoutEvent` - Indicates to the Requestor that no Approve or Reject action has been called
           on the Agreement within Agreement's validity period.
 
       responses:
