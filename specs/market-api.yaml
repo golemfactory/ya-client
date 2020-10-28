@@ -841,14 +841,14 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Offer'
+            $ref: '#/components/schemas/DemandOfferBase'
 
     Demand:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Demand'
+            $ref: '#/components/schemas/DemandOfferBase'
 
     Proposal:
       required: true
