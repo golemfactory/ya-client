@@ -61,7 +61,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateActivityResult'
+                oneOf:
+                  - type: string
+                  - $ref: '#/components/schemas/CreateActivityResult'
         400:
           description: Bad Request
           content:
