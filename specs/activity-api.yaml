@@ -480,9 +480,7 @@ components:
         - sgx
       properties:
         sgx:
-          oneOf:
-            - $ref: '#/components/schemas/SgxCredentials'
-            - $ref: '#/components/schemas/AnyCredentials'
+          $ref: '#/components/schemas/SgxCredentials'
 
     SgxCredentials:
       type: object
@@ -506,10 +504,6 @@ components:
         iasSig:
           type: string
           format: hex
-
-    AnyCredentials:
-      type: object
-      additionalProperties: true
 
     ExeScriptRequest:
       required:
