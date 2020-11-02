@@ -713,8 +713,6 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         408:
           $ref: 'common.yaml#/responses/Timeout'
-        410:
-          $ref: 'common.yaml#/responses/Gone'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -1218,15 +1216,6 @@ components:
               readOnly: true
             reason:
               $ref: 'common.yaml#/components/schemas/Reason'
-
-    AgreementProposalEvent:
-      allOf:
-        - $ref: '#/components/schemas/Event'
-        - type: object
-          properties:
-            agreement:
-              $ref: '#/components/schemas/Agreement'
-
 
     # note this should be specified as a sub-class of Event, BUT
     # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(
