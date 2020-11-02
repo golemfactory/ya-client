@@ -671,8 +671,6 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         408:
           $ref: 'common.yaml#/responses/Timeout'
-        410:
-          $ref: 'common.yaml#/responses/Gone'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -949,9 +947,6 @@ components:
         - properties
         - constraints
       properties:
-        timestamp:
-          type: string
-          format: date-time
         properties:
           description: >
             The object which includes all the Demand/Offer properties.
@@ -993,6 +988,9 @@ components:
         - $ref: '#/components/schemas/DemandOfferBase'
         - type: object
       properties:
+        timestamp:
+          type: string
+          format: date-time
         demandId:
           type: string
           readOnly: true
@@ -1008,6 +1006,9 @@ components:
         - $ref: '#/components/schemas/DemandOfferBase'
         - type: object
       properties:
+        timestamp:
+          type: string
+          format: date-time
         offerId:
           type: string
           readOnly: true
@@ -1023,6 +1024,9 @@ components:
         - $ref: '#/components/schemas/DemandOfferBase'
         - type: object
       properties:
+        timestamp:
+          type: string
+          format: date-time
         proposalId:
           type: string
           readOnly: true
@@ -1079,6 +1083,9 @@ components:
         - validTo
         - state
       properties:
+        timestamp:
+          type: string
+          format: date-time
         agreementId:
           type: string
         demand:
