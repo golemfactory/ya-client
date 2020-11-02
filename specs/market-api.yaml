@@ -197,6 +197,27 @@ paths:
           description: Proposal rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
+    delete:
+      tags:
+        - provider
+      operationId: rejectProposalDemand
+      deprecated: true
+      summary: RejectProposalDemand - Rejects Proposal (Demand).
+      description: >
+        DEPRECATED: use `rejectProposalDemandReason` instead.
+        Effectively ends a Negotiation chain - it explicitly indicates that the sender
+        will not create another counter-Proposal.
+      responses:
+        '204':
+          description: Proposal rejected.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        '410':
+          description: Proposal already rejected.
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - provider
@@ -229,8 +250,8 @@ paths:
     post:
       tags:
         - provider
-      operationId: rejectProposalDemand
-      summary: RejectProposalDemand - Rejects Proposal (Demand).
+      operationId: rejectProposalDemandReason
+      summary: RejectProposalDemandReason - Rejects Proposal (Demand) allowing specifying a Reason.
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
@@ -406,6 +427,27 @@ paths:
           description: Proposal rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
+    delete:
+      tags:
+        - requestor
+      operationId: rejectProposalOffer
+      deprecated: true
+      summary: RejectProposalOffer - Rejects Proposal (Offer).
+      description: >
+        DEPRECATED: use `rejectProposalOfferReason` instead.
+        Effectively ends a Negotiation chain - it explicitly indicates that the sender
+        will not create another counter-Proposal.
+      responses:
+        '204':
+          description: Proposal rejected.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        '410':
+          description: Proposal already rejected.
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - requestor
@@ -438,8 +480,8 @@ paths:
     post:
       tags:
         - requestor
-      operationId: rejectProposalOffer
-      summary: Rejects Proposal (Offer).
+      operationId: rejectProposalOfferReason
+      summary: RejectProposalOfferReason - Rejects Proposal (Offer).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
