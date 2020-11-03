@@ -25,8 +25,8 @@ pub enum ProviderEvent {
     ProposalRejectedEvent {
         #[serde(rename = "eventDate")]
         event_date: DateTime<Utc>,
-        #[serde(rename = "proposalId", skip_serializing_if = "Option::is_none")]
-        proposal_id: Option<String>,
+        #[serde(rename = "proposalId")]
+        proposal_id: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
         reason: Option<Reason>,
     },
@@ -60,8 +60,8 @@ pub enum RequestorEvent {
     ProposalRejectedEvent {
         #[serde(rename = "eventDate")]
         event_date: String,
-        #[serde(rename = "proposalId", skip_serializing_if = "Option::is_none")]
-        proposal_id: Option<String>,
+        #[serde(rename = "proposalId")]
+        proposal_id: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
         reason: Option<Reason>,
     },
