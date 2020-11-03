@@ -1217,9 +1217,17 @@ components:
             reason:
               $ref: 'common.yaml#/components/schemas/Reason'
 
+    AgreementEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            agreement:
+              $ref: '#/components/schemas/Agreement'
+
     # note this should be specified as a sub-class of Event, BUT
     # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(
-    AgreementEvent:
+    AgreementOperationEvent:
       type: object
       required:
         - eventType
@@ -1237,12 +1245,12 @@ components:
 
     AgreementApprovedEvent:
       allOf:
-        - $ref: '#/components/schemas/AgreementEvent'
+        - $ref: '#/components/schemas/AgreementOperationEvent'
         - type: object
 
     AgreementRejectedEvent:
       allOf:
-        - $ref: '#/components/schemas/AgreementEvent'
+        - $ref: '#/components/schemas/AgreementOperationEvent'
         - type: object
           properties:
             reason:
@@ -1250,7 +1258,7 @@ components:
 
     AgreementCancelledEvent:
       allOf:
-        - $ref: '#/components/schemas/AgreementEvent'
+        - $ref: '#/components/schemas/AgreementOperationEvent'
         - type: object
           properties:
             reason:
@@ -1258,12 +1266,12 @@ components:
 
     AgreementTimeoutEvent:
       allOf:
-        - $ref: '#/components/schemas/AgreementEvent'
+        - $ref: '#/components/schemas/AgreementOperationEvent'
         - type: object
 
     AgreementTerminatedEvent:
       allOf:
-        - $ref: '#/components/schemas/AgreementEvent'
+        - $ref: '#/components/schemas/AgreementOperationEvent'
         - type: object
           properties:
             reason:
