@@ -1,5 +1,7 @@
 //! Provider part of the Market API
-use ya_client_model::market::{Agreement, Offer, Proposal, ProviderEvent, MARKET_API_PATH};
+use ya_client_model::market::{
+    Agreement, DemandOfferBase, Offer, Proposal, ProviderEvent, MARKET_API_PATH,
+};
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 
@@ -21,7 +23,7 @@ impl WebInterface for MarketProviderApi {
 impl MarketProviderApi {
     /// Publish Provider’s service capabilities (`Offer`) on the market to declare an
     /// interest in Demands meeting specified criteria.
-    pub async fn subscribe(&self, offer: &Offer) -> Result<String> {
+    pub async fn subscribe(&self, offer: &DemandOfferBase) -> Result<String> {
         self.client.post("offers").send_json(&offer).json().await
     }
 
@@ -94,7 +96,7 @@ impl MarketProviderApi {
     /// Changes Proposal state to `Draft`. Returns created Proposal id.
     pub async fn counter_proposal(
         &self,
-        offer_proposal: &Proposal,
+        offer_proposal: &DemandOfferBase,
         subscription_id: &str,
     ) -> Result<String> {
         let proposal_id = offer_proposal.prev_proposal_id()?;
