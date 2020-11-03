@@ -74,7 +74,6 @@ impl PaymentProviderApi {
         self.client.get(&url).send().json().await
     }
 
-    #[allow(non_snake_case)]
     #[rustfmt::skip]
     pub async fn send_debit_note(&self, debit_note_id: &str) -> Result<()> {
         let timeout = self.config.send_debit_note_timeout;
@@ -86,7 +85,6 @@ impl PaymentProviderApi {
         self.client.post(&url).send().json().await
     }
 
-    #[allow(non_snake_case)]
     #[rustfmt::skip]
     pub async fn cancel_debit_note(&self, debit_note_id: &str) -> Result<()> {
         let timeout = self.config.cancel_debit_note_timeout;
@@ -98,7 +96,6 @@ impl PaymentProviderApi {
         self.client.post(&url).send().json().await
     }
 
-    #[allow(non_snake_case)]
     #[rustfmt::skip]
     pub async fn get_debit_note_events<Tz>(
         &self,
@@ -109,11 +106,11 @@ impl PaymentProviderApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let laterThan = later_than.map(|dt| dt.to_rfc3339());
+        let later_then = later_than.map(|dt| dt.to_rfc3339());
         let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "provider/debitNoteEvents",
-            #[query] laterThan,
+            #[query] later_then,
             #[query] timeout
         );
         self.client.get(&url).send().json().await
@@ -141,7 +138,6 @@ impl PaymentProviderApi {
         self.client.get(&url).send().json().await
     }
 
-    #[allow(non_snake_case)]
     #[rustfmt::skip]
     pub async fn send_invoice(&self, invoice_id: &str) -> Result<()> {
         let timeout = self.config.send_invoice_timeout;
@@ -153,7 +149,6 @@ impl PaymentProviderApi {
         self.client.post(&url).send().json().await
     }
 
-    #[allow(non_snake_case)]
     #[rustfmt::skip]
     pub async fn cancel_invoice(&self, invoice_id: &str) -> Result<()> {
         let timeout = self.config.cancel_invoice_timeout;
@@ -165,7 +160,6 @@ impl PaymentProviderApi {
         self.client.post(&url).send().json().await
     }
 
-    #[allow(non_snake_case)]
     #[rustfmt::skip]
     pub async fn get_invoice_events<Tz>(
         &self,
@@ -176,17 +170,16 @@ impl PaymentProviderApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let laterThan = later_than.map(|dt| dt.to_rfc3339());
+        let later_then = later_than.map(|dt| dt.to_rfc3339());
         let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "provider/invoiceEvents",
-            #[query] laterThan,
+            #[query] later_then,
             #[query] timeout
         );
         self.client.get(&url).send().json().await
     }
 
-    #[allow(non_snake_case)]
     #[rustfmt::skip]
     pub async fn get_payments<Tz>(
         &self,
@@ -197,11 +190,11 @@ impl PaymentProviderApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let laterThan = later_than.map(|dt| dt.to_rfc3339());
+        let later_then = later_than.map(|dt| dt.to_rfc3339());
         let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "provider/payments",
-            #[query] laterThan,
+            #[query] later_then,
             #[query] timeout
         );
         self.client.get(&url).send().json().await
