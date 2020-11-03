@@ -9,6 +9,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+use crate::NodeId;
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Demand {
     /// The object which includes all the Demand properties.
@@ -44,7 +46,7 @@ pub struct Demand {
     #[serde(rename = "demandId")]
     pub demand_id: String,
     #[serde(rename = "requestorId")]
-    pub requestor_id: String, // TODO: use NodeId
+    pub requestor_id: NodeId,
     /// Object creation timestamp
     #[serde(rename = "timestamp")]
     pub timestamp: DateTime<Utc>,
@@ -55,7 +57,7 @@ impl Demand {
         properties: serde_json::Value,
         constraints: String,
         demand_id: String,
-        requestor_id: String,
+        requestor_id: NodeId,
         timestamp: DateTime<Utc>,
     ) -> Demand {
         Demand {

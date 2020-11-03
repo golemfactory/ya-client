@@ -9,6 +9,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+use crate::NodeId;
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Offer {
     /// The object which includes all the Offer properties.
@@ -44,7 +46,7 @@ pub struct Offer {
     #[serde(rename = "offerId")]
     pub offer_id: String,
     #[serde(rename = "providerId")]
-    pub provider_id: String, // TODO: use NodeId
+    pub provider_id: NodeId,
     // TODO: introduce TTL aka validTo
     /// Object creation timestamp
     #[serde(rename = "timestamp")]
@@ -56,7 +58,7 @@ impl Offer {
         properties: serde_json::Value,
         constraints: String,
         offer_id: String,
-        provider_id: String,
+        provider_id: NodeId,
         timestamp: DateTime<Utc>,
     ) -> Offer {
         Offer {

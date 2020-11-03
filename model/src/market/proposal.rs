@@ -9,7 +9,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::market::DemandOfferBase;
-use crate::ErrorMessage;
+use crate::{ErrorMessage, NodeId};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Proposal {
@@ -45,7 +45,7 @@ pub struct Proposal {
     #[serde(rename = "proposalId")]
     pub proposal_id: String,
     #[serde(rename = "issuerId")]
-    pub issuer_id: String, // TODO: use NodeId
+    pub issuer_id: NodeId,
     /// * `Initial` - proposal arrived from the market as response to subscription
     /// * `Draft` - bespoke counter-proposal issued by one party directly to other party (negotiation phase)
     /// * `Rejected` by other party
@@ -66,7 +66,7 @@ impl Proposal {
         properties: serde_json::Value,
         constraints: String,
         proposal_id: String,
-        issuer_id: String,
+        issuer_id: NodeId,
         state: State,
         timestamp: String,
     ) -> Proposal {

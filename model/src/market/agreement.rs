@@ -10,6 +10,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::market::{Demand, Offer};
+use crate::NodeId;
 
 /// Agreement expresses the terms of the deal between Provider and Requestor.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -64,11 +65,11 @@ impl Agreement {
         }
     }
 
-    pub fn provider_id(&self) -> &str {
+    pub fn provider_id(&self) -> &NodeId {
         &self.offer.provider_id
     }
 
-    pub fn requestor_id(&self) -> &str {
+    pub fn requestor_id(&self) -> &NodeId {
         &self.demand.requestor_id
     }
 }
