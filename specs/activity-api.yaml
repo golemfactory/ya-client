@@ -20,6 +20,26 @@ tags:
 
 paths:
   /activity:
+    get:
+      tags:
+        - provider
+      summary: Lists all Activity ids for Provider identified by app_key.
+      operationId: ListActivities
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
     post:
       tags:
         - requestor_control
@@ -31,7 +51,9 @@ paths:
         content:
           application/json:
             schema:
-              type: string
+              oneOf:
+                - type: string
+                - $ref: '#/components/schemas/CreateActivityRequest'
         required: true
       responses:
         201:
@@ -39,8 +61,9 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                example: '"activityId"'
+                oneOf:
+                  - type: string
+                  - $ref: '#/components/schemas/CreateActivityResult'
         400:
           description: Bad Request
           content:
@@ -118,6 +141,46 @@ paths:
               schema:
                 $ref: 'common.yaml#/schemas/ErrorMessage'
       x-codegen-request-body-name: script
+  /activity/{activityId}/encrypted:
+    post:
+      tags:
+        - requestor_control
+      summary: Sends encrypted command to secure exe-unit.
+      operationId: callEncrypted
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: 'common.yaml#/schemas/ErrorMessage'
+
   /activity/{activityId}/exec/{batchId}:
     get:
       tags:
@@ -393,6 +456,57 @@ components:
     app_key:
       $ref: 'common.yaml#/components/securitySchemes/app_key'
   schemas:
+    CreateActivityRequest:
+      type: object
+      required:
+        - agreementId
+      properties:
+        agreementId:
+          type: string
+        requestorPubKey:
+          type: string
+
+    CreateActivityResult:
+      type: object
+      required:
+        - activityId
+      properties:
+        activityId:
+          type: string
+        credentials:
+          $ref: '#/components/schemas/Credentials'
+
+    Credentials:
+      type: object
+      required:
+        - sgx
+      properties:
+        sgx:
+          $ref: '#/components/schemas/SgxCredentials'
+
+    SgxCredentials:
+      type: object
+      required:
+        - enclavePubKey
+        - requestorPubKey
+        - payloadHash
+        - iasReport
+        - iasSig
+      properties:
+        enclavePubKey:
+          type: string
+          format: hex
+        requestorPubKey:
+          type: string
+          format: hex
+        payloadHash:
+          type: string
+        iasReport:
+          type: string
+        iasSig:
+          type: string
+          format: hex
+
     ExeScriptRequest:
       required:
         - text
@@ -416,6 +530,10 @@ components:
           enum:
             - Ok
             - Error
+        stdout:
+          type: string
+        stderr:
+          type: string
         message:
           type: string
         isBatchFinished:
@@ -497,6 +615,9 @@ components:
           properties:
             agreementId:
               type: string
+            requestorPubKey:
+              type: string
+              format: byte
 
     DestroyActivity:
       required:

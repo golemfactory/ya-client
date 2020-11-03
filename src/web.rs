@@ -1,19 +1,25 @@
 //! Web utils
+use crate::{Error, Result};
+use awc::http::header::qitem;
 use awc::{
     error::PayloadError,
     http::{header, HeaderMap, HeaderName, HeaderValue, Method, StatusCode},
     ClientRequest, ClientResponse, SendClientRequest,
 };
-use bytes::Bytes;
-use futures::Stream;
+use bytes::{Buf, Bytes, BytesMut};
+use futures::stream::Peekable;
+use futures::{Stream, StreamExt, TryStreamExt};
 use serde::{de::DeserializeOwned, Serialize};
+use std::cmp::max;
+use std::convert::TryFrom;
+use std::pin::Pin;
+use std::task::{Context, Poll};
 use std::{env, rc::Rc, str::FromStr, time::Duration};
 use url::{form_urlencoded, Url};
 
-use crate::{Error, Result};
-
 pub const YAGNA_API_URL_ENV_VAR: &str = "YAGNA_API_URL";
 pub const DEFAULT_YAGNA_API_URL: &str = "http://127.0.0.1:7465";
+const MAX_BODY_SIZE: usize = 10 * 1024 * 1024;
 
 pub fn rest_api_url() -> Url {
     let api_url = env::var(YAGNA_API_URL_ENV_VAR).unwrap_or(DEFAULT_YAGNA_API_URL.into());
@@ -79,6 +85,24 @@ impl WebClient {
         }
     }
 
+    pub async fn event_stream(&self, url: &str) -> Result<impl Stream<Item = Result<Event>>> {
+        let url = self.url(url).unwrap().to_string();
+        log::debug!("event stream at {}", url);
+        let request = self
+            .awc
+            .request(Method::GET, &url)
+            .set(awc::http::header::Accept(vec![qitem(
+                mime::TEXT_EVENT_STREAM,
+            )]));
+        let stream = request
+            .send()
+            .await?
+            .into_stream()
+            .map_err(Error::from)
+            .event_stream();
+        Ok(stream)
+    }
+
     pub fn get(&self, url: &str) -> WebRequest<ClientRequest> {
         self.request(Method::GET, url)
     }
@@ -122,6 +146,15 @@ impl WebRequest<ClientRequest> {
         }
     }
 
+    pub fn send_bytes(self, bytes: Vec<u8>) -> WebRequest<SendClientRequest> {
+        let url = self.url;
+        let inner_request = self
+            .inner_request
+            .content_type("application/octet-stream")
+            .send_body(bytes);
+        WebRequest { url, inner_request }
+    }
+
     pub fn send(self) -> WebRequest<SendClientRequest> {
         WebRequest {
             inner_request: self.inner_request.send(),
@@ -141,11 +174,48 @@ where
     if response.status().is_success() {
         Ok(response)
     } else {
-        Err((response.status(), url, response.json().await).into())
+        if response
+            .headers()
+            .get("content-type")
+            .map(|v| v.as_bytes() == b"application/json")
+            .unwrap_or_default()
+        {
+            Err((response.status(), url, response.json().await).into())
+        } else {
+            match response.body().await {
+                Ok(ref bytes) => {
+                    let message = String::from_utf8_lossy(&bytes);
+                    Err(Error::HttpStatusCode {
+                        code: response.status(),
+                        url,
+                        msg: message.to_string(),
+                        bt: Default::default(),
+                    })
+                }
+                Err(_e) => Err(Error::HttpStatusCode {
+                    code: response.status(),
+                    url,
+                    msg: response.status().as_str().to_string(),
+                    bt: Default::default(),
+                }),
+            }
+        }
     }
 }
 
 impl WebRequest<SendClientRequest> {
+    pub async fn bytes(self) -> Result<Vec<u8>> {
+        let url = self.url.clone();
+        let response = self
+            .inner_request
+            .await
+            .map_err(|e| Error::from((e, url.clone())))?;
+
+        let mut response = filter_http_status(response, url).await?;
+        let raw_body = response.body().await?;
+        Ok(raw_body.to_vec())
+    }
+
     pub async fn json<T: DeserializeOwned>(self) -> Result<T> {
         let url = self.url.clone();
         let response = self
@@ -168,8 +238,14 @@ impl WebRequest<SendClientRequest> {
                 response.status()
             ))?);
         }
-
-        Ok(response.json().await?)
+        let raw_body = response.body().limit(MAX_BODY_SIZE).await?;
+        let body = std::str::from_utf8(&raw_body)?;
+        log::debug!(
+            "WebRequest.json(). url={}, resp={}",
+            self.url,
+            body.split_at(512.min(body.len())).0
+        );
+        Ok(serde_json::from_str(body)?)
     }
 }
 
@@ -276,6 +352,148 @@ impl<'a> QueryParamsBuilder<'a> {
     }
 }
 
+#[derive(Debug)]
+pub struct Event {
+    pub id: Option<u64>,
+    pub event: String,
+    pub data: String,
+}
+
+impl TryFrom<String> for Event {
+    type Error = Error;
+
+    fn try_from(string: String) -> Result<Self> {
+        let mut id = None;
+        let mut event = String::new();
+        let mut data = Vec::<String>::new();
+
+        for line in string.split('\n') {
+            let split = line.splitn(2, ":").collect::<Vec<_>>();
+            if split.len() < 2 {
+                continue;
+            }
+
+            let value = split[1].trim_start();
+            match split[0] {
+                "event" => event = value.into(),
+                "data" => data.push(value.into()),
+                "id" => {
+                    id = match value.parse::<u64>() {
+                        Ok(id) => Some(id),
+                        _ => None,
+                    }
+                }
+                _ => (),
+            }
+        }
+        if event.is_empty() {
+            return Err(Error::EventStreamError("Missing event entry".into()));
+        }
+        let data = data.join("\n");
+        Ok(Event { id, event, data })
+    }
+}
+
+pub trait EventStreamExt<S, E>
+where
+    S: Stream<Item = std::result::Result<Bytes, E>> + Unpin + 'static,
+    E: Into<Error>,
+{
+    fn event_stream(self) -> EventStream<S, E>;
+}
+
+impl<S, E> EventStreamExt<S, E> for S
+where
+    S: Stream<Item = std::result::Result<Bytes, E>> + Unpin + 'static,
+    E: Into<Error>,
+{
+    fn event_stream(self) -> EventStream<S, E> {
+        EventStream::new(self)
+    }
+}
+
+pub struct EventStream<S, E>
+where
+    S: Stream<Item = std::result::Result<Bytes, E>> + Unpin + 'static,
+{
+    inner: Peekable<S>,
+    buffer: BytesMut,
+}
+
+impl<S, E> EventStream<S, E>
+where
+    S: Stream<Item = std::result::Result<Bytes, E>> + Unpin + 'static,
+    E: Into<Error>,
+{
+    pub fn new(stream: S) -> Self {
+        EventStream {
+            inner: stream.peekable(),
+            buffer: BytesMut::new(),
+        }
+    }
+
+    fn next_event(&mut self, start_idx: usize) -> Option<Result<Event>> {
+        let idx = max(0, start_idx as i64 - 1) as usize;
+        if let Some(idx) = Self::find(self.buffer.bytes(), b"\n\n", idx) {
+            let bytes = self.buffer.split_to(idx);
+            return String::from_utf8(bytes.to_vec())
+                .map(Event::try_from)
+                .map_err(Error::from)
+                .ok();
+        }
+        None
+    }
+
+    fn find(source: &[u8], find: &[u8], start_idx: usize) -> Option<usize> {
+        let mut find_idx = 0;
+        for (i, b) in source.iter().enumerate().skip(start_idx) {
+            if *b == find[find_idx] {
+                find_idx += 1;
+                if find_idx == find.len() {
+                    return Some(i);
+                }
+            } else {
+                find_idx = 0;
+            }
+        }
+        None
+    }
+}
+
+impl<S, E> Stream for EventStream<S, E>
+where
+    S: Stream<Item = std::result::Result<Bytes, E>> + Unpin + 'static,
+    E: Into<Error>,
+{
+    type Item = std::result::Result<Event, Error>;
+
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let this = self.get_mut();
+        if let Some(result) = this.next_event(0) {
+            return Poll::Ready(Some(result));
+        }
+
+        match Pin::new(&mut this.inner).poll_next(cx) {
+            Poll::Ready(Some(Ok(bytes))) => {
+                let idx = this.buffer.len();
+                this.buffer.extend(bytes.into_iter());
+
+                if let Some(result) = this.next_event(idx) {
+                    Poll::Ready(Some(result))
+                } else {
+                    if let Poll::Ready(_) = Pin::new(&mut this.inner).poll_peek(cx) {
+                        cx.waker().wake_by_ref();
+                    }
+                    Poll::Pending
+                }
+            }
+            Poll::Ready(Some(Err(e))) => Poll::Ready(Some(Err(e.into()))),
+            Poll::Ready(None) => Poll::Ready(None),
+            Poll::Pending => Poll::Pending,
+        }
+    }
+}
+
 /// Macro to facilitate URL formatting for REST API async bindings
 macro_rules! url_format {
     {
@@ -295,6 +513,10 @@ macro_rules! url_format {
 #[cfg(test)]
 #[rustfmt::skip]
 mod tests {
+    use bytes::Bytes;
+    use crate::web::EventStream;
+    use futures::{StreamExt, FutureExt, Stream};
+    use crate::Error;
 
     #[test]
     fn static_url() {
@@ -373,5 +595,76 @@ mod tests {
             ),
             "foo/baara/fuu/0?qar=true&qaz=3"
         );
+    }
+
+    async fn verify_stream<S, F>(f: F) -> anyhow::Result<()>
+    where
+        S: Stream<Item = std::result::Result<Bytes, Error>> + Unpin + 'static,
+        F: Fn(&'static str) -> EventStream<S, Error>,
+    {
+        let src = r#"
+:ping
+event: stdout
+data: some
+data: output
+id: 1
+
+:ping
+
+event: stderr
+data:
+id: 2
+
+event: stdout
+data: 0
+id
+
+"#;
+        let stream = f(src);
+        let events = stream.collect::<Vec<_>>().await;
+
+        assert_eq!(events.len(), 4);
+        let mut iter = events.into_iter();
+
+        let event = iter.next().unwrap()?;
+        assert_eq!(event.event, "stdout".to_string());
+        assert_eq!(event.data, "some\noutput".to_string());
+        assert_eq!(event.id, Some(1));
+
+        assert!(iter.next().unwrap().is_err());
+
+        let event = iter.next().unwrap()?;
+        assert_eq!(event.event, "stderr".to_string());
+        assert_eq!(event.data, "".to_string());
+        assert_eq!(event.id, Some(2));
+
+        let event = iter.next().unwrap()?;
+        assert_eq!(event.event, "stdout".to_string());
+        assert_eq!(event.data, "0".to_string());
+        assert_eq!(event.id, None);
+
+        Ok(())
+    }
+
+    #[actix_rt::test]
+    async fn event_stream() {
+        verify_stream(|s| {
+            let stream = futures::stream::once(async move { Ok::<_, Error>(Bytes::from(s.to_string().into_bytes()))}.boxed_local());
+            EventStream::new(stream)
+        }).await.unwrap();
+
+        verify_stream(|s| {
+            let stream = futures::stream::iter(s.as_bytes()).chunks(5).map(|v| {
+                Ok::<_, Error>(Bytes::from(v.iter().map(|b| **b).collect::<Vec<_>>()))
+            });
+            EventStream::new(stream)
+        }).await.unwrap();
+
+        verify_stream(|s| {
+            let stream = futures::stream::iter(s.as_bytes()).chunks(1).map(|v| {
+                Ok::<_, Error>(Bytes::from(v.iter().map(|b| **b).collect::<Vec<_>>()))
+            });
+            EventStream::new(stream)
+        }).await.unwrap();
     }
 }

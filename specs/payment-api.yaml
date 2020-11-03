@@ -366,6 +366,20 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
 
+  /provider/accounts:
+    get:
+      tags:
+        - provider
+      summary: Get available accounts for receiving payments.
+      operationId: getReceiveAccounts
+      responses:
+        200:
+          $ref: '#/components/responses/AccountList'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'
+
   /requestor/debitNotes:
     get:
       tags:
@@ -802,6 +816,20 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
 
+  /requestor/accounts:
+    get:
+      tags:
+        - requestor
+      summary: Get available accounts for sending payments.
+      operationId: getSendAccounts
+      responses:
+        200:
+          $ref: '#/components/responses/AccountList'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'
+
 components:
   securitySchemes:
     app_key:
@@ -1043,6 +1071,15 @@ components:
             items:
               $ref: '#/components/schemas/InvoiceEvent'
 
+    AccountList:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Account'
+
   schemas:
 
     DebitNote:
@@ -1074,6 +1111,9 @@ components:
           type: string
           readOnly: true
         payerAddr:
+          type: string
+          readOnly: true
+        paymentPlatform:
           type: string
           readOnly: true
         previousDebitNoteId:
@@ -1136,6 +1176,9 @@ components:
           type: string
           readOnly: true
         payerAddr:
+          type: string
+          readOnly: true
+        paymentPlatform:
           type: string
           readOnly: true
         lastDebitNoteId:
@@ -1242,6 +1285,10 @@ components:
         allocationId:
           type: string
           readOnly: true
+        address:
+          type: string
+        paymentPlatform:
+          type: string
         totalAmount:
           type: string
         spentAmount:
@@ -1277,13 +1324,13 @@ components:
           type: string
         payeeAddr:
           type: string
+        paymentPlatform:
+          type: string
         amount:
           type: string
         timestamp:
           type: string
           format: date-time
-        allocationId:
-          type: string
         agreementPayments:
           type: array
           items:
@@ -1299,6 +1346,9 @@ components:
         - paymentId
         - payerId
         - payeeId
+        - payerAddr
+        - payeeAddr
+        - paymentPlatform
         - amount
         - timestamp
         - agreementPayments
@@ -1316,6 +1366,8 @@ components:
           type: string
         amount:
           type: string
+        allocationId:
+          type: string
       required:
         - agreementId
         - amount
@@ -1329,6 +1381,8 @@ components:
         activityId:
           type: string
         amount:
+          type: string
+        allocationId:
           type: string
       required:
         - activityId
@@ -1378,3 +1432,16 @@ components:
         - ACCEPTED
         - REJECTED
         - CANCELLED
+
+    Account:
+      description: Payment account (wallet)
+      type: object
+      readOnly: true
+      properties:
+        platform:
+          type: string
+        address:
+          type: string
+      required:
+        - platform
+        - address
