@@ -171,6 +171,10 @@ components:
       scheme: bearer
 
   schemas:
+    Timestamp:
+      type: string
+      format: date-time
+
     Reason:
       type: object
       description: >
