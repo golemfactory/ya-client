@@ -672,6 +672,7 @@ paths:
   /agreements/events:
     parameters:
       - $ref: 'common.yaml#/parameters/pollTimeout'
+      - $ref: 'common.yaml#/parameters/afterTimestamp'
       - $ref: 'common.yaml#/parameters/maxEvents'
       - $ref: 'common.yaml#/parameters/appSessionId'
     get:
@@ -898,7 +899,6 @@ components:
             $ref: '#/components/schemas/DemandOfferBase'
 
     Reason:
-      required: true
       content:
         application/json:
           schema:
