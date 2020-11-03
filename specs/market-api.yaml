@@ -44,9 +44,6 @@ paths:
         - provider
       operationId: getOffers
       summary: GetOffers - Fetches all active Offers which have been published by the Provider.
-      parameters:
-        - $ref: 'common.yaml#/parameters/afterTimestamp'
-        - $ref: 'common.yaml#/parameters/maxItems'
       responses:
         200:
           $ref: '#/components/responses/OfferList'
@@ -275,9 +272,6 @@ paths:
         - requestor
       operationId: getDemands
       summary: GetDemands - Fetches all active Demands which have been published by the Requestor.
-      parameters:
-        - $ref: 'common.yaml#/parameters/afterTimestamp'
-        - $ref: 'common.yaml#/parameters/maxItems'
       responses:
         200:
           $ref: '#/components/responses/DemandList'

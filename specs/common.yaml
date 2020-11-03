@@ -11,7 +11,7 @@ schemas:
 
 parameters:
   pollTimeout:
-    name: pollTimeout
+    name: timeout
     description: >
         Timeout used in long-polling calls (in seconds).
         How many seconds server should wait for new events (0.0 means it should
@@ -24,7 +24,7 @@ parameters:
       minimum: 0.0
 
   ackTimeout:
-    name: ackTimeout
+    name: timeout
     description: >
         Timeout used in blocking calls waiting for eg. acknowledgement.
         How many seconds server should wait for response/acknowledgement of an action
