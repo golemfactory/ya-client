@@ -830,6 +830,29 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
 
+  /requestor/decorateDemand:
+    get:
+      tags:
+        - requestor
+      summary: Decorate market demand.
+      operationId: decorateDemand
+      description: >
+        Generate payment-related properties and constraints to be added to a
+        demand published on the marketplace. As a parameter it accepts a list of
+        IDs of allocations to be used to pay for invoices resulting from the
+        decorated demand.
+      parameters:
+        - $ref: '#/components/parameters/allocationIds'
+      responses:
+        200:
+          $ref: '#/components/responses/MarketDecoration'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'
+
 components:
   securitySchemes:
     app_key:
@@ -897,6 +920,17 @@ components:
       schema:
         type: string
         format: date-time
+
+    allocationIds:
+      name: allocationIds
+      required: true
+      in: query
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
 
   requestBodies:
 
@@ -1079,6 +1113,13 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Account'
+
+    MarketDecoration:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MarketDecoration'
 
   schemas:
 
@@ -1445,3 +1486,30 @@ components:
       required:
         - platform
         - address
+
+    MarketDecoration:
+      description: >
+        Properties and constraints to be added to a market object (i.e. a demand
+        or an offer).
+      type: object
+      readOnly: true
+      properties:
+        properties:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+            required:
+              - key
+              - value
+        constraints:
+          type: array
+          items:
+            type: string
+      required:
+        - properties
+        - constraints
