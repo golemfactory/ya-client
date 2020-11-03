@@ -542,8 +542,6 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         409:
           description: Proposal not in `Draft` state.
-        410:
-          $ref: 'common.yaml#/responses/Gone'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -701,9 +699,6 @@ paths:
 
         * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated
           by the other party.
-
-        * `AgreementTimeoutEvent` - Indicates to the Requestor that no Approve or Reject action has been called
-          on the Agreement within Agreement's validity period.
 
       responses:
         200:
@@ -1056,8 +1051,8 @@ components:
         - type: object
           required:
             - offerId
-            - timestamp
             - providerId
+            - timestamp
           properties:
             offerId:
               type: string
@@ -1283,11 +1278,6 @@ components:
           properties:
             reason:
               $ref: 'common.yaml#/components/schemas/Reason'
-
-    AgreementTimeoutEvent:
-      allOf:
-        - $ref: '#/components/schemas/AgreementOperationEvent'
-        - type: object
 
     AgreementTerminatedEvent:
       allOf:

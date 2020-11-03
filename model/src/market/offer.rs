@@ -45,8 +45,7 @@ pub struct Offer {
     pub offer_id: String,
     #[serde(rename = "providerId")]
     pub provider_id: String, // TODO: use NodeId
-
-    // TODO: ttl
+    // TODO: introduce TTL aka validTo
     /// Object creation timestamp
     #[serde(rename = "timestamp")]
     pub timestamp: DateTime<Utc>,
