@@ -22,7 +22,6 @@ members = [
 ya-client-model = { version="0.2", path = "model" }
 
 awc = "1.0"
-backtrace = "0.3"
 bytes = "0.5"
 chrono = "0.4"
 envy = "0.4"
