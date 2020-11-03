@@ -9,6 +9,7 @@ use awc::{
 use bytes::{Buf, Bytes, BytesMut};
 use futures::stream::Peekable;
 use futures::{Stream, StreamExt, TryStreamExt};
+use heck::MixedCase;
 use serde::{de::DeserializeOwned, Serialize};
 use std::cmp::max;
 use std::convert::TryFrom;
@@ -342,7 +343,7 @@ impl<'a> QueryParamsBuilder<'a> {
     pub fn put<N: ToString, V: ToString>(mut self, name: N, value: Option<V>) -> Self {
         if let Some(v) = value {
             self.serializer
-                .append_pair(&name.to_string(), &v.to_string());
+                .append_pair(&name.to_string().to_mixed_case(), &v.to_string());
         };
         self
     }

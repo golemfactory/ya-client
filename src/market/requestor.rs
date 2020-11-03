@@ -1,7 +1,12 @@
 //! Requestor part of the Market API
-use ya_client_model::market::{Agreement, AgreementProposal, Demand, Proposal, RequestorEvent, DemandOfferBase};
+use ya_client_model::market::{
+    Agreement, AgreementOperationEvent, AgreementProposal, Demand, DemandOfferBase, Proposal,
+    RequestorEvent,
+};
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
+use chrono::{DateTime, TimeZone};
+use std::fmt::Display;
 
 /// Bindings for Requestor part of the Market API.
 #[derive(Clone)]
@@ -50,14 +55,13 @@ impl MarketRequestorApi {
         &self,
         subscription_id: &str,
         timeout: Option<f32>,
-        #[allow(non_snake_case)]
-        maxEvents: Option<i32>,
+        max_events: Option<i32>,
     ) -> Result<Vec<RequestorEvent>> {
         let url = url_format!(
             "demands/{subscription_id}/events",
             subscription_id,
             #[query] timeout,
-            #[query] maxEvents
+            #[query] max_events,
         );
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
     }
@@ -67,12 +71,12 @@ impl MarketRequestorApi {
         &self,
         demand_proposal: &DemandOfferBase,
         subscription_id: &str,
+        proposal_id: &str,
     ) -> Result<String> {
-        let proposal_id = demand_proposal.prev_proposal_id()?;
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
-            proposal_id
+            proposal_id,
         );
         self.client
             .post(&url)
@@ -86,7 +90,7 @@ impl MarketRequestorApi {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
-            proposal_id
+            proposal_id,
         );
         self.client.get(&url).send().json().await
     }
@@ -100,7 +104,7 @@ impl MarketRequestorApi {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
-            proposal_id
+            proposal_id,
         );
         self.client.delete(&url).send().json().await
     }
@@ -136,8 +140,17 @@ impl MarketRequestorApi {
 
     /// Sends Agreement draft to the Provider.
     /// Signs Agreement self-created via `create_agreement` and sends it to the Provider.
-    pub async fn confirm_agreement(&self, agreement_id: &str) -> Result<String> {
-        let url = url_format!("agreements/{agreement_id}/confirm", agreement_id);
+    #[rustfmt::skip]
+    pub async fn confirm_agreement(
+        &self,
+        agreement_id: &str,
+        app_session_id: Option<String>,
+    ) -> Result<String> {
+        let url = url_format!(
+            "agreements/{agreement_id}/confirm",
+            agreement_id,
+            #[query] app_session_id,
+        );
         self.client.post(&url).send().json().await
     }
 
@@ -170,7 +183,7 @@ impl MarketRequestorApi {
         let url = url_format!(
             "agreements/{agreement_id}/wait",
             agreement_id,
-            #[query] timeout
+            #[query] timeout,
         );
         self.client.post(&url).send().json().await
     }
@@ -187,5 +200,43 @@ impl MarketRequestorApi {
     pub async fn terminate_agreement(&self, agreement_id: &str) -> Result<String> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
         self.client.post(&url).send().json().await
+    }
+
+    /// Returns Agreement related events:
+    /// * `AgreementApprovedEvent` - Indicates to the Requestor that the Agreement has been approved by the Provider.
+    ///   - The Provider is now ready to accept a request to start an Activity
+    ///     as described in the negotiated agreement.
+    ///   - The Providers’s corresponding `approveAgreement` call returns `Approved` after
+    ///     this event is emitted.
+    /// * `AgreementRejectedEvent` - Indicates to the Requestor that the Provider has called `rejectAgreement`,
+    ///   which effectively stops the Agreement handshake. The Requestor may attempt
+    ///   to return to the Negotiation phase by sending a new Proposal.
+    /// * `AgreementCancelledEvent` - Indicates to the Provider that the Requestor has called
+    ///   `cancelAgreement`, which effectively stops the Agreement handshake.
+    /// * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated
+    ///   by the other party.
+    ///
+    /// This is a blocking operation.
+    #[rustfmt::skip]
+    pub async fn collect_agreement_events<Tz>(
+        &self,
+        timeout: Option<f32>,
+        after_timestamp: Option<&DateTime<Tz>>,
+        max_events: Option<i32>,
+        app_session_id: Option<String>,
+    ) -> Result<Vec<AgreementOperationEvent>>
+        where
+            Tz: TimeZone,
+            Tz::Offset: Display,
+    {
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        let url = url_format!(
+            "agreements/events",
+            #[query] timeout,
+            #[query] after_timestamp,
+            #[query] max_events,
+            #[query] app_session_id,
+        );
+        self.client.get(&url).send().json().await.or_else(default_on_timeout)
     }
 }

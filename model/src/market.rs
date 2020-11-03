@@ -1,5 +1,5 @@
 pub mod agreement;
-pub mod agreement_operation_event;
+pub mod agreement_event;
 pub mod agreement_proposal;
 pub mod demand;
 pub mod demand_offer_base;
@@ -10,7 +10,7 @@ pub mod proposal;
 pub mod reason;
 
 pub use agreement::Agreement;
-pub use agreement_operation_event::AgreementOperationEvent;
+pub use agreement_event::AgreementOperationEvent;
 pub use agreement_proposal::AgreementProposal;
 pub use demand::Demand;
 pub use demand_offer_base::DemandOfferBase;

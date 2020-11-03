@@ -1,9 +1,12 @@
 //! Provider part of the Market API
 use ya_client_model::market::{
-    Agreement, DemandOfferBase, Offer, Proposal, ProviderEvent, MARKET_API_PATH,
+    Agreement, AgreementOperationEvent, DemandOfferBase, Offer, Proposal, ProviderEvent,
+    MARKET_API_PATH,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
+use chrono::{DateTime, TimeZone};
+use std::fmt::Display;
 
 /// Bindings for Provider part of the Market API.
 #[derive(Clone)]
@@ -51,14 +54,13 @@ impl MarketProviderApi {
         &self,
         subscription_id: &str,
         timeout: Option<f32>,
-        #[allow(non_snake_case)]
-        maxEvents: Option<i32>,
+        max_events: Option<i32>,
     ) -> Result<Vec<ProviderEvent>> {
         let url = url_format!(
             "offers/{subscription_id}/events",
             subscription_id,
             #[query] timeout,
-            #[query] maxEvents
+            #[query] max_events,
         );
 
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
@@ -69,7 +71,7 @@ impl MarketProviderApi {
         let url = url_format!(
             "offers/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
-            proposal_id
+            proposal_id,
         );
         self.client.get(&url).send().json().await
     }
@@ -85,7 +87,7 @@ impl MarketProviderApi {
         let url = url_format!(
             "offers/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
-            proposal_id
+            proposal_id,
         );
         self.client.delete(&url).send().json().await
     }
@@ -98,12 +100,12 @@ impl MarketProviderApi {
         &self,
         offer_proposal: &DemandOfferBase,
         subscription_id: &str,
+        proposal_id: &str,
     ) -> Result<String> {
-        let proposal_id = offer_proposal.prev_proposal_id()?;
         let url = url_format!(
             "offers/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
-            proposal_id
+            proposal_id,
         );
         self.client
             .post(&url)
@@ -145,12 +147,14 @@ impl MarketProviderApi {
     pub async fn approve_agreement(
         &self,
         agreement_id: &str,
+        app_session_id: Option<String>,
         timeout: Option<f32>,
     ) -> Result<String> {
         let url = url_format!(
             "agreements/{agreement_id}/approve",
             agreement_id,
-            #[query] timeout
+            #[query] app_session_id,
+            #[query] timeout,
         );
         self.client.post(&url).send().json().await
     }
@@ -176,5 +180,43 @@ impl MarketProviderApi {
     pub async fn get_agreement(&self, agreement_id: &str) -> Result<Agreement> {
         let url = url_format!("agreements/{agreement_id}", agreement_id);
         self.client.get(&url).send().json().await
+    }
+
+    /// Returns Agreement related events:
+    /// * `AgreementApprovedEvent` - Indicates to the Requestor that the Agreement has been approved by the Provider.
+    ///   - The Provider is now ready to accept a request to start an Activity
+    ///     as described in the negotiated agreement.
+    ///   - The Providers’s corresponding `approveAgreement` call returns `Approved` after
+    ///     this event is emitted.
+    /// * `AgreementRejectedEvent` - Indicates to the Requestor that the Provider has called `rejectAgreement`,
+    ///   which effectively stops the Agreement handshake. The Requestor may attempt
+    ///   to return to the Negotiation phase by sending a new Proposal.
+    /// * `AgreementCancelledEvent` - Indicates to the Provider that the Requestor has called
+    ///   `cancelAgreement`, which effectively stops the Agreement handshake.
+    /// * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated
+    ///   by the other party.
+    ///
+    /// This is a blocking operation.
+    #[rustfmt::skip]
+    pub async fn collect_agreement_events<Tz>(
+        &self,
+        timeout: Option<f32>,
+        after_timestamp: Option<&DateTime<Tz>>,
+        max_events: Option<i32>,
+        app_session_id: Option<String>,
+    ) -> Result<Vec<AgreementOperationEvent>>
+        where
+            Tz: TimeZone,
+            Tz::Offset: Display,
+    {
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        let url = url_format!(
+            "agreements/events",
+            #[query] timeout,
+            #[query] after_timestamp,
+            #[query] max_events,
+            #[query] app_session_id,
+        );
+        self.client.get(&url).send().json().await.or_else(default_on_timeout)
     }
 }

@@ -5,12 +5,11 @@ use url::Url;
 
 use ya_client::{
     market::{MarketProviderApi, MarketRequestorApi},
-    model::market::{
-        proposal::State, AgreementProposal, Demand, Offer, Proposal, ProviderEvent, RequestorEvent,
-    },
+    model::market::{proposal::State, AgreementProposal, Proposal, ProviderEvent, RequestorEvent},
     web::{WebClient, WebInterface},
     Error, Result,
 };
+use ya_client_model::market::DemandOfferBase;
 
 #[derive(StructOpt)]
 #[structopt(name = "Market", about = "Market service properties")]
@@ -69,7 +68,7 @@ fn cmp_proposals(p1: &Proposal, p2: &Proposal) {
 //////////////
 async fn provider_interact(client: MarketProviderApi) -> Result<()> {
     // provider - publish offer
-    let offer = Offer::new(serde_json::json!({"zima":"już"}), "(&(lato=nie))".into());
+    let offer = DemandOfferBase::new(serde_json::json!({"zima":"już"}), "(&(lato=nie))".into());
     let provider_subscription_id = client.subscribe(&offer).await?;
     println!(
         "  <=PROVIDER | subscription id: {}",
@@ -90,26 +89,26 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
         }
         println!("  <=PROVIDER | Yay! Got event(s): {:#?}", provider_events);
 
-        for event in &provider_events {
-            match &event {
+        for event in provider_events {
+            match event {
                 // demand proposal received --> respond with an counter offer
                 ProviderEvent::ProposalEvent { proposal, .. } => {
-                    if proposal.prev_proposal_id.is_none() && proposal.state()? == &State::Draft {
+                    if proposal.prev_proposal_id.is_none() && proposal.state == State::Draft {
                         log::error!("Draft Proposal but wo prev id: {:#?}", proposal)
                     }
 
-                    let proposal_id = proposal.proposal_id()?;
+                    let proposal_id = &proposal.proposal_id;
 
                     // this is not needed in regular flow; just to illustrate possibility
                     let demand_proposal = client
-                        .get_proposal(&provider_subscription_id, &proposal_id)
+                        .get_proposal(&provider_subscription_id, proposal_id)
                         .await?;
-                    cmp_proposals(&demand_proposal, proposal);
+                    cmp_proposals(&demand_proposal, &proposal);
 
                     println!("  <=PROVIDER | Huha! Got Demand Proposal. Accepting...");
-                    let bespoke_proposal = proposal.counter_offer(offer.clone())?;
+                    let bespoke_proposal = offer.clone();
                     let new_prop_id = client
-                        .counter_proposal(&bespoke_proposal, &provider_subscription_id)
+                        .counter_proposal(&bespoke_proposal, &provider_subscription_id, proposal_id)
                         .await?;
                     println!(
                         "  <=PROVIDER | Responded with Counter proposal: {}",
@@ -124,13 +123,23 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
                         agreement_id
                     );
 
-                    let status = client.approve_agreement(agreement_id, None).await?;
+                    let status = client.approve_agreement(agreement_id, None, None).await?;
                     // one can also call:
                     // let res = client.reject_agreement(agreement_id).await?;
                     println!("  <=PROVIDER | Agreement {} by Requestor!", status);
 
                     println!("  <=PROVIDER | I'm done for now! Bye...");
                     break 'prov_events;
+                }
+                ProviderEvent::ProposalRejectedEvent {
+                    proposal_id,
+                    reason,
+                    ..
+                } => {
+                    println!(
+                        "Proposal rejected [{}], reason: '{:?}'",
+                        proposal_id, reason
+                    );
                 }
                 ProviderEvent::PropertyQueryEvent { .. } => {
                     println!("Unsupported PropertyQueryEvent.");
@@ -151,7 +160,7 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
 async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
     thread::sleep(Duration::from_millis(300));
     // requestor - publish demand
-    let demand = Demand::new(serde_json::json!({"lato":"nie"}), "(&(zima=już))".into());
+    let demand = DemandOfferBase::new(serde_json::json!({"lato":"nie"}), "(&(zima=już))".into());
     let requestor_subscription_id = client.subscribe(&demand).await?;
     println!(
         "REQUESTOR=>  | subscription id: {}",
@@ -173,26 +182,30 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
         println!("REQUESTOR=>  | Yay! Got event(s): {:#?}", requestor_events);
 
         // requestor - support first event
-        for event in &requestor_events {
-            match &event {
+        for event in requestor_events {
+            match event {
                 RequestorEvent::ProposalEvent { proposal, .. } => {
-                    let proposal_id = proposal.proposal_id()?;
+                    let proposal_id = &proposal.proposal_id;
 
                     // this is not needed in regular flow; just to illustrate possibility
                     let offer_proposal = client
-                        .get_proposal(&requestor_subscription_id, proposal.proposal_id()?)
+                        .get_proposal(&requestor_subscription_id, proposal_id)
                         .await?;
-                    cmp_proposals(&offer_proposal, proposal);
+                    cmp_proposals(&offer_proposal, &proposal);
 
-                    match proposal.state()? {
+                    match proposal.state {
                         State::Initial => {
                             if proposal.prev_proposal_id.is_some() {
                                 log::error!("Initial Proposal but with prev id: {:#?}", proposal);
                             }
                             println!("REQUESTOR=>  | Negotiating proposal...");
-                            let bespoke_proposal = proposal.counter_demand(demand.clone())?;
+                            let bespoke_proposal = demand.clone();
                             let new_proposal_id = client
-                                .counter_proposal(&bespoke_proposal, &requestor_subscription_id)
+                                .counter_proposal(
+                                    &bespoke_proposal,
+                                    &requestor_subscription_id,
+                                    proposal_id,
+                                )
                                 .await?;
                             println!(
                                 "REQUESTOR=>  | Responded with counter proposal (id: {})",
@@ -209,7 +222,9 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
                                 "REQUESTOR=>  | agreement created {}: \n{:#?}\nConfirming...",
                                 id, &agreement
                             );
-                            let res = client.confirm_agreement(&agreement.proposal_id).await?;
+                            let res = client
+                                .confirm_agreement(&agreement.proposal_id, None)
+                                .await?;
                             println!(
                                 "REQUESTOR=>  | agreement {} confirmed: {}",
                                 &agreement.proposal_id, res
@@ -235,6 +250,16 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
                         }
                         _ => log::error!("unsupported offer proposal state: {:#?}", proposal),
                     }
+                }
+                RequestorEvent::ProposalRejectedEvent {
+                    proposal_id,
+                    reason,
+                    ..
+                } => {
+                    println!(
+                        "Proposal rejected [{}], reason: '{:?}'",
+                        proposal_id, reason
+                    );
                 }
                 RequestorEvent::PropertyQueryEvent { .. } => {
                     log::error!("Unsupported PropertyQueryEvent.");
