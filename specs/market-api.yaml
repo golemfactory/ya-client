@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 1.6.0
+  version: 1.6.1
   title: Yagna Market API
   description: '
     ## Yagna Market
