@@ -8,6 +8,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::market::DemandOfferBase;
 use crate::ErrorMessage;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -84,6 +85,10 @@ impl Proposal {
         self.prev_proposal_id
             .as_ref()
             .ok_or("no previous proposal id".into())
+    }
+
+    pub fn get_demand_offer_base(&self) -> DemandOfferBase {
+        DemandOfferBase::new(self.properties.clone(), self.constraints.clone())
     }
 }
 
