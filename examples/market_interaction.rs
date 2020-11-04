@@ -133,8 +133,8 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
     }
 
     println!("  <=PROVIDER | Unsubscribing...");
-    let res = client.unsubscribe(&offer_id).await?;
-    println!("  <=PROVIDER | Unsubscribed: {}", res);
+    client.unsubscribe(&offer_id).await?;
+    println!("  <=PROVIDER | Unsubscribed");
     Ok(())
 }
 
@@ -196,10 +196,10 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
                                 "REQUESTOR=>  | agreement created {}: \n{:#?}\nConfirming...",
                                 agreement_id, &agreement
                             );
-                            let res = client.confirm_agreement(&agreement_id, None).await?;
+                            client.confirm_agreement(&agreement_id, None).await?;
                             println!(
-                                "REQUESTOR=>  | agreement {} confirmed: {}",
-                                &agreement.proposal_id, res
+                                "REQUESTOR=>  | agreement {} confirmed",
+                                &agreement.proposal_id
                             );
 
                             println!("REQUESTOR=>  | Waiting for Agreement approval...");
@@ -241,8 +241,8 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
     }
 
     println!("REQUESTOR=>  | Unsunscribing...");
-    let res = client.unsubscribe(&demand_id).await?;
-    println!("REQUESTOR=>  | Unsubscribed: {}", res);
+    client.unsubscribe(&demand_id).await?;
+    println!("REQUESTOR=>  | Unsubscribed");
     Ok(())
 }
 
