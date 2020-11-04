@@ -21,6 +21,7 @@ parameters:
     schema:
       type: number
       format: float
+      default: 5.0
       minimum: 0.0
 
   ackTimeout:
@@ -34,37 +35,40 @@ parameters:
     schema:
       type: number
       format: float
+      default: 5.0
       minimum: 0.0
 
   maxItems:
     name: maxItems
     description: >
-        Maximum number of items that server should return at once
-        (empty value means no limit).
+        Maximum number of items that server should return at once.
     required: false
     in: query
     schema:
       type: integer
       format: int32
-      minimum: 0
+      default: 10
+      maximum: 100
+      minimum: 1
 
   maxEvents:
     name: maxEvents
     description: >
-        Maximum number of events that server should return at once
-        (empty value means no limit).
+        Maximum number of events that server should return at once.
     required: false
     in: query
     schema:
       type: integer
       format: int32
-      minimum: 0
+      default: 10
+      maximum: 100
+      minimum: 1
 
   afterTimestamp:
     name: afterTimestamp
     description: Apply only to events later than specified timestamp
-    in: query
     required: false
+    in: query
     schema:
       type: string
       format: date-time
