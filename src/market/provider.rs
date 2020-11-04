@@ -41,7 +41,7 @@ impl MarketProviderApi {
     /// **Note**: this will terminate all pending `collect_demands` calls on this subscription.
     /// This implies, that client code should not `unsubscribe_offer` before it has received
     /// all expected/useful inputs from `collect_demands`.
-    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<String> {
+    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<()> {
         let url = url_format!("offers/{subscription_id}", subscription_id);
         self.client.delete(&url).send().json().await
     }
@@ -79,11 +79,7 @@ impl MarketProviderApi {
     /// Rejects Proposal (Demand).
     /// Effectively ends a Negotiation chain - it explicitly indicates that the sender
     /// will not create another counter-Proposal.
-    pub async fn reject_proposal(
-        &self,
-        subscription_id: &str,
-        proposal_id: &str,
-    ) -> Result<String> {
+    pub async fn reject_proposal(&self, subscription_id: &str, proposal_id: &str) -> Result<()> {
         let url = url_format!(
             "offers/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
@@ -165,13 +161,13 @@ impl MarketProviderApi {
     /// a negotiated agreement. This effectively stops the Agreement handshake.
     ///
     /// **Note**: Mutually exclusive with `approve_agreement`.
-    pub async fn reject_agreement(&self, agreement_id: &str) -> Result<String> {
+    pub async fn reject_agreement(&self, agreement_id: &str) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/reject", agreement_id);
         self.client.post(&url).send().json().await
     }
 
     /// Terminates approved Agreement.
-    pub async fn terminate_agreement(&self, agreement_id: &str) -> Result<String> {
+    pub async fn terminate_agreement(&self, agreement_id: &str) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
         self.client.post(&url).send().json().await
     }
