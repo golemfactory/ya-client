@@ -1497,15 +1497,7 @@ components:
         properties:
           type: array
           items:
-            type: object
-            properties:
-              key:
-                type: string
-              value:
-                type: string
-            required:
-              - key
-              - value
+            $ref: '#/components/schemas/MarketDecorationProperty'
         constraints:
           type: array
           items:
@@ -1513,3 +1505,14 @@ components:
       required:
         - properties
         - constraints
+
+    MarketDecorationProperty:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      required:
+        - key
+        - value
