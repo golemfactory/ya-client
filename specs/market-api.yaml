@@ -1185,6 +1185,8 @@ components:
             * `Terminated` - finished after approval.
         timestamp:
           $ref: 'common.yaml#/components/schemas/Timestamp'
+        appSessionId:
+          $ref: 'common.yaml#/components/schemas/AppSessionId'
         proposedSignature:
           type: string
         approvedSignature:

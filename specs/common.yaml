@@ -189,3 +189,9 @@ components:
       properties:
         message:
           type: string
+
+    AppSessionId:
+      type: string
+      description: >
+        A correlation/session identifier used for querying events related
+        to an action where this appSessionId has been specified.

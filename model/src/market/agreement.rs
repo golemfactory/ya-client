@@ -35,6 +35,8 @@ pub struct Agreement {
     pub state: State,
     #[serde(rename = "timestamp")]
     pub timestamp: DateTime<Utc>,
+    #[serde(rename = "appSessionId", skip_serializing_if = "Option::is_none")]
+    pub app_session_id: Option<String>,
     #[serde(rename = "proposedSignature", skip_serializing_if = "Option::is_none")]
     pub proposed_signature: Option<String>,
     #[serde(rename = "approvedSignature", skip_serializing_if = "Option::is_none")]
@@ -60,6 +62,7 @@ impl Agreement {
             approved_date: None,
             state,
             timestamp,
+            app_session_id: None,
             proposed_signature: None,
             approved_signature: None,
             committed_signature: None,
