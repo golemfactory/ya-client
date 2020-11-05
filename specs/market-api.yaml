@@ -1193,6 +1193,8 @@ components:
           type: string
         committedSignature:
           type: string
+        terminatedSignature:
+          type: string
 
     PropertyQuery:
       type: object

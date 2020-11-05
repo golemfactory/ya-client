@@ -43,6 +43,11 @@ pub struct Agreement {
     pub approved_signature: Option<String>,
     #[serde(rename = "committedSignature", skip_serializing_if = "Option::is_none")]
     pub committed_signature: Option<String>,
+    #[serde(
+        rename = "terminatedSignature",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub terminated_signature: Option<String>,
 }
 
 impl Agreement {
@@ -66,6 +71,7 @@ impl Agreement {
             proposed_signature: None,
             approved_signature: None,
             committed_signature: None,
+            terminated_signature: None,
         }
     }
 
