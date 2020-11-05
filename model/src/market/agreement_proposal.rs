@@ -14,7 +14,10 @@ pub struct AgreementProposal {
     /// id of the proposal to be promoted to the Agreement
     #[serde(rename = "proposalId")]
     pub proposal_id: String,
-    /// End of validity period. Agreement needs to be accepted, rejected or cancellled before this date; otherwise will expire
+    /// End of validity period.
+    ///
+    /// Agreement needs to be accepted, rejected or cancelled before this date;
+    /// otherwise will expire
     #[serde(rename = "validTo")]
     pub valid_to: DateTime<Utc>,
 }

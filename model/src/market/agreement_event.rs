@@ -39,13 +39,6 @@ pub enum AgreementOperationEvent {
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
         reason: Option<Reason>,
     },
-    #[serde(rename = "AgreementTimeoutEvent")]
-    AgreementTimeoutEvent {
-        #[serde(rename = "eventDate")]
-        event_date: DateTime<Utc>,
-        #[serde(rename = "agreementId")]
-        agreement_id: String,
-    },
     #[serde(rename = "AgreementTerminatedEvent")]
     AgreementTerminatedEvent {
         #[serde(rename = "eventDate")]

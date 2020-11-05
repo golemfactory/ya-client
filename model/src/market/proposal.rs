@@ -46,11 +46,7 @@ pub struct Proposal {
     pub proposal_id: String,
     #[serde(rename = "issuerId")]
     pub issuer_id: NodeId,
-    /// * `Initial` - proposal arrived from the market as response to subscription
-    /// * `Draft` - bespoke counter-proposal issued by one party directly to other party (negotiation phase)
-    /// * `Rejected` by other party
-    /// * `Accepted` - promoted into the Agreement draft
-    /// * `Expired` - not accepted nor rejected before validity period
+    /// See [State](enum.State.html).
     #[serde(rename = "state")]
     pub state: State,
     /// Object creation timestamp
@@ -88,6 +84,11 @@ impl Proposal {
     }
 }
 
+/// * `Initial` - proposal arrived from the market as response to subscription
+/// * `Draft` - bespoke counter-proposal issued by one party directly to other party (negotiation phase)
+/// * `Rejected` by other party
+/// * `Accepted` - promoted into the Agreement draft
+/// * `Expired` - not accepted nor rejected before validity period
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum State {
     #[serde(rename = "Initial")]

@@ -23,7 +23,8 @@ pub struct Agreement {
     pub offer: Offer,
     /// End of validity period.
     ///
-    /// Agreement needs to be accepted, rejected or cancelled before this date; otherwise will expire.
+    /// Agreement needs to be accepted, rejected or cancelled before this date;
+    /// otherwise will expire.
     #[serde(rename = "validTo")]
     pub valid_to: DateTime<Utc>,
     /// Agreement approval timestamp
@@ -74,6 +75,13 @@ impl Agreement {
     }
 }
 
+/// * `Proposal` - newly created by a Requestor (based on Proposal)
+/// * `Pending` - confirmed by a Requestor and send to Provider for approval
+/// * `Cancelled` by a Requestor
+/// * `Rejected` by a Provider
+/// * `Approved` by both sides
+/// * `Expired` - not accepted, rejected nor cancelled within validity period
+/// * `Terminated` - finished after approval.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum State {
     /// Newly created by a Requestor (based on Proposal)

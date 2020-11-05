@@ -11,13 +11,13 @@ use serde::{Deserialize, Serialize};
 /// Generic Event reason information structure.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Reason {
-    #[serde(rename = "message", skip_serializing_if = "Option::is_none")]
-    pub message: Option<String>,
+    #[serde(rename = "message")]
+    pub message: String,
 }
 
 impl Reason {
     /// Generic Event reason information structure.
-    pub fn new() -> Reason {
-        Reason { message: None }
+    pub fn new(message: String) -> Reason {
+        Reason { message }
     }
 }
