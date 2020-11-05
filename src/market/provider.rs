@@ -1,6 +1,6 @@
 //! Provider part of the Market API
 use ya_client_model::market::{
-    Agreement, AgreementOperationEvent, DemandOfferBase, Offer, Proposal, ProviderEvent,
+    Agreement, AgreementOperationEvent, NewOffer, NewProposal, Offer, Proposal, ProviderEvent,
     MARKET_API_PATH,
 };
 
@@ -26,7 +26,7 @@ impl WebInterface for MarketProviderApi {
 impl MarketProviderApi {
     /// Publish Provider’s service capabilities (`Offer`) on the market to declare an
     /// interest in Demands meeting specified criteria.
-    pub async fn subscribe(&self, offer: &DemandOfferBase) -> Result<String> {
+    pub async fn subscribe(&self, offer: &NewOffer) -> Result<String> {
         self.client.post("offers").send_json(&offer).json().await
     }
 
@@ -98,7 +98,7 @@ impl MarketProviderApi {
     /// Changes Proposal state to `Draft`. Returns created Proposal id.
     pub async fn counter_proposal(
         &self,
-        offer_proposal: &DemandOfferBase,
+        offer_proposal: &NewProposal,
         subscription_id: &str,
         proposal_id: &str,
     ) -> Result<String> {

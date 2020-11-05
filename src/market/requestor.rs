@@ -1,7 +1,7 @@
 //! Requestor part of the Market API
 use ya_client_model::market::{
-    Agreement, AgreementOperationEvent, AgreementProposal, Demand, DemandOfferBase, Proposal,
-    RequestorEvent,
+    Agreement, AgreementOperationEvent, AgreementProposal, Demand, NewDemand, NewProposal,
+    Proposal, RequestorEvent,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
@@ -32,7 +32,7 @@ impl MarketRequestorApi {
     ///
     /// **Note**: it is an "atomic" operation, ie. as soon as Subscription is placed,
     /// the Demand is published on the market.
-    pub async fn subscribe(&self, demand: &DemandOfferBase) -> Result<String> {
+    pub async fn subscribe(&self, demand: &NewDemand) -> Result<String> {
         self.client.post("demands").send_json(&demand).json().await
     }
 
@@ -69,7 +69,7 @@ impl MarketRequestorApi {
     /// Responds with a bespoke Demand to received Offer.
     pub async fn counter_proposal(
         &self,
-        demand_proposal: &DemandOfferBase,
+        demand_proposal: &NewProposal,
         subscription_id: &str,
         proposal_id: &str,
     ) -> Result<String> {
