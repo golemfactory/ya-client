@@ -583,11 +583,49 @@ paths:
       tags:
         - requestor
       operationId: cancelAgreement
-      summary: CancelAgreement - Cancels agreement.
+      deprecated: true
+      summary: CancelAgreement - Cancels Agreement.
       description: >
+        DEPRECATED: use `cancelAgreementWithReason` instead.
+        It is only possible before Requestor confirmed or Provider approved
+        or rejected the Agreement, and before Expiration.
+
+
         Causes:
           - the awaiting `approveAgreement` on Provider side to return with `Cancelled` response.
           - the awaiting `waitForApproval` local call to return with `Cancelled` response.
+      responses:
+        204:
+          description: Agreement cancelled.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
+          description: Agreement not in `Proposal` nor `Pending` state.
+        410:
+          $ref: 'common.yaml#/responses/Gone' # Expired
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /agreements/{agreementId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/agreementId'
+    post:
+      tags:
+        - requestor
+      operationId: cancelAgreementWithReason
+      summary: CancelAgreementWithReason - Cancels Agreement.
+      description: >
+        It is only possible before Requestor confirmed or Provider approved
+        or rejected the Agreement, and before Expiration.
+
+
+        Causes:
+          - the awaiting `approveAgreement` on Provider side to return with `Cancelled` response.
+          - the awaiting `waitForApproval` local call to return with `Cancelled` response.
+      requestBody:
+        $ref: '#/components/requestBodies/Reason'
       responses:
         204:
           description: Agreement cancelled.

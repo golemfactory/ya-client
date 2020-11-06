@@ -4,6 +4,7 @@ use ya_client_model::market::{
     Proposal, RequestorEvent,
 };
 
+use crate::model::market::{convert_reason, ConvertReason};
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 use chrono::{DateTime, TimeZone};
 use std::fmt::Display;
@@ -95,7 +96,14 @@ impl MarketRequestorApi {
         self.client.get(&url).send().json().await
     }
 
-    /// Rejects a bespoke Demand.
+    /// Rejects Proposal (Offer)
+    ///
+    /// Effectively ends a Negotiation chain - it explicitly indicates that
+    /// the sender will not create another counter-Proposal.
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use the reject_proposal_with_reason function instead"
+    )]
     pub async fn reject_proposal(
         &self,
         subscription_id: &str,
@@ -107,6 +115,28 @@ impl MarketRequestorApi {
             proposal_id,
         );
         self.client.delete(&url).send().json().await
+    }
+
+    /// Rejects Proposal (Offer)
+    ///
+    /// Effectively ends a Negotiation chain - it explicitly indicates that
+    /// the sender will not create another counter-Proposal.
+    pub async fn reject_proposal_with_reason(
+        &self,
+        subscription_id: &str,
+        proposal_id: &str,
+        reason: Option<impl ConvertReason>,
+    ) -> Result<String> {
+        let url = url_format!(
+            "demands/{subscription_id}/proposals/{proposal_id}",
+            subscription_id,
+            proposal_id,
+        );
+        self.client
+            .post(&url)
+            .send_json(&convert_reason(reason)?)
+            .json()
+            .await
     }
 
     /// Creates Agreement from selected Proposal.
@@ -188,7 +218,11 @@ impl MarketRequestorApi {
         self.client.post(&url).send().json().await
     }
 
-    /// Cancels agreement.
+    /// Cancels Agreement.
+    ///
+    /// It is only possible before Requestor confirmed or Provider approved
+    /// or rejected the Agreement, and before Expiration.
+    ///
     /// Causes the awaiting `wait_for_approval` call to return with `Cancelled` response.
     /// Also the Provider's corresponding `approve_agreement` returns `Cancelled`.
     pub async fn cancel_agreement(&self, agreement_id: &str) -> Result<()> {
@@ -196,10 +230,38 @@ impl MarketRequestorApi {
         self.client.delete(&url).send().json().await
     }
 
+    /// Cancels Agreement.
+    ///
+    /// It is only possible before Requestor confirmed or Provider approved
+    /// or rejected the Agreement, and before Expiration.
+    ///
+    /// Causes the awaiting `wait_for_approval` call to return with `Cancelled` response.
+    /// Also the Provider's corresponding `approve_agreement` returns `Cancelled`.
+    pub async fn cancel_agreement_with_reason(
+        &self,
+        agreement_id: &str,
+        reason: Option<impl ConvertReason>,
+    ) -> Result<()> {
+        let url = url_format!("agreements/{agreement_id}", agreement_id);
+        self.client
+            .post(&url)
+            .send_json(&convert_reason(reason)?)
+            .json()
+            .await
+    }
+
     /// Terminates approved Agreement.
-    pub async fn terminate_agreement(&self, agreement_id: &str) -> Result<String> {
+    pub async fn terminate_agreement(
+        &self,
+        agreement_id: &str,
+        reason: Option<impl ConvertReason>,
+    ) -> Result<String> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
-        self.client.post(&url).send().json().await
+        self.client
+            .post(&url)
+            .send_json(&convert_reason(reason)?)
+            .json()
+            .await
     }
 
     /// Returns Agreement related events:
