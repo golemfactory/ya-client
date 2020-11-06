@@ -181,6 +181,7 @@ components:
       properties:
         message:
           type: string
+      additionalProperties: true
 
     ErrorMessage:
       type: object

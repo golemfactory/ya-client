@@ -18,6 +18,6 @@ pub use event::{ProviderEvent, RequestorEvent};
 pub use offer::Offer;
 pub use property_query::PropertyQuery;
 pub use proposal::Proposal;
-pub use reason::Reason;
+pub use reason::{convert_reason, ConvertReason, JsonReason, Reason};
 
 pub const MARKET_API_PATH: &str = "market-api/v1/";
