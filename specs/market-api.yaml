@@ -1231,8 +1231,6 @@ components:
           type: string
         committedSignature:
           type: string
-        terminatedSignature:
-          type: string
 
     PropertyQuery:
       type: object
@@ -1352,6 +1350,14 @@ components:
       allOf:
         - $ref: '#/components/schemas/AgreementOperationEvent'
         - type: object
+          required:
+            - terminator
+            - signature
           properties:
+            terminator:
+              type: string
+              enum: [Requestor, Provider]
+            signature:
+              type: string
             reason:
               $ref: 'common.yaml#/components/schemas/Reason'

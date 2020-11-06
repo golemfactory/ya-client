@@ -42,10 +42,22 @@ pub enum AgreementOperationEvent {
     #[serde(rename = "AgreementTerminatedEvent")]
     AgreementTerminatedEvent {
         #[serde(rename = "eventDate")]
-        event_date: DateTime<Utc>,
+        event_date: String,
         #[serde(rename = "agreementId")]
         agreement_id: String,
+        #[serde(rename = "terminator")]
+        terminator: AgreementTerminator,
+        #[serde(rename = "signature")]
+        signature: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
         reason: Option<JsonReason>,
     },
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+pub enum AgreementTerminator {
+    #[serde(rename = "Requestor")]
+    Requestor,
+    #[serde(rename = "Provider")]
+    Provider,
 }
