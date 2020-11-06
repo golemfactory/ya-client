@@ -225,21 +225,30 @@ impl MarketProviderApi {
         self.client.get(&url).send().json().await
     }
 
-    /// Returns Agreement related events:
-    /// * `AgreementApprovedEvent` - Indicates to the Requestor that the Agreement has been approved by the Provider.
-    ///   - The Provider is now ready to accept a request to start an Activity
-    ///     as described in the negotiated agreement.
-    ///   - The Providers’s corresponding `approveAgreement` call returns `Approved` after
-    ///     this event is emitted.
-    /// * `AgreementRejectedEvent` - Indicates to the Requestor that the Provider has called `rejectAgreement`,
-    ///   which effectively stops the Agreement handshake. The Requestor may attempt
-    ///   to return to the Negotiation phase by sending a new Proposal.
-    /// * `AgreementCancelledEvent` - Indicates to the Provider that the Requestor has called
-    ///   `cancelAgreement`, which effectively stops the Agreement handshake.
-    /// * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated
-    ///   by the other party.
+    /// Collects events related to an Agreement.
     ///
-    /// This is a blocking operation.
+    /// This is a blocking operation. It will not return until there is
+    /// at least one new event. All events are appearing on both sides equally.
+    ///
+    /// Returns Agreement related events:
+    ///
+    /// * `AgreementApprovedEvent` - Indicates that the Agreement has been
+    ///   approved by the Provider.
+    ///     - The Provider is now ready to accept a request to start an
+    ///       Activity as described in the negotiated agreement.
+    ///     - The Providers’s corresponding `approveAgreement` call
+    ///       returns `Approved` after this event is emitted.
+    ///
+    /// * `AgreementRejectedEvent` - Indicates that the Provider has called
+    ///   `rejectAgreement`, which effectively stops the Agreement handshake.
+    ///   The Requestor may attempt to return to the Negotiation phase by
+    ///   sending a new Proposal.
+    ///
+    /// * `AgreementCancelledEvent` - Indicates that the Requestor has called
+    ///   `cancelAgreement`, which effectively stops the Agreement handshake.
+    ///
+    /// * `AgreementTerminatedEvent` - Indicates that the Agreement has been
+    ///   terminated by specified party (contains signature).
     #[rustfmt::skip]
     pub async fn collect_agreement_events<Tz>(
         &self,
