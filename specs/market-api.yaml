@@ -119,16 +119,33 @@ paths:
       operationId: collectDemands
       summary: CollectDemands - Reads Market responses to published Offer.
       description: >
-        This is a blocking operation. It will not return until there is at least one new event.
+        This is a blocking operation. It will not return until there is at
+        least one new event.
+
+        Returns Proposal related events:
+
+        * `ProposalEvent` - Indicates that there is new Demand Proposal for
+        this Offer.
+
+        * `ProposalRejectedEvent` - Indicates that the Requestor has rejected
+          our previous Proposal related to this Offer. This effectively ends a
+          Negotiation chain - it explicitly indicates that the sender will not
+          create another counter-Proposal.
+
+        * `AgreementEvent` - Indicates that the Requestor is accepting our
+          previous Proposal and ask for our approval of the Agreement.
+
+        * `PropertyQueryEvent` - not supported yet.
 
 
-        **Note**: When `collectDemands` is waiting, simultaneous call to `unsubscribeOffer` on the
-        same `subscriptionId` should result in "Subscription does not exist" error returned from
-        `collectDemands`.
+        **Note**: When `collectDemands` is waiting, simultaneous call to
+        `unsubscribeOffer` on the same `subscriptionId` should result in
+        "Subscription does not exist" error returned from `collectDemands`.
 
 
-        **Note**: Specification requires this endpoint to support list of specific Proposal Ids
-        to listen for messages related only to specific Proposals. This is not covered yet.
+        **Note**: Specification requires this endpoint to support list of
+        specific Proposal Ids to listen for messages related only to specific
+        Proposals. This is not covered yet.
       responses:
         200:
           $ref: '#/components/responses/EventList'
@@ -352,16 +369,30 @@ paths:
       operationId: collectOffers
       summary: CollectOffers - Reads Market responses to published Demand.
       description: >
-        This is a blocking operation. It will not return until there is at least one new event.
+        This is a blocking operation. It will not return until there is at
+        least one new event.
+
+        Returns Proposal related events:
+
+        * `ProposalEvent` - Indicates that there is new Offer Proposal for
+        this Demand.
+
+        * `ProposalRejectedEvent` - Indicates that the Provider has rejected
+          our previous Proposal related to this Demand. This effectively ends a
+          Negotiation chain - it explicitly indicates that the sender will not
+          create another counter-Proposal.
+
+        * `PropertyQueryEvent` - not supported yet.
 
 
-        **Note**: When `collectOffers` is waiting, simultaneous call to `unsubscribeDemand` on the
-        same `subscriptionId` should result in "Subscription does not exist" error returned from
-        `collectOffers`.
+        **Note**: When `collectOffers` is waiting, simultaneous call to
+        `unsubscribeDemand` on the same `subscriptionId` should result in
+        "Subscription does not exist" error returned from `collectOffers`.
 
 
-        **Note**: Specification requires this endpoint to support list of specific Proposal Ids
-        to listen for messages related only to specific Proposals. This is not covered yet.
+        **Note**: Specification requires this endpoint to support list of
+        specific Proposal Ids to listen for messages related only to specific
+        Proposals. This is not covered yet.
       responses:
         200:
           $ref: '#/components/responses/EventList'

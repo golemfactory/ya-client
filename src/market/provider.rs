@@ -49,6 +49,32 @@ impl MarketProviderApi {
     /// Get events which have arrived from the market in response to the Offer
     /// published by the Provider via  [`subscribe`](#method.subscribe).
     /// Returns collection of at most `max_events` `ProviderEvents` or times out.
+    ///
+    /// This is a blocking operation. It will not return until there is at
+    /// least one new event.
+    ///
+    /// Returns Proposal related events:
+    ///
+    /// * `ProposalEvent` - Indicates that there is new Demand Proposal for
+    /// this Offer.
+    ///
+    /// * `ProposalRejectedEvent` - Indicates that the Requestor has rejected
+    ///   our previous Proposal related to this Offer. This effectively ends a
+    ///   Negotiation chain - it explicitly indicates that the sender will not
+    ///   create another counter-Proposal.
+    ///
+    /// * `AgreementEvent` - Indicates that the Requestor is accepting our
+    ///   previous Proposal and ask for our approval of the Agreement.
+    ///
+    /// * `PropertyQueryEvent` - not supported yet.
+    ///
+    /// **Note**: When `collectOffers` is waiting, simultaneous call to
+    /// `unsubscribeDemand` on the same `subscriptionId` should result in
+    /// "Subscription does not exist" error returned from `collectOffers`.
+    ///
+    /// **Note**: Specification requires this endpoint to support list of
+    /// specific Proposal Ids to listen for messages related only to specific
+    /// Proposals. This is not covered yet.
     #[rustfmt::skip]
     pub async fn collect(
         &self,
@@ -149,14 +175,14 @@ impl MarketProviderApi {
     ///
     /// It returns one of the following options:
     ///
-    /// * `Ok` - Indicates that the approved Agreement has been successfully
+    /// * `Approved` - Indicates that the approved Agreement has been successfully
     /// delivered to the Requestor and acknowledged.
-    /// - The Requestor side has been notified about the Provider’s commitment
-    /// to the Agreement.
-    /// - The Provider is now ready to accept a request to start an Activity
-    /// as described in the negotiated agreement.
-    /// - The Requestor’s corresponding `wait_for_approval` call returns Ok after
-    /// the one on the Provider side.
+    ///   - The Requestor side has been notified about the Provider’s commitment
+    ///     to the Agreement.
+    ///   - The Provider is now ready to accept a request to start an Activity
+    ///     as described in the negotiated agreement.
+    ///   - The Requestor’s corresponding `wait_for_approval` call returns Ok after
+    ///     the one on the Provider side.
     ///
     /// * `Cancelled` - Indicates that before delivering the approved Agreement,
     /// the Requestor has called `cancel_agreement`, thus invalidating the
@@ -167,7 +193,6 @@ impl MarketProviderApi {
     /// the resources required to fulfill the Agreement before the `approve_agreement`
     /// is sent. However, the resources should not be fully committed until `Ok`
     /// response is received from the `approve_agreement` call.
-    ///
     ///
     /// **Note**: Mutually exclusive with `reject_agreement`.
     #[rustfmt::skip]

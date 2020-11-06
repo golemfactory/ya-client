@@ -51,6 +51,29 @@ impl MarketRequestorApi {
     /// Get events which have arrived from the market in response to the Demand
     /// published by the Requestor via  [`subscribe`](#method.subscribe).
     /// Returns collection of at most `max_events` `RequestorEvents` or times out.
+    ///
+    /// This is a blocking operation. It will not return until there is at
+    /// least one new event.
+    ///
+    /// Returns Proposal related events:
+    ///
+    /// * `ProposalEvent` - Indicates that there is new Offer Proposal for
+    /// this Demand.
+    ///
+    /// * `ProposalRejectedEvent` - Indicates that the Provider has rejected
+    /// our previous Proposal related to this Demand. This effectively ends a
+    /// Negotiation chain - it explicitly indicates that the sender will not
+    /// create another counter-Proposal.
+    ///
+    /// * `PropertyQueryEvent` - not supported yet.
+    ///
+    /// **Note**: When `collectOffers` is waiting, simultaneous call to
+    /// `unsubscribeDemand` on the same `subscriptionId` should result in
+    /// "Subscription does not exist" error returned from `collectOffers`.
+    ///
+    /// **Note**: Specification requires this endpoint to support list of
+    /// specific Proposal Ids to listen for messages related only to specific
+    /// Proposals. This is not covered yet.
     #[rustfmt::skip]
     pub async fn collect(
         &self,
@@ -193,10 +216,10 @@ impl MarketRequestorApi {
     /// It returns one of the following options:
     ///
     /// * `Approved` - Indicates that the Agreement has been approved by the Provider.
-    /// - The Provider is now ready to accept a request to start an Activity
-    /// as described in the negotiated agreement.
-    /// - The Requestor’s corresponding `wait_for_approval` call returns Ok after
-    /// this on the Provider side.
+    ///   - The Provider is now ready to accept a request to start an Activity
+    ///     as described in the negotiated agreement.
+    ///   - The Requestor’s corresponding `wait_for_approval` call returns Ok after
+    ///     this on the Provider side.
     ///
     /// * `Rejected` - Indicates that the Provider has called `reject_agreement`,
     /// which effectively stops the Agreement handshake. The Requestor may attempt
