@@ -1,3 +1,4 @@
+## Obsolete, kept temporarily for backwards compatibility
 schemas:
   ErrorMessage:
     type: object
@@ -6,20 +7,82 @@ schemas:
     properties:
       message:
         type: string
+## End Obsolete
 
 parameters:
-  maxEvents:
-    name: maxEvents
+  pollTimeout:
+    name: timeout
     description: >
-      Maximum number of events that server should return at once
-      (empty value means no limit).
+        Timeout used in long-polling calls (in seconds).
+        How many seconds server should wait for new events (0.0 means it should
+        return immediately if there are no events)
+    required: false
+    in: query
+    schema:
+      type: number
+      format: float
+      default: 5.0
+      minimum: 0.0
+
+  ackTimeout:
+    name: timeout
+    description: >
+        Timeout used in blocking calls waiting for eg. acknowledgement.
+        How many seconds server should wait for response/acknowledgement of an action
+        (0.0 means it should wait for other party's response indefinitely)
+    required: false
+    in: query
+    schema:
+      type: number
+      format: float
+      default: 5.0
+      minimum: 0.0
+
+  maxItems:
+    name: maxItems
+    description: >
+        Maximum number of items that server should return at once.
     required: false
     in: query
     schema:
       type: integer
       format: int32
-      minimum: 0
+      default: 10
+      maximum: 100
+      minimum: 1
 
+  maxEvents:
+    name: maxEvents
+    description: >
+        Maximum number of events that server should return at once.
+    required: false
+    in: query
+    schema:
+      type: integer
+      format: int32
+      default: 10
+      maximum: 100
+      minimum: 1
+
+  afterTimestamp:
+    name: afterTimestamp
+    description: Apply only to events later than specified timestamp
+    required: false
+    in: query
+    schema:
+      type: string
+      format: date-time
+
+  appSessionId:
+    name: appSessionId
+    description: A correlation/session identifier used for querying events related to an action
+        where this appSessionId has been specified
+    in: query
+    required: false
+    schema:
+      type: string
+
+## Obsolete, kept temporarily for backward compatibility of yamls
   timeout:
     name: timeout
     description: >
@@ -31,9 +94,105 @@ parameters:
       type: number
       format: float
       minimum: 0.0
+## End Obsolete
+
+responses:
+  BadRequest:
+    description: (400) Bad request
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  Unauthorized:
+    description: (401) Authorization information is missing or invalid.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  Forbidden:
+    description: (403) Forbidden.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  NotFound:
+    description: (404) The specified resource was not found.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  Timeout:
+    description: (408) Timeout.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  Conflict:
+    description: (409) Conflict.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  Gone:
+    description: (410) Gone.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  ServerError:
+    description: (500) Server error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  UnexpectedError:
+    description: Unexpected error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
 
 components:
   securitySchemes:
     app_key:
       type: http
       scheme: bearer
+
+  schemas:
+    Timestamp:
+      type: string
+      format: date-time
+
+    Reason:
+      type: object
+      description: >
+        Generic Event reason information structure.
+      required:
+        - message
+      properties:
+        message:
+          type: string
+      additionalProperties: true
+
+    ErrorMessage:
+      type: object
+      description: >
+        Generic Error Message structure.
+      properties:
+        message:
+          type: string
+
+    AppSessionId:
+      type: string
+      description: >
+        A correlation/session identifier used for querying events related
+        to an action where this appSessionId has been specified.

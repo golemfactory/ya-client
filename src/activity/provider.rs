@@ -46,15 +46,13 @@ impl ActivityProviderApi {
     #[rustfmt::skip]
     pub async fn get_activity_events(
         &self,
-        #[allow(non_snake_case)]
         timeout: Option<f32>,
-        #[allow(non_snake_case)]
-        maxEvents: Option<i32>,
+        max_events: Option<i32>,
     ) -> Result<Vec<ProviderEvent>> {
         let url = url_format!(
             "events",
             #[query] timeout,
-            #[query] maxEvents
+            #[query] max_events,
         );
 
         self.client.get(&url).send().json().await.or_else(default_on_timeout)

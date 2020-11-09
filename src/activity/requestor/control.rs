@@ -85,7 +85,6 @@ impl ActivityRequestorControlApi {
         &self,
         activity_id: &str,
         batch_id: &str,
-        #[allow(non_snake_case)]
         timeout: Option<f32>,
         command_index: Option<usize>,
     ) -> Result<Vec<ExeScriptCommandResult>> {

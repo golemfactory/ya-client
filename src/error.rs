@@ -1,20 +1,19 @@
 //! Error definitions and mappings
 use awc::error::{JsonPayloadError, PayloadError, SendRequestError};
 use awc::http::StatusCode;
-use backtrace::Backtrace as Trace; // needed b/c of thiserror magic
 
 use ya_client_model::ErrorMessage;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("AWC error requesting {url}: {msg}")]
-    SendRequestError { msg: String, url: String, bt: Trace },
+    SendRequestError { msg: String, url: String },
     #[error("AWC timeout requesting {url}: {msg}")]
-    TimeoutError { msg: String, url: String, bt: Trace },
-    #[error("AWC payload error: {e}")]
-    PayloadError { e: PayloadError, bt: Trace },
-    #[error("AWC JSON payload error: {e}")]
-    JsonPayloadError { e: JsonPayloadError, bt: Trace },
+    TimeoutError { msg: String, url: String },
+    #[error("AWC payload error: {0}")]
+    PayloadError(PayloadError),
+    #[error("AWC JSON payload error: {0}")]
+    JsonPayloadError(JsonPayloadError),
     #[error("JSON error: {0}")]
     JsonError(#[from] serde_json::error::Error),
     #[error("request for {url} resulted in HTTP status code: {code}: {msg}")]
@@ -22,7 +21,6 @@ pub enum Error {
         code: StatusCode,
         url: String,
         msg: String,
-        bt: Trace,
     },
     #[error("serde JSON error: {0}")]
     SerdeJsonError(serde_json::Error),
@@ -55,29 +53,22 @@ impl From<SendRequestError> for Error {
 impl From<(SendRequestError, String)> for Error {
     fn from((e, url): (SendRequestError, String)) -> Self {
         let msg = e.to_string();
-        let bt = Trace::new();
         match e {
-            SendRequestError::Timeout => Error::TimeoutError { msg, url, bt },
-            _ => Error::SendRequestError { msg, url, bt },
+            SendRequestError::Timeout => Error::TimeoutError { msg, url },
+            _ => Error::SendRequestError { msg, url },
         }
     }
 }
 
 impl From<PayloadError> for Error {
     fn from(e: PayloadError) -> Self {
-        Error::PayloadError {
-            e,
-            bt: Trace::new(),
-        }
+        Error::PayloadError(e)
     }
 }
 
 impl From<JsonPayloadError> for Error {
     fn from(e: JsonPayloadError) -> Self {
-        Error::JsonPayloadError {
-            e,
-            bt: Trace::new(),
-        }
+        Error::JsonPayloadError(e)
     }
 }
 
@@ -86,11 +77,10 @@ impl<E: std::fmt::Display> From<(StatusCode, String, Result<ErrorMessage, E>)> f
         let msg = err_msg
             .map(|e| e.message.unwrap_or_default())
             .unwrap_or_else(|e| format!("error parsing error msg: {}", e));
-        let bt = Trace::new();
         if code == StatusCode::REQUEST_TIMEOUT {
-            Error::TimeoutError { msg, url, bt }
+            Error::TimeoutError { msg, url }
         } else {
-            Error::HttpStatusCode { code, url, msg, bt }
+            Error::HttpStatusCode { code, url, msg }
         }
     }
 }
