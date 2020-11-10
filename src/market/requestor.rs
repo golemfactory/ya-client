@@ -127,11 +127,7 @@ impl MarketRequestorApi {
         since = "0.4.0",
         note = "Please use the reject_proposal_with_reason function instead"
     )]
-    pub async fn reject_proposal(
-        &self,
-        subscription_id: &str,
-        proposal_id: &str,
-    ) -> Result<()> {
+    pub async fn reject_proposal(&self, subscription_id: &str, proposal_id: &str) -> Result<()> {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
