@@ -248,6 +248,10 @@ impl MarketRequestorApi {
     ///
     /// Causes the awaiting `wait_for_approval` call to return with `Cancelled` response.
     /// Also the Provider's corresponding `approve_agreement` returns `Cancelled`.
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use the cancel_agreement_with_reason function instead"
+    )]
     pub async fn cancel_agreement(&self, agreement_id: &str) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}", agreement_id);
         self.client.delete(&url).send().json().await
