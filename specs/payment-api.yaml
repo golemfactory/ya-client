@@ -830,12 +830,12 @@ paths:
         500:
           $ref: '#/components/responses/ServerError'
 
-  /requestor/decorateDemand:
+  /requestor/demandDecorations:
     get:
       tags:
         - requestor
-      summary: Decorate market demand.
-      operationId: decorateDemand
+      summary: Obtain Demand elements specific to the given allocations, to be appended to a market Demand.
+      operationId: getDemandDecorations
       description: >
         Generate payment-related properties and constraints to be added to a
         demand published on the marketplace. As a parameter it accepts a list of

@@ -233,9 +233,15 @@ impl PaymentRequestorApi {
         self.client.get("requestor/accounts").send().json().await
     }
 
-    pub async fn decorate_demand(&self, allocation_ids: Vec<String>) -> Result<MarketDecoration> {
+    pub async fn get_demand_decorations(
+        &self,
+        allocation_ids: Vec<String>,
+    ) -> Result<MarketDecoration> {
         let allocation_ids = allocation_ids.join(",");
-        let url = format!("requestor/decorateDemand?allocationIds={}", allocation_ids);
+        let url = format!(
+            "requestor/demandDecorations?allocationIds={}",
+            allocation_ids
+        );
         self.client.get(&url).send().json().await
     }
 }
