@@ -132,7 +132,7 @@ impl MarketProviderApi {
         subscription_id: &str,
         proposal_id: &str,
         reason: Option<impl ConvertReason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "offers/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
