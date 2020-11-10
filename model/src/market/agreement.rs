@@ -23,7 +23,8 @@ pub struct Agreement {
     pub offer: Offer,
     /// End of validity period.
     ///
-    /// Agreement needs to be accepted, rejected or cancelled before this date; otherwise will expire.
+    /// Agreement needs to be accepted, rejected or cancelled before this date;
+    /// otherwise will expire.
     #[serde(rename = "validTo")]
     pub valid_to: DateTime<Utc>,
     /// Agreement approval timestamp
@@ -34,6 +35,8 @@ pub struct Agreement {
     pub state: State,
     #[serde(rename = "timestamp")]
     pub timestamp: DateTime<Utc>,
+    #[serde(rename = "appSessionId", skip_serializing_if = "Option::is_none")]
+    pub app_session_id: Option<String>,
     #[serde(rename = "proposedSignature", skip_serializing_if = "Option::is_none")]
     pub proposed_signature: Option<String>,
     #[serde(rename = "approvedSignature", skip_serializing_if = "Option::is_none")]
@@ -59,6 +62,7 @@ impl Agreement {
             approved_date: None,
             state,
             timestamp,
+            app_session_id: None,
             proposed_signature: None,
             approved_signature: None,
             committed_signature: None,
@@ -74,6 +78,13 @@ impl Agreement {
     }
 }
 
+/// * `Proposal` - newly created by a Requestor (based on Proposal)
+/// * `Pending` - confirmed by a Requestor and send to Provider for approval
+/// * `Cancelled` by a Requestor
+/// * `Rejected` by a Provider
+/// * `Approved` by both sides
+/// * `Expired` - not accepted, rejected nor cancelled within validity period
+/// * `Terminated` - finished after approval.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum State {
     /// Newly created by a Requestor (based on Proposal)

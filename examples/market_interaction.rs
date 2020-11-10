@@ -5,11 +5,13 @@ use url::Url;
 
 use ya_client::{
     market::{MarketProviderApi, MarketRequestorApi},
-    model::market::{proposal::State, AgreementProposal, Proposal, ProviderEvent, RequestorEvent},
+    model::market::{
+        proposal::State, AgreementProposal, NewDemand, NewOffer, Proposal, ProviderEvent,
+        RequestorEvent,
+    },
     web::{WebClient, WebInterface},
     Error, Result,
 };
-use ya_client_model::market::DemandOfferBase;
 
 #[derive(StructOpt)]
 #[structopt(name = "Market", about = "Market service properties")]
@@ -61,7 +63,7 @@ fn cmp_proposals(p1: &Proposal, p2: &Proposal) {
 async fn provider_interact(client: MarketProviderApi) -> Result<()> {
     unsubscribe_old_offers(&client).await?;
     // provider - publish offer
-    let offer = DemandOfferBase::new(serde_json::json!({"zima":"już"}), "(&(lato=nie))".into());
+    let offer = NewOffer::new(serde_json::json!({"zima":"już"}), "(&(lato=nie))".into());
     let offer_id = client.subscribe(&offer).await?;
     println!("  <=PROVIDER | offer id: {}", offer_id);
 
@@ -145,7 +147,7 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
     thread::sleep(Duration::from_millis(300));
     unsubscribe_old_demands(&client).await?;
     // requestor - publish demand
-    let demand = DemandOfferBase::new(serde_json::json!({"lato":"nie"}), "(&(zima=już))".into());
+    let demand = NewDemand::new(serde_json::json!({"lato":"nie"}), "(&(zima=już))".into());
     let demand_id = client.subscribe(&demand).await?;
     println!("REQUESTOR=>  | demand id: {}", demand_id);
 

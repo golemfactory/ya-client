@@ -1,7 +1,7 @@
 //! Provider part of the Market API
 use ya_client_model::market::{
-    Agreement, AgreementOperationEvent, DemandOfferBase, Offer, Proposal, ProviderEvent,
-    MARKET_API_PATH,
+    convert_reason, Agreement, AgreementOperationEvent, ConvertReason, NewOffer, NewProposal,
+    Offer, Proposal, ProviderEvent, MARKET_API_PATH,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
@@ -26,7 +26,7 @@ impl WebInterface for MarketProviderApi {
 impl MarketProviderApi {
     /// Publish Provider’s service capabilities (`Offer`) on the market to declare an
     /// interest in Demands meeting specified criteria.
-    pub async fn subscribe(&self, offer: &DemandOfferBase) -> Result<String> {
+    pub async fn subscribe(&self, offer: &NewOffer) -> Result<String> {
         self.client.post("offers").send_json(&offer).json().await
     }
 
@@ -49,6 +49,32 @@ impl MarketProviderApi {
     /// Get events which have arrived from the market in response to the Offer
     /// published by the Provider via  [`subscribe`](#method.subscribe).
     /// Returns collection of at most `max_events` `ProviderEvents` or times out.
+    ///
+    /// This is a blocking operation. It will not return until there is at
+    /// least one new event.
+    ///
+    /// Returns Proposal related events:
+    ///
+    /// * `ProposalEvent` - Indicates that there is new Demand Proposal for
+    /// this Offer.
+    ///
+    /// * `ProposalRejectedEvent` - Indicates that the Requestor has rejected
+    ///   our previous Proposal related to this Offer. This effectively ends a
+    ///   Negotiation chain - it explicitly indicates that the sender will not
+    ///   create another counter-Proposal.
+    ///
+    /// * `AgreementEvent` - Indicates that the Requestor is accepting our
+    ///   previous Proposal and ask for our approval of the Agreement.
+    ///
+    /// * `PropertyQueryEvent` - not supported yet.
+    ///
+    /// **Note**: When `collectOffers` is waiting, simultaneous call to
+    /// `unsubscribeDemand` on the same `subscriptionId` should result in
+    /// "Subscription does not exist" error returned from `collectOffers`.
+    ///
+    /// **Note**: Specification requires this endpoint to support list of
+    /// specific Proposal Ids to listen for messages related only to specific
+    /// Proposals. This is not covered yet.
     #[rustfmt::skip]
     pub async fn collect(
         &self,
@@ -77,9 +103,18 @@ impl MarketProviderApi {
     }
 
     /// Rejects Proposal (Demand).
-    /// Effectively ends a Negotiation chain - it explicitly indicates that the sender
-    /// will not create another counter-Proposal.
-    pub async fn reject_proposal(&self, subscription_id: &str, proposal_id: &str) -> Result<()> {
+    ///
+    /// Effectively ends a Negotiation chain - it explicitly indicates that
+    /// the sender will not create another counter-Proposal.
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use the reject_proposal_with_reason function instead"
+    )]
+    pub async fn reject_proposal(
+        &self,
+        subscription_id: &str,
+        proposal_id: &str,
+    ) -> Result<()> {
         let url = url_format!(
             "offers/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
@@ -88,13 +123,35 @@ impl MarketProviderApi {
         self.client.delete(&url).send().json().await
     }
 
+    /// Rejects Proposal (Demand).
+    ///
+    /// Effectively ends a Negotiation chain - it explicitly indicates that
+    /// the sender will not create another counter-Proposal.
+    pub async fn reject_proposal_with_reason(
+        &self,
+        subscription_id: &str,
+        proposal_id: &str,
+        reason: Option<impl ConvertReason>,
+    ) -> Result<String> {
+        let url = url_format!(
+            "offers/{subscription_id}/proposals/{proposal_id}",
+            subscription_id,
+            proposal_id,
+        );
+        self.client
+            .post(&url)
+            .send_json(&convert_reason(reason)?)
+            .json()
+            .await
+    }
+
     /// Responds with a bespoke Offer to received Demand.
     /// Creates and sends a modified version of original Offer (a
     /// counter-proposal) adjusted to previously received Proposal (ie. Demand).
     /// Changes Proposal state to `Draft`. Returns created Proposal id.
     pub async fn counter_proposal(
         &self,
-        offer_proposal: &DemandOfferBase,
+        offer_proposal: &NewProposal,
         subscription_id: &str,
         proposal_id: &str,
     ) -> Result<String> {
@@ -118,14 +175,14 @@ impl MarketProviderApi {
     ///
     /// It returns one of the following options:
     ///
-    /// * `Ok` - Indicates that the approved Agreement has been successfully
+    /// * `Approved` - Indicates that the approved Agreement has been successfully
     /// delivered to the Requestor and acknowledged.
-    /// - The Requestor side has been notified about the Provider’s commitment
-    /// to the Agreement.
-    /// - The Provider is now ready to accept a request to start an Activity
-    /// as described in the negotiated agreement.
-    /// - The Requestor’s corresponding `wait_for_approval` call returns Ok after
-    /// the one on the Provider side.
+    ///   - The Requestor side has been notified about the Provider’s commitment
+    ///     to the Agreement.
+    ///   - The Provider is now ready to accept a request to start an Activity
+    ///     as described in the negotiated agreement.
+    ///   - The Requestor’s corresponding `wait_for_approval` call returns Ok after
+    ///     the one on the Provider side.
     ///
     /// * `Cancelled` - Indicates that before delivering the approved Agreement,
     /// the Requestor has called `cancel_agreement`, thus invalidating the
@@ -136,7 +193,6 @@ impl MarketProviderApi {
     /// the resources required to fulfill the Agreement before the `approve_agreement`
     /// is sent. However, the resources should not be fully committed until `Ok`
     /// response is received from the `approve_agreement` call.
-    ///
     ///
     /// **Note**: Mutually exclusive with `reject_agreement`.
     #[rustfmt::skip]
@@ -161,15 +217,31 @@ impl MarketProviderApi {
     /// a negotiated agreement. This effectively stops the Agreement handshake.
     ///
     /// **Note**: Mutually exclusive with `approve_agreement`.
-    pub async fn reject_agreement(&self, agreement_id: &str) -> Result<()> {
+    pub async fn reject_agreement(
+        &self,
+        agreement_id: &str,
+        reason: Option<impl ConvertReason>,
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/reject", agreement_id);
-        self.client.post(&url).send().json().await
+        self.client
+            .post(&url)
+            .send_json(&convert_reason(reason)?)
+            .json()
+            .await
     }
 
     /// Terminates approved Agreement.
-    pub async fn terminate_agreement(&self, agreement_id: &str) -> Result<()> {
+    pub async fn terminate_agreement(
+        &self,
+        agreement_id: &str,
+        reason: Option<impl ConvertReason>,
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
-        self.client.post(&url).send().json().await
+        self.client
+            .post(&url)
+            .send_json(&convert_reason(reason)?)
+            .json()
+            .await
     }
 
     /// Fetches agreement with given agreement id.
@@ -178,21 +250,30 @@ impl MarketProviderApi {
         self.client.get(&url).send().json().await
     }
 
-    /// Returns Agreement related events:
-    /// * `AgreementApprovedEvent` - Indicates to the Requestor that the Agreement has been approved by the Provider.
-    ///   - The Provider is now ready to accept a request to start an Activity
-    ///     as described in the negotiated agreement.
-    ///   - The Providers’s corresponding `approveAgreement` call returns `Approved` after
-    ///     this event is emitted.
-    /// * `AgreementRejectedEvent` - Indicates to the Requestor that the Provider has called `rejectAgreement`,
-    ///   which effectively stops the Agreement handshake. The Requestor may attempt
-    ///   to return to the Negotiation phase by sending a new Proposal.
-    /// * `AgreementCancelledEvent` - Indicates to the Provider that the Requestor has called
-    ///   `cancelAgreement`, which effectively stops the Agreement handshake.
-    /// * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated
-    ///   by the other party.
+    /// Collects events related to an Agreement.
     ///
-    /// This is a blocking operation.
+    /// This is a blocking operation. It will not return until there is
+    /// at least one new event. All events are appearing on both sides equally.
+    ///
+    /// Returns Agreement related events:
+    ///
+    /// * `AgreementApprovedEvent` - Indicates that the Agreement has been
+    ///   approved by the Provider.
+    ///     - The Provider is now ready to accept a request to start an
+    ///       Activity as described in the negotiated agreement.
+    ///     - The Providers’s corresponding `approveAgreement` call
+    ///       returns `Approved` after this event is emitted.
+    ///
+    /// * `AgreementRejectedEvent` - Indicates that the Provider has called
+    ///   `rejectAgreement`, which effectively stops the Agreement handshake.
+    ///   The Requestor may attempt to return to the Negotiation phase by
+    ///   sending a new Proposal.
+    ///
+    /// * `AgreementCancelledEvent` - Indicates that the Requestor has called
+    ///   `cancelAgreement`, which effectively stops the Agreement handshake.
+    ///
+    /// * `AgreementTerminatedEvent` - Indicates that the Agreement has been
+    ///   terminated by specified party (contains signature).
     #[rustfmt::skip]
     pub async fn collect_agreement_events<Tz>(
         &self,

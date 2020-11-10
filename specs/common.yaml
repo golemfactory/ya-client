@@ -153,13 +153,6 @@ responses:
         schema:
           $ref: '#/components/schemas/ErrorMessage'
 
-  AckTimeout:
-    description: (504) The Requestor has not responded to the request within timeout.
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/ErrorMessage'
-
   UnexpectedError:
     description: Unexpected error.
     content:
@@ -183,9 +176,12 @@ components:
       type: object
       description: >
         Generic Event reason information structure.
+      required:
+        - message
       properties:
         message:
           type: string
+      additionalProperties: true
 
     ErrorMessage:
       type: object
@@ -194,3 +190,9 @@ components:
       properties:
         message:
           type: string
+
+    AppSessionId:
+      type: string
+      description: >
+        A correlation/session identifier used for querying events related
+        to an action where this appSessionId has been specified.

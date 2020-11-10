@@ -17,9 +17,11 @@ info:
     respectively, find matching counterparty, conduct negotiations
     and make an agreement.
 
+
     This version of Market API conforms with capability level 1 of the
     <a href="https://docs.google.com/document/d/1Zny_vfgWV-hcsKS7P-Kdr3Fb0dwfl-6T_cYKVQ9mkNg">
     Market API specification</a>.
+
 
     Market API contains two roles: Requestors and Providers which are
     symmetrical most of the time (excluding agreement phase).
@@ -117,14 +119,33 @@ paths:
       operationId: collectDemands
       summary: CollectDemands - Reads Market responses to published Offer.
       description: >
-        This is a blocking operation. It will not return until there is at least one new event.
+        This is a blocking operation. It will not return until there is at
+        least one new event.
 
-        **Note**: When `collectDemands` is waiting, simultaneous call to `unsubscribeOffer` on the
-        same `subscriptionId` should result in "Subscription does not exist" error returned from
-        `collectDemands`.
+        Returns Proposal related events:
 
-        **Note**: Specification requires this endpoint to support list of specific Proposal Ids
-        to listen for messages related only to specific Proposals. This is not covered yet.
+        * `ProposalEvent` - Indicates that there is new Demand Proposal for
+        this Offer.
+
+        * `ProposalRejectedEvent` - Indicates that the Requestor has rejected
+          our previous Proposal related to this Offer. This effectively ends a
+          Negotiation chain - it explicitly indicates that the sender will not
+          create another counter-Proposal.
+
+        * `AgreementEvent` - Indicates that the Requestor is accepting our
+          previous Proposal and ask for our approval of the Agreement.
+
+        * `PropertyQueryEvent` - not supported yet.
+
+
+        **Note**: When `collectDemands` is waiting, simultaneous call to
+        `unsubscribeOffer` on the same `subscriptionId` should result in
+        "Subscription does not exist" error returned from `collectDemands`.
+
+
+        **Note**: Specification requires this endpoint to support list of
+        specific Proposal Ids to listen for messages related only to specific
+        Proposals. This is not covered yet.
       responses:
         200:
           $ref: '#/components/responses/EventList'
@@ -147,17 +168,20 @@ paths:
       description: >
         Sends a response to a received property value query.
 
+
         The Market Matching Mechanism, when resolving the match relation for the
         specific Demand-Offer pair, is to detect the “dynamic” properties required
         (via constraints) by the other side. At this point, it is able to query the
         issuing node for those properties and submit the other side’s requested
         properties as the context of the query.
 
+
         **Note**: The property query responses may be submitted in “chunks”, ie. the
         responder may choose to resolve ‘quick’/lightweight’ properties faster and
         provide response sooner, while still working on more time-consuming properties
         in the background. Therefore the response contains both the resolved properties,
         as well as list of properties which responder knows still require resolution.
+
 
         **Note**: This method must be implemented for Market API Capability Level 2.
       requestBody:
@@ -201,7 +225,7 @@ paths:
       deprecated: true
       summary: RejectProposalDemand - Rejects Proposal (Demand).
       description: >
-        DEPRECATED: use `rejectProposalDemandReason` instead.
+        DEPRECATED: use `rejectProposalDemandWithReason` instead.
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
       responses:
@@ -247,7 +271,7 @@ paths:
     post:
       tags:
         - provider
-      operationId: rejectProposalDemandReason
+      operationId: rejectProposalDemandWithReason
       summary: RejectProposalDemandReason - Rejects Proposal (Demand) allowing specifying a Reason.
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
@@ -318,6 +342,7 @@ paths:
       description: >
         Stop receiving Proposals.
 
+
         **Note**: this will terminate all pending `collectOffers` calls on this subscription.
         This implies, that client code should not `unsubscribeDemand` before it has received
         all expected/useful inputs from `collectOffers`.
@@ -344,14 +369,30 @@ paths:
       operationId: collectOffers
       summary: CollectOffers - Reads Market responses to published Demand.
       description: >
-        This is a blocking operation. It will not return until there is at least one new event.
+        This is a blocking operation. It will not return until there is at
+        least one new event.
 
-        **Note**: When `collectOffers` is waiting, simultaneous call to `unsubscribeDemand` on the
-        same `subscriptionId` should result in "Subscription does not exist" error returned from
-        `collectOffers`.
+        Returns Proposal related events:
 
-        **Note**: Specification requires this endpoint to support list of specific Proposal Ids
-        to listen for messages related only to specific Proposals. This is not covered yet.
+        * `ProposalEvent` - Indicates that there is new Offer Proposal for
+        this Demand.
+
+        * `ProposalRejectedEvent` - Indicates that the Provider has rejected
+          our previous Proposal related to this Demand. This effectively ends a
+          Negotiation chain - it explicitly indicates that the sender will not
+          create another counter-Proposal.
+
+        * `PropertyQueryEvent` - not supported yet.
+
+
+        **Note**: When `collectOffers` is waiting, simultaneous call to
+        `unsubscribeDemand` on the same `subscriptionId` should result in
+        "Subscription does not exist" error returned from `collectOffers`.
+
+
+        **Note**: Specification requires this endpoint to support list of
+        specific Proposal Ids to listen for messages related only to specific
+        Proposals. This is not covered yet.
       responses:
         200:
           $ref: '#/components/responses/EventList'
@@ -374,17 +415,21 @@ paths:
       description: >
         Sends a response to a received property value query.
 
+
         The Market Matching Mechanism, when resolving the match relation for the
         specific Demand-Offer pair, is to detect the “dynamic” properties required
         (via constraints) by the other side. At this point, it is able to query the
         issuing node for those properties and submit the other side’s requested
         properties as the context of the query.
 
+
         **Note**: The property query responses may be submitted in “chunks”, ie. the
         responder may choose to resolve ‘quick’/lightweight’ properties faster and
-        provide response sooner, while still working on more time-consuming properties
-        in the background. Therefore the response contains both the resolved properties,
-        as well as list of properties which responder knows still require resolution.
+        provide response sooner, while still working on more time-consuming
+        properties in the background. Therefore the response contains both the
+        resolved properties, as well as list of properties which responder knows
+        still require resolution.
+
 
         **Note**: This method must be implemented for Market API Capability Level 2.
       requestBody:
@@ -428,7 +473,7 @@ paths:
       deprecated: true
       summary: RejectProposalOffer - Rejects Proposal (Offer).
       description: >
-        DEPRECATED: use `rejectProposalOfferReason` instead.
+        DEPRECATED: use `rejectProposalOfferWithReason` instead.
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
       responses:
@@ -474,7 +519,7 @@ paths:
     post:
       tags:
         - requestor
-      operationId: rejectProposalOfferReason
+      operationId: rejectProposalOfferWithReason
       summary: RejectProposalOfferReason - Rejects Proposal (Offer).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
@@ -502,15 +547,19 @@ paths:
       description: >
         Initiates the Agreement handshake phase.
 
+
         Formulates an Agreement artifact from the Proposal indicated by the
         received Proposal Id. Created Agreement is in `Proposal` state.
+
 
         The Approval Expiry Date is added to Agreement artifact and implies
         the effective timeout on the whole Agreement Confirmation sequence.
 
+
         A successful call to `createAgreement` shall immediately be followed
         by a `confirmAgreement` and `waitForApproval` call in order to listen
         for responses from the Provider.
+
 
         **Note**: Moves given Proposal to `Approved` state.
       requestBody:
@@ -565,11 +614,49 @@ paths:
       tags:
         - requestor
       operationId: cancelAgreement
-      summary: CancelAgreement - Cancels agreement.
+      deprecated: true
+      summary: CancelAgreement - Cancels Agreement.
       description: >
+        DEPRECATED: use `cancelAgreementWithReason` instead.
+        It is only possible before Requestor confirmed or Provider approved
+        or rejected the Agreement, and before Expiration.
+
+
         Causes:
           - the awaiting `approveAgreement` on Provider side to return with `Cancelled` response.
           - the awaiting `waitForApproval` local call to return with `Cancelled` response.
+      responses:
+        204:
+          description: Agreement cancelled.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        409:
+          description: Agreement not in `Proposal` nor `Pending` state.
+        410:
+          $ref: 'common.yaml#/responses/Gone' # Expired
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /agreements/{agreementId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/agreementId'
+    post:
+      tags:
+        - requestor
+      operationId: cancelAgreementWithReason
+      summary: CancelAgreementWithReason - Cancels Agreement.
+      description: >
+        It is only possible before Requestor confirmed or Provider approved
+        or rejected the Agreement, and before Expiration.
+
+
+        Causes:
+          - the awaiting `approveAgreement` on Provider side to return with `Cancelled` response.
+          - the awaiting `waitForApproval` local call to return with `Cancelled` response.
+      requestBody:
+        $ref: '#/components/requestBodies/Reason'
       responses:
         204:
           description: Agreement cancelled.
@@ -595,6 +682,7 @@ paths:
       summary: ConfirmAgreement - Sends Agreement proposal to the Provider.
       description: >
         Signs self-created Agreement and sends it to the Provider.
+
 
         This call should immediately follow `createAgreement`.
       responses:
@@ -625,6 +713,7 @@ paths:
         code. After the call is aborted, another `waitForApproval` call can be
         raised on the same Agreement Id.
 
+
         It returns one of the following options:
 
         * `Approved` - Indicates that the Agreement has been approved by the Provider.
@@ -639,7 +728,6 @@ paths:
 
         * `Cancelled` - Indicates that the Requestor himself has called
           `cancelAgreement`, which effectively stops the Agreement handshake.
-
       responses:
         200:
           description: Agreement approval result.
@@ -674,25 +762,29 @@ paths:
       operationId: collectAgreementEvents
       summary: CollectAgreementEvents - Collects events related to an Agreement.
       description: >
-        This is a blocking operation.
+        This is a blocking operation. It will not return until there is
+        at least one new event. All events are appearing on both sides equally.
 
-        It returns events such as:
 
-        * `AgreementApprovedEvent` - Indicates to the Requestor that the Agreement has been approved by the Provider.
+        Returns Agreement related events:
+
+        * `AgreementApprovedEvent` - Indicates that the Agreement has been approved
+          by the Provider.
           - The Provider is now ready to accept a request to start an Activity
             as described in the negotiated agreement.
-          - The Providers’s corresponding `approveAgreement` call returns `Approved` after
-            this event is emitted.
+          - The Providers’s corresponding `approveAgreement` call returns `Approved`
+            after this event is emitted.
 
-        * `AgreementRejectedEvent` - Indicates to the Requestor that the Provider has called `rejectAgreement`,
-          which effectively stops the Agreement handshake. The Requestor may attempt
-          to return to the Negotiation phase by sending a new Proposal.
+        * `AgreementRejectedEvent` - Indicates that the Provider has called
+          `rejectAgreement`, which effectively stops the Agreement handshake.
+          The Requestor may attempt to return to the Negotiation phase by sending
+          a new Proposal.
 
-        * `AgreementCancelledEvent` - Indicates to the Provider that the Requestor has called
+        * `AgreementCancelledEvent` - Indicates that the Requestor has called
           `cancelAgreement`, which effectively stops the Agreement handshake.
 
-        * `AgreementTerminatedEvent` - Indicates to the receiving party that the Agreement has been terminated
-          by the other party.
+        * `AgreementTerminatedEvent` - Indicates that the Agreement has been
+          terminated by specified party (contains signature).
 
       responses:
         200:
@@ -720,6 +812,7 @@ paths:
         This is a blocking operation. The call may be aborted by Provider caller
         code. After the call is aborted or timed out, another `approveAgreement`
         call can be raised on the same `agreementId`.
+
 
         It returns one of the following options:
 
@@ -778,6 +871,7 @@ paths:
         The Requestor side is notified about the Provider’s decision to reject
         a negotiated agreement. This effectively stops the Agreement handshake.
 
+
         **Note**: Mutually exclusive with `approveAgreement`.
       requestBody:
         $ref: '#/components/requestBodies/Reason'
@@ -807,10 +901,17 @@ paths:
       description: >
         Method to finish/close the Agreement while in `Approved` state.
 
-        The other party gets notified about calling party decision to terminate a "running" agreement.
 
-        **Note**: Can be invoked at any time after Agreement was approved by both sides.
-        Financial and reputational consequences are not defined by this specification.
+        The other party gets notified about calling party decision to
+        terminate a "running" agreement.
+
+
+        **Note**: Can be invoked at any time after Agreement was approved
+        by both sides.
+
+
+        **Note**: Financial and reputational consequences are not
+        defined by this specification.
       requestBody:
         $ref: '#/components/requestBodies/Reason'
       responses:
@@ -888,6 +989,7 @@ components:
             $ref: '#/components/schemas/DemandOfferBase'
 
     Reason:
+      required: false
       content:
         application/json:
           schema:
@@ -976,8 +1078,11 @@ components:
       type: string
       format: date-time
       description: >
-        End of validity period. Agreement needs to be accepted, rejected or
-        cancelled before this date; otherwise will expire.
+        End of validity period.
+
+
+        Agreement needs to be accepted, rejected or cancelled before this date;
+        otherwise will expire.
 
 
     DemandOfferBase:
@@ -1152,6 +1257,8 @@ components:
             * `Terminated` - finished after approval.
         timestamp:
           $ref: 'common.yaml#/components/schemas/Timestamp'
+        appSessionId:
+          $ref: 'common.yaml#/components/schemas/AppSessionId'
         proposedSignature:
           type: string
         approvedSignature:
@@ -1277,6 +1384,14 @@ components:
       allOf:
         - $ref: '#/components/schemas/AgreementOperationEvent'
         - type: object
+          required:
+            - terminator
+            - signature
           properties:
+            terminator:
+              type: string
+              enum: [Requestor, Provider]
+            signature:
+              type: string
             reason:
               $ref: 'common.yaml#/components/schemas/Reason'

@@ -61,7 +61,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateActivityResult'
+                oneOf:
+                  - type: string
+                  - $ref: '#/components/schemas/CreateActivityResult'
         400:
           description: Bad Request
           content:
@@ -480,9 +482,7 @@ components:
         - sgx
       properties:
         sgx:
-          oneOf:
-            - $ref: '#/components/schemas/SgxCredentials'
-            - $ref: '#/components/schemas/AnyCredentials'
+          $ref: '#/components/schemas/SgxCredentials'
 
     SgxCredentials:
       type: object
@@ -506,10 +506,6 @@ components:
         iasSig:
           type: string
           format: hex
-
-    AnyCredentials:
-      type: object
-      additionalProperties: true
 
     ExeScriptRequest:
       required:

@@ -8,6 +8,10 @@
 
 use serde::{Deserialize, Serialize};
 
+pub type NewOffer = DemandOfferBase;
+pub type NewDemand = DemandOfferBase;
+pub type NewProposal = DemandOfferBase;
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DemandOfferBase {
     /// The object which includes all the Demand/Offer/Proposal properties.
