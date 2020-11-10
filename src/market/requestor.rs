@@ -131,7 +131,7 @@ impl MarketRequestorApi {
         &self,
         subscription_id: &str,
         proposal_id: &str,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
@@ -149,7 +149,7 @@ impl MarketRequestorApi {
         subscription_id: &str,
         proposal_id: &str,
         reason: Option<impl ConvertReason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
