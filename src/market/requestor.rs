@@ -329,7 +329,7 @@ impl MarketRequestorApi {
     {
         let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
         let url = url_format!(
-            "agreements/events",
+            "agreementEvents",
             #[query] timeout,
             #[query] after_timestamp,
             #[query] max_events,
