@@ -1,6 +1,6 @@
 parameters:
   pollTimeout:
-    name: pollTimeout
+    name: timeout
     description: >
         Timeout used in long-polling calls (in seconds).
         How many seconds server should wait for response containing new events (`0.0` means it should
@@ -10,10 +10,11 @@ parameters:
     schema:
       type: number
       format: float
+      default: 5.0
       minimum: 0.0
 
   ackTimeout:
-    name: ackTimeout
+    name: timeout
     description: >
         Timeout used in blocking calls waiting for eg. acknowledgement.
         How many seconds server should wait for response/acknowledgement of an action
@@ -23,37 +24,40 @@ parameters:
     schema:
       type: number
       format: float
+      default: 5.0
       minimum: 0.0
 
   maxItems:
     name: maxItems
     description: >
-        Maximum number of items that server should return at once
-        (empty value means no limit).
+        Maximum number of items that server should return at once.
     required: false
     in: query
     schema:
       type: integer
       format: int32
-      minimum: 0
+      default: 10
+      maximum: 100
+      minimum: 1
 
   maxEvents:
     name: maxEvents
     description: >
-        Maximum number of events that server should return at once
-        (empty value means no limit).
+        Maximum number of events that server should return at once.
     required: false
     in: query
     schema:
       type: integer
       format: int32
+      default: 10
       minimum: 1
+      maximum: 100
 
   afterTimestamp:
     name: afterTimestamp
     description: Apply only to records created later than the specified timestamp
-    in: query
     required: false
+    in: query
     schema:
       type: string
       format: date-time
@@ -124,13 +128,6 @@ responses:
         schema:
           $ref: '#/components/schemas/ErrorMessage'
 
-  AckTimeout:
-    description: (504) The Requestor has not responded to the request within timeout.
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/ErrorMessage'
-
   UnexpectedError:
     description: Unexpected error.
     content:
@@ -146,13 +143,20 @@ components:
       scheme: bearer
 
   schemas:
+    Timestamp:
+      type: string
+      format: date-time
+
     Reason:
       type: object
       description: >
         Generic Event reason information structure.
+      required:
+        - message
       properties:
         message:
           type: string
+      additionalProperties: true
 
     ErrorMessage:
       type: object
@@ -161,3 +165,9 @@ components:
       properties:
         message:
           type: string
+
+    AppSessionId:
+      type: string
+      description: >
+        A correlation/session identifier used for querying events related
+        to an action where this appSessionId has been specified.
