@@ -59,7 +59,7 @@ pub enum RequestorEvent {
     #[serde(rename = "ProposalRejectedEvent")]
     ProposalRejectedEvent {
         #[serde(rename = "eventDate")]
-        event_date: String,
+        event_date: DateTime<Utc>,
         #[serde(rename = "proposalId")]
         proposal_id: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]

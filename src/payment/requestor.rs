@@ -106,11 +106,11 @@ impl PaymentRequestorApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let later_then = later_than.map(|dt| dt.to_rfc3339());
+        let later_than = later_than.map(|dt| dt.to_rfc3339());
         let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "requestor/debitNoteEvents",
-            #[query] later_then,
+            #[query] later_than,
             #[query] timeout
         );
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
@@ -166,11 +166,11 @@ impl PaymentRequestorApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let later_then = later_than.map(|dt| dt.to_rfc3339());
+        let later_than = later_than.map(|dt| dt.to_rfc3339());
         let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "requestor/invoiceEvents",
-            #[query] later_then,
+            #[query] later_than,
             #[query] timeout
         );
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
@@ -214,11 +214,11 @@ impl PaymentRequestorApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let later_then = later_than.map(|dt| dt.to_rfc3339());
+        let later_than = later_than.map(|dt| dt.to_rfc3339());
         let timeout = timeout.map(|d| d.as_secs_f64());
         let url = url_format!(
             "requestor/payments",
-            #[query] later_then,
+            #[query] later_than,
             #[query] timeout
         );
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
