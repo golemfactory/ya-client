@@ -133,7 +133,7 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: 'common.yaml#/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/ackTimeout'
 
   /debitNotes/{debitNoteId}/cancel:
     post:
