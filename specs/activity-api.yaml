@@ -703,8 +703,8 @@ components:
         bin:
           type: array
           items:
-            type: number
-            format: byte
+            type: string
+            format: binary
 
 
     # End ExeScript streaming result structures
