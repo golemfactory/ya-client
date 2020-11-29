@@ -134,7 +134,7 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/ErrorMessage'
-        
+
   UnexpectedError:
     description: Unexpected error.
     content:

@@ -691,11 +691,11 @@ paths:
         200:
           $ref: '#/components/responses/MarketDecoration'
         400:
-          $ref: 'common.yaml#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: 'common.yaml#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: 'common.yaml#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
 components:
   securitySchemes:
