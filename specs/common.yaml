@@ -128,6 +128,13 @@ responses:
         schema:
           $ref: '#/components/schemas/ErrorMessage'
 
+  AckTimeout:
+    description: (504) Ack timeout.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+        
   UnexpectedError:
     description: Unexpected error.
     content:

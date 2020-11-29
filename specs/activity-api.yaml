@@ -151,8 +151,8 @@ paths:
         received directly from ExeUnit (via the long polling pattern).
         **Note:** two formats of response are specified (as indicated by the Accept header):
           - application/json - standard JSON response, specified below, as code generators handle it properly.
-          - text/event-stream - an EventSource implementation (as per https://www.w3.org/TR/eventsource/). 
-            This isn't explicitly specified as code generators generally are unable to handle this. 
+          - text/event-stream - an EventSource implementation (as per https://www.w3.org/TR/eventsource/).
+            This isn't explicitly specified as code generators generally are unable to handle this.
             The streaming events adhere to following format:
 
               event: runtime
@@ -443,7 +443,7 @@ components:
 
     # ExeScript structures
 
-    
+
 
     Object:
       type: object
@@ -623,7 +623,7 @@ components:
     # ExeScript streaming result structures
 
     RuntimeEvent:
-      description: 
+      description:
         ' Structure returned as data element of event stream.
         '
       type: object

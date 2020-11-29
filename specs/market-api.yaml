@@ -239,7 +239,7 @@ paths:
           description: Proposal already rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-          
+
     post:
       tags:
         - provider
