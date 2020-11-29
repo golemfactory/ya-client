@@ -689,14 +689,14 @@ paths:
       responses:
         204:
           description: Agreement confirmed.
+        400:
+          $ref: 'common.yaml#/responses/BadRequest' # when called for cancelled agreement
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
         409:
           description: Agreement not in `Proposal` state.
-        410:
-          $ref: 'common.yaml#/responses/Gone' # Expired
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -731,12 +731,7 @@ paths:
           `cancelAgreement`, which effectively stops the Agreement handshake.
       responses:
         200:
-          description: Agreement approval result.
-          content:
-            application/json:
-              schema:
-                type: string
-                enum: [Approved, Rejected, Cancelled]
+          description: Agreement approved.
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
@@ -746,11 +741,11 @@ paths:
         409:
           description: Agreement not in `Pending` state.
         410:
-          $ref: 'common.yaml#/responses/Gone' # Expired
+          $ref: 'common.yaml#/responses/Gone' # Agreement Rejected
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /agreements/events:
+  /agreementEvents:
     parameters:
       - $ref: 'common.yaml#/parameters/pollTimeout'
       - $ref: 'common.yaml#/parameters/afterTimestamp'
@@ -792,9 +787,7 @@ paths:
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: 'common.yaml#/responses/NotFound'
-        408:
-          $ref: 'common.yaml#/responses/Timeout'
+          $ref: 'common.yaml#/responses/NotFound'  # for invalid appSessionId
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -840,12 +833,7 @@ paths:
         **Note**: Mutually exclusive with `rejectAgreement`.
       responses:
         200:
-          description: Agreement approval result.
-          content:
-            application/json:
-              schema:
-                type: string
-                enum: [Approved, Cancelled]
+          description: Agreement approved.
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
@@ -855,7 +843,7 @@ paths:
         409:
           description: Agreement not in `Proposal` state.
         410:
-          $ref: 'common.yaml#/responses/Gone'
+          $ref: 'common.yaml#/responses/Gone'  # Agreement Cancelled
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -1067,7 +1055,6 @@ components:
             items:
               $ref: '#/components/schemas/AgreementEvent'
 
-
   schemas:
 
     AgreementValidTo:
@@ -1075,7 +1062,6 @@ components:
       format: date-time
       description: >
         End of validity period.
-
 
         Agreement needs to be accepted, rejected or cancelled before this date;
         otherwise will expire.

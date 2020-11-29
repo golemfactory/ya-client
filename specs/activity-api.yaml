@@ -42,7 +42,7 @@ paths:
       summary: Creates new Activity based on given Agreement.
       description: '**Note:** This call shall get routed as a provider event (see
         ProviderEvent structure).'
-      operationId: CreateActivity
+      operationId: createActivity
       requestBody:
         content:
           application/json:
@@ -78,7 +78,7 @@ paths:
         - requestor_control
       summary: Executes an ExeScript batch within a given Activity.
       description: '**Note:** This call shall get routed directly to ExeUnit.'
-      operationId: Exec
+      operationId: exec
       parameters:
         - name: activityId
           in: path
@@ -146,15 +146,20 @@ paths:
       tags:
         - requestor_control
       summary: Queries for ExeScript batch results.
-      description: 'This call shall collect ExeScriptCommand result objects
+      description: >
+        'This call shall collect ExeScriptCommand result objects
         received directly from ExeUnit (via the long polling pattern).
-        The events are persistent, ie. the API can be called repeatedly
-        to receive the same events (the calls don’t remove the event records
-        from the receiving queue).
         **Note:** two formats of response are specified (as indicated by the Accept header):
-          - application/json - standard JSON response
-          - text/event-stream - an EventSource implementation (as per https://www.w3.org/TR/eventsource/)'
-      operationId: GetExecBatchResults
+          - application/json - standard JSON response, specified below, as code generators handle it properly.
+          - text/event-stream - an EventSource implementation (as per https://www.w3.org/TR/eventsource/). 
+            This isn't explicitly specified as code generators generally are unable to handle this. 
+            The streaming events adhere to following format:
+
+              event: runtime
+              data: <RuntimeEvent structure>
+
+            This streaming endpoint requires dedicated implementation. '
+      operationId: getExecBatchResults
       parameters:
         - name: activityId
           in: path
@@ -186,11 +191,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ExeScriptCommandResult'
-            text/event-stream: # an EventSource implementation (as per https://www.w3.org/TR/eventsource/)
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ExeScriptCommandResult'
+            # text/event-stream: # an EventSource implementation (as per https://www.w3.org/TR/eventsource/),
+            #                      not explicitly specified in YAML.
         400:
           $ref: 'common.yaml#/responses/BadRequest'
         403:
@@ -439,6 +441,144 @@ components:
         text:
           type: string
 
+    # ExeScript structures
+
+    
+
+    Object:
+      type: object
+
+    ExeScriptCommand:
+      description: '
+        The specification of ExeScript commands format as per Activity API specification.
+        Including TRANSFER command syntax extension described in
+        [this specification](https://github.com/golemfactory/golem-architecture/blob/master/GIPS/GIP-PR0001-multifile-transfer.md).
+
+        ## Implementation Notes
+
+        The schemas have been defined to accept a following format of JSON command collections:
+
+        ```
+        [
+        {
+            "deploy": {}
+        },
+        {
+            "start": {
+                "args": []
+            }
+        },
+        {
+            "transfer": {
+                "from": "http://34.244.4.185:8000/LICENSE",
+                "to": "container:/input/file_in",
+                "format": "zip",
+                "depth": 2,
+                "fileset": [{"desc":"all images", "includes": ["*.jpg"], "excludes": ["db*.*"] }]
+            }
+        },
+        {
+            "run": {
+                "entry_point": "rust-wasi-tutorial",
+                "args": ["/input/file_in", "/output/file_cp"]
+            }
+        },
+        ...
+        ]
+        ```
+
+        ### Rust
+
+        For Rust - this format is a default representation of Rust enum types, as serialized by `serde` library.
+        Therefore it is recommended to use this yaml specification to manually specify Rust enum types rather than depend on
+        automatically-generated code.
+
+    '
+      allOf:
+        - $ref: '#/components/schemas/Object'
+        - type: object
+
+    DeployCommand:
+      allOf:
+        - $ref: '#/components/schemas/ExeScriptCommand'
+        - type: object
+      properties:
+        deploy:
+          type: object
+
+    StartCommand:
+      allOf:
+        - $ref: '#/components/schemas/ExeScriptCommand'
+        - type: object
+      properties:
+        start:
+          $ref: '#/components/schemas/StartCommandBody'
+
+    StartCommandBody:
+      type: object
+      properties:
+        args:
+            type: array
+            items:
+              type: string
+
+    TransferCommand:
+      allOf:
+        - $ref: '#/components/schemas/ExeScriptCommand'
+        - type: object
+      properties:
+        transfer:
+          $ref: '#/components/schemas/TransferCommandBody'
+
+    TransferCommandBody:
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        format:
+          type: string
+        depth:
+          type: number
+        fileset:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileSet'
+
+    FileSet:
+      properties:
+        desc:
+          type: string
+        includes:
+          type: array
+          items:
+            type: string
+        excludes:
+          type: array
+          items:
+            type: string
+
+    RunCommand:
+      allOf:
+        - $ref: '#/components/schemas/ExeScriptCommand'
+        - type: object
+      properties:
+        run:
+          $ref: '#/components/schemas/RunCommandBody'
+
+    RunCommandBody:
+      type: object
+      properties:
+        entry_point:
+          type: string
+        args:
+          type: array
+          items:
+            type: string
+
+    # End ExeScript structures
+
     ExeScriptCommandState:
       required:
         - batchId
@@ -479,6 +619,95 @@ components:
           type: string
         isBatchFinished:
           type: boolean
+
+    # ExeScript streaming result structures
+
+    RuntimeEvent:
+      description: 
+        ' Structure returned as data element of event stream.
+        '
+      type: object
+      properties:
+        batchId:
+          type: string
+        index:
+          type: integer
+          format: int32
+        timestamp:
+          type: string
+        kind:
+          $ref: '#/components/schemas/RuntimeEventKind'
+
+    RuntimeEventKind:
+      allOf:
+        - $ref: '#/components/schemas/Object'
+        - type: object
+
+    RuntimeEventKindStarted:
+      allOf:
+        - $ref: '#/components/schemas/RuntimeEventKind'
+        - type: object
+      properties:
+        started:
+          $ref: '#/components/schemas/ExeScriptCommand'
+
+    RuntimeEventKindFinished:
+      allOf:
+        - $ref: '#/components/schemas/RuntimeEventKind'
+        - type: object
+      properties:
+        finished:
+          type: object
+
+    RuntimeEventKindStdOut:
+      allOf:
+        - $ref: '#/components/schemas/RuntimeEventKind'
+        - type: object
+      properties:
+        stdout:
+          $ref: '#/components/schemas/CommandOutput'
+
+    RuntimeEventKindStdErr:
+      allOf:
+        - $ref: '#/components/schemas/RuntimeEventKind'
+        - type: object
+      properties:
+        stderr:
+          $ref: '#/components/schemas/CommandOutput'
+
+    RuntimeEventKindFinishedBody:
+      type: object
+      properties:
+        returnCode:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    CommandOutput:
+      type: object
+
+    CommandOutputStr:
+      allOf:
+        - $ref: '#/components/schemas/CommandOutput'
+        - type: object
+      properties:
+        str:
+          type: string
+
+    CommandOutputBin:
+      allOf:
+        - $ref: '#/components/schemas/CommandOutput'
+        - type: object
+      properties:
+        bin:
+          type: array
+          items:
+            type: number
+            format: byte
+
+
+    # End ExeScript streaming result structures
 
     ActivityUsage:
       type: object
