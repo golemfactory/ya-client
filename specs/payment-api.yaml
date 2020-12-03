@@ -366,12 +366,12 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
-  /receiveAccounts:
+  /providerAccounts:
     get:
       tags:
         - provider
       summary: Get available accounts for receiving payments.
-      operationId: getReceiveAccounts
+      operationId: getProviderAccounts
       responses:
         200:
           $ref: '#/components/responses/AccountList'
@@ -660,12 +660,12 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
-  /sendAccounts:
+  /requestorAccounts:
     get:
       tags:
         - requestor
       summary: Get available accounts for sending payments.
-      operationId: getSendAccounts
+      operationId: getRequestorAccounts
       responses:
         200:
           $ref: '#/components/responses/AccountList'

@@ -180,8 +180,6 @@ paths:
             type: number
             format: integer
             minimum: 0
-        - $ref: 'common.yaml#/parameters/afterTimestamp'
-        - $ref: 'common.yaml#/parameters/pollTimeout'
       responses:
         200:
           description: Success
@@ -615,6 +613,10 @@ components:
           enum:
             - Ok
             - Error
+        stdout:
+          type: string
+        stderr:
+          type: string
         message:
           type: string
         isBatchFinished:
