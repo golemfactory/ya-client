@@ -732,7 +732,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/allocationId'
       requestBody:
-          $ref: '#/components/requestBodies/Allocation'
+        $ref: '#/components/requestBodies/Allocation'
       responses:
         200:
           $ref: '#/components/responses/Allocation'
@@ -979,42 +979,42 @@ components:
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     Unauthorized:
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     NotFound:
       description: Object not found
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     ServerError:
       description: Server error
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     AckTimeout:
       description: The Requestor has not responded to the request within timeout.
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     DebitNoteCancelRefused:
       description: The Requestor has refused to cancel the Debit Note.
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     DebitNote:
       description: OK
@@ -1037,7 +1037,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     Invoice:
       description: OK

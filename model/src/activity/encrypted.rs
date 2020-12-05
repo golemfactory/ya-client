@@ -28,7 +28,7 @@ pub enum RequestCommand {
 pub enum Response {
     Exec(Result<String, RpcMessageError>),
     GetExecBatchResults(Result<Vec<ExeScriptCommandResult>, RpcMessageError>),
-    GetRunningCommand(Result<ExeScriptCommandState, RpcMessageError>),
+    GetRunningCommand(Result<Vec<ExeScriptCommandState>, RpcMessageError>),
     Error(RpcMessageError),
 }
 

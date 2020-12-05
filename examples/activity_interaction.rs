@@ -1,4 +1,5 @@
 use std::env;
+use std::time::Duration;
 
 use ya_client::{
     activity::{ActivityProviderApi, ActivityRequestorControlApi, ActivityRequestorStateApi},
@@ -9,7 +10,9 @@ use ya_client::{
 
 async fn provider(client: &ActivityProviderApi, activity_id: &str) -> Result<()> {
     println!("[?] Events for activity {}", activity_id);
-    let activity_events = client.get_activity_events(Some(60.), None).await.unwrap();
+    let activity_events = client
+        .get_activity_events(None, None, Some(Duration::from_secs(5)), Some(10))
+        .await;
     println!("[<] Events: {:?}", activity_events);
 
     println!("[+] Activity state");

@@ -1,21 +1,10 @@
-## Obsolete, kept temporarily for backwards compatibility
-schemas:
-  ErrorMessage:
-    type: object
-    description: >
-      Generic Error Message structure.
-    properties:
-      message:
-        type: string
-## End Obsolete
-
 parameters:
   pollTimeout:
     name: timeout
     description: >
-        Timeout used in long-polling calls (in seconds).
-        How many seconds server should wait for new events (0.0 means it should
-        return immediately if there are no events)
+      Timeout used in long-polling calls (in seconds).
+      How many seconds server should wait for response containing new events (`0.0` means it should
+      return immediately if there are no events)
     required: false
     in: query
     schema:
@@ -27,9 +16,9 @@ parameters:
   ackTimeout:
     name: timeout
     description: >
-        Timeout used in blocking calls waiting for eg. acknowledgement.
-        How many seconds server should wait for response/acknowledgement of an action
-        (0.0 means it should wait for other party's response indefinitely)
+      Timeout used in blocking calls waiting for eg. acknowledgement.
+      How many seconds server should wait for response/acknowledgement of an action
+      (0.0 means it should wait for other party's response indefinitely)
     required: false
     in: query
     schema:
@@ -41,7 +30,7 @@ parameters:
   maxItems:
     name: maxItems
     description: >
-        Maximum number of items that server should return at once.
+      Maximum number of items that server should return at once.
     required: false
     in: query
     schema:
@@ -54,19 +43,19 @@ parameters:
   maxEvents:
     name: maxEvents
     description: >
-        Maximum number of events that server should return at once.
+      Maximum number of events that server should return at once.
     required: false
     in: query
     schema:
       type: integer
       format: int32
       default: 10
-      maximum: 100
       minimum: 1
+      maximum: 100
 
   afterTimestamp:
     name: afterTimestamp
-    description: Apply only to events later than specified timestamp
+    description: Apply only to records created later than the specified timestamp
     required: false
     in: query
     schema:
@@ -76,7 +65,7 @@ parameters:
   appSessionId:
     name: appSessionId
     description: A correlation/session identifier used for querying events related to an action
-        where this appSessionId has been specified
+      where this appSessionId has been specified
     in: query
     required: false
     schema:
@@ -148,6 +137,13 @@ responses:
 
   ServerError:
     description: (500) Server error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorMessage'
+
+  AckTimeout:
+    description: (504) Ack timeout.
     content:
       application/json:
         schema:

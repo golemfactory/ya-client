@@ -1362,7 +1362,6 @@ components:
     AgreementApprovedEvent:
       allOf:
         - $ref: '#/components/schemas/AgreementOperationEvent'
-        - type: object
 
     AgreementRejectedEvent:
       allOf:
