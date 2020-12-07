@@ -12,12 +12,11 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProviderEvent {
-    #[serde(rename = "activityId")]
     pub activity_id: String,
-    #[serde(rename = "eventType")]
+    pub agreement_id: String,
     pub event_type: ProviderEventType,
-    #[serde(rename = "eventDate")]
     pub event_date: DateTime<Utc>,
 }
 
@@ -25,14 +24,9 @@ pub struct ProviderEvent {
 pub enum ProviderEventType {
     #[serde(rename = "CreateActivity")]
     CreateActivity {
-        #[serde(rename = "agreementId")]
-        agreement_id: String,
         #[serde(rename = "requestorPubKey", skip_serializing_if = "Option::is_none")]
         requestor_pub_key: Option<String>,
     },
     #[serde(rename = "DestroyActivity")]
-    DestroyActivity {
-        #[serde(rename = "agreementId")]
-        agreement_id: String,
-    },
+    DestroyActivity {},
 }

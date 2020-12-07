@@ -477,6 +477,12 @@ components:
                 "args": ["/input/file_in", "/output/file_cp"]
             }
         },
+        {
+            "sign": {}
+        },
+        {
+            "terminate": {}
+        },
         ...
         ]
         ```
@@ -494,6 +500,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/ExeScriptCommand'
         - type: object
+          required:
+            - deploy
           properties:
             deploy:
               type: object
@@ -518,12 +526,17 @@ components:
       allOf:
         - $ref: '#/components/schemas/ExeScriptCommand'
         - type: object
+          required:
+            - transfer
           properties:
             transfer:
               $ref: '#/components/schemas/TransferCommandBody'
 
     TransferCommandBody:
       type: object
+      required:
+        - from
+        - to
       properties:
         from:
           type: string
@@ -555,12 +568,16 @@ components:
       allOf:
         - $ref: '#/components/schemas/ExeScriptCommand'
         - type: object
+          required:
+            - run
           properties:
             run:
               $ref: '#/components/schemas/RunCommandBody'
 
     RunCommandBody:
       type: object
+      required:
+        - entry_point
       properties:
         entry_point:
           type: string
@@ -568,6 +585,32 @@ components:
           type: array
           items:
             type: string
+
+    SignCommand:
+      allOf:
+        - $ref: '#/components/schemas/ExeScriptCommand'
+        - type: object
+          required:
+            - sign
+          properties:
+            sign:
+              $ref: '#/components/schemas/SignCommandBody'
+
+    SignCommandBody:
+      type: object
+
+    TerminateCommand:
+      allOf:
+        - $ref: '#/components/schemas/ExeScriptCommand'
+        - type: object
+          required:
+            - terminate
+          properties:
+            terminate:
+              $ref: '#/components/schemas/TerminateCommandBody'
+
+    TerminateCommandBody:
+      type: object
 
     # End ExeScript structures
 
@@ -623,6 +666,11 @@ components:
         ' Structure returned as data element of event stream.
         '
       type: object
+      required:
+        - batchId
+        - index
+        - timestamp
+        - kind
       properties:
         batchId:
           type: string
@@ -641,6 +689,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/RuntimeEventKind'
         - type: object
+          required:
+            - started
           properties:
             started:
               $ref: '#/components/schemas/ExeScriptCommand'
@@ -649,14 +699,18 @@ components:
       allOf:
         - $ref: '#/components/schemas/RuntimeEventKind'
         - type: object
+          required:
+            - finished
           properties:
             finished:
-              type: object
+              $ref: '#/components/schemas/RuntimeEventKindFinishedBody'
 
     RuntimeEventKindStdOut:
       allOf:
         - $ref: '#/components/schemas/RuntimeEventKind'
         - type: object
+          required:
+            - stdout
           properties:
             stdout:
               $ref: '#/components/schemas/CommandOutput'
@@ -665,12 +719,16 @@ components:
       allOf:
         - $ref: '#/components/schemas/RuntimeEventKind'
         - type: object
+          required:
+            - stderr
           properties:
             stderr:
               $ref: '#/components/schemas/CommandOutput'
 
     RuntimeEventKindFinishedBody:
       type: object
+      required:
+        - returnCode
       properties:
         returnCode:
           type: integer
@@ -685,6 +743,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/CommandOutput'
         - type: object
+          required:
+            - str
           properties:
             str:
               type: string
@@ -693,6 +753,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/CommandOutput'
         - type: object
+          required:
+            - bin
           properties:
             bin:
               type: array
@@ -705,6 +767,8 @@ components:
 
     ActivityUsage:
       type: object
+      required:
+        - timestamp
       properties:
         currentUsage:
           type: array
@@ -748,6 +812,7 @@ components:
         - eventType
         - eventDate
         - activityId
+        - agreementId
       type: object
       properties:
         eventType:
@@ -757,31 +822,24 @@ components:
           format: date-time
         activityId:
           type: string
+        agreementId:
+          type: string
       discriminator:
         propertyName: eventType
 
     CreateActivity:
-      required:
-        - agreementId
       allOf:
         - $ref: '#/components/schemas/ProviderEvent'
         - type: object
           properties:
-            agreementId:
-              type: string
             requestorPubKey:
               type: string
               format: byte
 
     DestroyActivity:
-      required:
-        - agreementId
       allOf:
         - $ref: '#/components/schemas/ProviderEvent'
-        - type: object
-          properties:
-            agreementId:
-              type: string
+
 
     GetActivityState:
       allOf:
