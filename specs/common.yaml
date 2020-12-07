@@ -2,9 +2,9 @@ parameters:
   pollTimeout:
     name: timeout
     description: >
-        Timeout used in long-polling calls (in seconds).
-        How many seconds server should wait for response containing new events (`0.0` means it should
-        return immediately if there are no events)
+      Timeout used in long-polling calls (in seconds).
+      How many seconds server should wait for response containing new events (`0.0` means it should
+      return immediately if there are no events)
     required: false
     in: query
     schema:
@@ -16,9 +16,9 @@ parameters:
   ackTimeout:
     name: timeout
     description: >
-        Timeout used in blocking calls waiting for eg. acknowledgement.
-        How many seconds server should wait for response/acknowledgement of an action
-        (0.0 means it should wait for other party's response indefinitely)
+      Timeout used in blocking calls waiting for eg. acknowledgement.
+      How many seconds server should wait for response/acknowledgement of an action
+      (0.0 means it should wait for other party's response indefinitely)
     required: false
     in: query
     schema:
@@ -30,7 +30,7 @@ parameters:
   maxItems:
     name: maxItems
     description: >
-        Maximum number of items that server should return at once.
+      Maximum number of items that server should return at once.
     required: false
     in: query
     schema:
@@ -43,7 +43,7 @@ parameters:
   maxEvents:
     name: maxEvents
     description: >
-        Maximum number of events that server should return at once.
+      Maximum number of events that server should return at once.
     required: false
     in: query
     schema:
@@ -65,7 +65,7 @@ parameters:
   appSessionId:
     name: appSessionId
     description: A correlation/session identifier used for querying events related to an action
-        where this appSessionId has been specified
+      where this appSessionId has been specified
     in: query
     required: false
     schema:

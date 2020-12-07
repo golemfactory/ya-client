@@ -591,7 +591,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/allocationId'
       requestBody:
-          $ref: '#/components/requestBodies/Allocation'
+        $ref: '#/components/requestBodies/Allocation'
       responses:
         200:
           $ref: '#/components/responses/Allocation'
