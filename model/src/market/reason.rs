@@ -28,10 +28,18 @@ impl Reason {
             extra: Default::default(),
         }
     }
+
+    /// Calling functions with `impl ConvertReason` is hard, because it requires
+    /// specifying full Option type, like this: `Option<Reason>::None` instead of jsut
+    /// typing `None`. Use this function to simplify.
+    pub fn none() -> Option<Reason> {
+        None
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct JsonReason {
+    #[serde(flatten)]
     pub json: Value,
 }
 
