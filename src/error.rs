@@ -1,63 +1,56 @@
 //! Error definitions and mappings
 use awc::error::{JsonPayloadError, PayloadError, SendRequestError};
-use awc::http::StatusCode;
+use awc::http::{Method, StatusCode};
 
 use ya_client_model::ErrorMessage;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("AWC error requesting {url}: {msg}")]
-    SendRequestError { msg: String, url: String },
-    #[error("AWC timeout requesting {url}: {msg}")]
-    TimeoutError { msg: String, url: String },
+    #[error("AWC error requesting {method} {url}: {msg}")]
+    SendRequestError {
+        msg: String,
+        method: Method,
+        url: String,
+    },
+    #[error("AWC timeout requesting {method} {url}: {msg}")]
+    TimeoutError {
+        msg: String,
+        method: Method,
+        url: String,
+    },
     #[error("AWC payload error: {0}")]
     PayloadError(PayloadError),
     #[error("AWC JSON payload error: {0}")]
     JsonPayloadError(JsonPayloadError),
     #[error("JSON error: {0}")]
     JsonError(#[from] serde_json::error::Error),
-    #[error("request for {url} resulted in HTTP status code: {code}: {msg}")]
-    HttpStatusCode {
+    #[error("HTTP error requesting {method} {url}: {code}; msg: '{msg}'")]
+    HttpError {
         code: StatusCode,
-        url: String,
         msg: String,
+        method: Method,
+        url: String,
     },
-    #[error("serde JSON error: {0}")]
+    #[error("Serde JSON error: {0}")]
     SerdeJsonError(serde_json::Error),
-    #[error("invalid address: {0}")]
+    #[error("Invalid address: {0}")]
     InvalidAddress(std::convert::Infallible),
-    #[error("invalid header: {0}")]
+    #[error("Invalid header: {0}")]
     InvalidHeaderName(#[from] awc::http::header::InvalidHeaderName),
-    #[error("invalid header: {0}")]
+    #[error("Invalid header: {0}")]
     InvalidHeaderValue(#[from] awc::http::header::InvalidHeaderValue),
-    #[error("invalid UTF8 string: {0}")]
+    #[error("Invalid UTF8 string: {0}")]
     FromUtf8Error(#[from] std::string::FromUtf8Error),
-    #[error("invalid UTF8 string: {0}")]
+    #[error("Invalid UTF8 string: {0}")]
     Utf8Error(#[from] std::str::Utf8Error),
     #[error("Url parse error: {0}")]
     UrlParseError(#[from] url::ParseError),
     #[error("Yagna model error: {0}")]
     ModelError(#[from] ErrorMessage),
-    #[error("{0}")]
+    #[error("Internal ya-client error: {0}")]
     InternalError(String),
     #[error("Event stream error: {0}")]
     EventStreamError(String),
-}
-
-impl From<SendRequestError> for Error {
-    fn from(e: SendRequestError) -> Self {
-        (e, "".into()).into()
-    }
-}
-
-impl From<(SendRequestError, String)> for Error {
-    fn from((e, url): (SendRequestError, String)) -> Self {
-        let msg = e.to_string();
-        match e {
-            SendRequestError::Timeout => Error::TimeoutError { msg, url },
-            _ => Error::SendRequestError { msg, url },
-        }
-    }
 }
 
 impl From<PayloadError> for Error {
@@ -72,15 +65,30 @@ impl From<JsonPayloadError> for Error {
     }
 }
 
-impl<E: std::fmt::Display> From<(StatusCode, String, Result<ErrorMessage, E>)> for Error {
-    fn from((code, url, err_msg): (StatusCode, String, Result<ErrorMessage, E>)) -> Self {
-        let msg = err_msg
-            .map(|e| e.message.unwrap_or_default())
-            .unwrap_or_else(|e| format!("error parsing error msg: {}", e));
+impl Error {
+    pub(crate) fn from_request(err: SendRequestError, method: Method, url: String) -> Self {
+        let msg = err.to_string();
+        match err {
+            SendRequestError::Timeout => Error::TimeoutError { msg, method, url },
+            _ => Error::SendRequestError { msg, method, url },
+        }
+    }
+
+    pub(crate) fn from_response(
+        code: StatusCode,
+        msg: String,
+        method: Method,
+        url: String,
+    ) -> Self {
         if code == StatusCode::REQUEST_TIMEOUT {
-            Error::TimeoutError { msg, url }
+            Error::TimeoutError { msg, method, url }
         } else {
-            Error::HttpStatusCode { code, url, msg }
+            Error::HttpError {
+                method,
+                url,
+                code,
+                msg,
+            }
         }
     }
 }
