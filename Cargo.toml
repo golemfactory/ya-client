@@ -1,6 +1,6 @@
 [package]
 name = "ya-client"
-version = "0.4.1"
+version = "0.4.0"
 description = "Yagna REST API client async binding"
 authors = ["Golem Factory <contact@golem.network>"]
 homepage = "https://github.com/golemfactory/ya-client"
