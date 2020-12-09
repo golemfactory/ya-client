@@ -111,7 +111,7 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
 
                     let status = client.approve_agreement(agreement_id, None, None).await?;
                     // one can also call:
-                    // let res = client.reject_agreement(agreement_id).await?;
+                    // client.reject_agreement(agreement_id).await?;
                     println!("  <=PROVIDER | Agreement {} by Requestor!", status);
 
                     println!("  <=PROVIDER | I'm done for now! Bye...");
