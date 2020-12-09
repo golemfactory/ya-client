@@ -42,7 +42,7 @@ pub enum AgreementOperationEvent {
     #[serde(rename = "AgreementTerminatedEvent")]
     AgreementTerminatedEvent {
         #[serde(rename = "eventDate")]
-        event_date: String,
+        event_date: DateTime<Utc>,
         #[serde(rename = "agreementId")]
         agreement_id: String,
         #[serde(rename = "terminator")]
