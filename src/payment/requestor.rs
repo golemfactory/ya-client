@@ -1,5 +1,5 @@
 //! Requestor part of the Payment API
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{DateTime, TimeZone};
 use std::fmt::Display;
 use std::sync::Arc;
 
@@ -49,13 +49,8 @@ impl PaymentRequestorApi {
         Self { client, config }
     }
 
-    pub async fn get_debit_notes(&self, afterTimestamp: Option<DateTime<Utc>>, maxItems: Option<i64>) -> Result<Vec<DebitNote>> {
-        let url = url_format!(
-            "requestor/debitNotes",
-            #[query] afterTimestamp,
-            #[query] maxItems
-        );
-        self.client.get(&url).send().json().await
+    pub async fn get_debit_notes(&self) -> Result<Vec<DebitNote>> {
+        self.client.get("requestor/debitNotes").send().json().await
     }
 
     pub async fn get_debit_note(&self, debit_note_id: &str) -> Result<DebitNote> {
