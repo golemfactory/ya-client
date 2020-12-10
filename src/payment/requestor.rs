@@ -1,5 +1,5 @@
 //! Requestor part of the Payment API
-use chrono::{DateTime, TimeZone};
+use chrono::{DateTime, TimeZone, Utc};
 use std::fmt::Display;
 use std::sync::Arc;
 
@@ -49,8 +49,13 @@ impl PaymentRequestorApi {
         Self { client, config }
     }
 
-    pub async fn get_debit_notes(&self) -> Result<Vec<DebitNote>> {
-        self.client.get("requestor/debitNotes").send().json().await
+    pub async fn get_debit_notes(&self, afterTimestamp: Option<DateTime<Utc>>, maxItems: Option<i64>) -> Result<Vec<DebitNote>> {
+        let url = url_format!(
+            "requestor/debitNotes",
+            #[query] afterTimestamp,
+            #[query] maxItems
+        );
+        self.client.get(&url).send().json().await
     }
 
     pub async fn get_debit_note(&self, debit_note_id: &str) -> Result<DebitNote> {
@@ -116,8 +121,15 @@ impl PaymentRequestorApi {
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
     }
 
-    pub async fn get_invoices(&self) -> Result<Vec<Invoice>> {
-        self.client.get("requestor/invoices").send().json().await
+    pub async fn get_invoices<Tz>(&self, after_timestamp: Option<DateTime<Tz>>, max_items: Option<i64>) -> Result<Vec<Invoice>> where Tz: TimeZone, Tz::Offset: Display, {
+        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        let maxItems = max_items;
+        let url = url_format!(
+            "requestor/invoices",
+            #[query] afterTimestamp,
+            #[query] maxItems
+        );
+        self.client.get(&url).send().json().await
     }
 
     pub async fn get_invoice(&self, invoice_id: &str) -> Result<Invoice> {
