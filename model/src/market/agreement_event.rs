@@ -9,7 +9,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::market::JsonReason;
+use crate::market::Reason;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "eventtype")]
@@ -28,7 +28,7 @@ pub enum AgreementOperationEvent {
         #[serde(rename = "agreementId")]
         agreement_id: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
-        reason: Option<JsonReason>,
+        reason: Option<Reason>,
     },
     #[serde(rename = "AgreementCancelledEvent")]
     AgreementCancelledEvent {
@@ -37,7 +37,7 @@ pub enum AgreementOperationEvent {
         #[serde(rename = "agreementId")]
         agreement_id: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
-        reason: Option<JsonReason>,
+        reason: Option<Reason>,
     },
     #[serde(rename = "AgreementTerminatedEvent")]
     AgreementTerminatedEvent {
@@ -50,7 +50,7 @@ pub enum AgreementOperationEvent {
         #[serde(rename = "signature")]
         signature: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
-        reason: Option<JsonReason>,
+        reason: Option<Reason>,
     },
 }
 
