@@ -125,7 +125,9 @@ impl PaymentRequestorApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
+        #[allow(non_snake_case)]
         let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        #[allow(non_snake_case)]
         let maxItems = max_items;
 
         #[rustfmt::skip]
