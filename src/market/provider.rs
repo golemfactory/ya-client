@@ -41,7 +41,7 @@ impl MarketProviderApi {
     /// **Note**: this will terminate all pending `collect_demands` calls on this subscription.
     /// This implies, that client code should not `unsubscribe_offer` before it has received
     /// all expected/useful inputs from `collect_demands`.
-    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<String> {
+    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<()> {
         let url = url_format!("offers/{subscription_id}", subscription_id);
         self.client.delete(&url).send().json().await
     }
@@ -110,11 +110,7 @@ impl MarketProviderApi {
         since = "0.4.0",
         note = "Please use the reject_proposal_with_reason function instead"
     )]
-    pub async fn reject_proposal(
-        &self,
-        subscription_id: &str,
-        proposal_id: &str,
-    ) -> Result<String> {
+    pub async fn reject_proposal(&self, subscription_id: &str, proposal_id: &str) -> Result<()> {
         let url = url_format!(
             "offers/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
@@ -134,7 +130,7 @@ impl MarketProviderApi {
         reason: &Option<Reason>,
     ) -> Result<()> {
         let url = url_format!(
-            "offers/{subscription_id}/proposals/{proposal_id}",
+            "offers/{subscription_id}/proposals/{proposal_id}/reject",
             subscription_id,
             proposal_id,
         );
