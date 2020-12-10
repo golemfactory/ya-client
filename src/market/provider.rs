@@ -131,7 +131,7 @@ impl MarketProviderApi {
         &self,
         subscription_id: &str,
         proposal_id: &str,
-        reason: Option<Reason>,
+        reason: &Option<Reason>,
     ) -> Result<String> {
         let url = url_format!(
             "offers/{subscription_id}/proposals/{proposal_id}",
@@ -216,7 +216,7 @@ impl MarketProviderApi {
     pub async fn reject_agreement(
         &self,
         agreement_id: &str,
-        reason: Option<Reason>,
+        reason: &Option<Reason>,
     ) -> Result<String> {
         let url = url_format!("agreements/{agreement_id}/reject", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
@@ -226,7 +226,7 @@ impl MarketProviderApi {
     pub async fn terminate_agreement(
         &self,
         agreement_id: &str,
-        reason: Option<Reason>,
+        reason: &Option<Reason>,
     ) -> Result<String> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
         self.client.post(&url).send_json(&reason).json().await

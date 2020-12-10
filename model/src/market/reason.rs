@@ -22,6 +22,12 @@ impl Reason {
     }
 }
 
+impl<T: Into<String>> From<T> for Reason {
+    fn from(m: T) -> Self {
+        Reason::new(m.into())
+    }
+}
+
 #[derive(thiserror::Error, Clone, Debug, PartialEq)]
 #[error("Error converting `{0}` to Reason: {1}")]
 pub struct ReasonConversionError(String, String);

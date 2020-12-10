@@ -147,7 +147,7 @@ impl MarketRequestorApi {
         &self,
         subscription_id: &str,
         proposal_id: &str,
-        reason: Option<Reason>,
+        reason: &Option<Reason>,
     ) -> Result<String> {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}",
@@ -262,7 +262,7 @@ impl MarketRequestorApi {
     pub async fn cancel_agreement_with_reason(
         &self,
         agreement_id: &str,
-        reason: Option<Reason>,
+        reason: &Option<Reason>,
     ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
@@ -272,7 +272,7 @@ impl MarketRequestorApi {
     pub async fn terminate_agreement(
         &self,
         agreement_id: &str,
-        reason: Option<Reason>,
+        reason: &Option<Reason>,
     ) -> Result<String> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
