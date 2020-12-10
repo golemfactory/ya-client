@@ -104,15 +104,15 @@ async fn provider_interact(options: Options, nanos: u32) -> Result<()> {
 
                     println!("  <=PROVIDER | Huha! Got Demand Proposal.");
 
-                    if !first_rejected {
-                        println!("  <=PROVIDER | Rejecting first Demand Proposal...");
+                    first_rejected = !first_rejected;
+                    if first_rejected {
+                        println!("  <=PROVIDER | Rejecting Demand Proposal...");
                         client
                             .reject_proposal_with_reason(&offer_id, proposal_id, &None)
                             .await?;
                         println!("  <=PROVIDER | Rejected");
-                        first_rejected = true;
                     } else {
-                        println!("  <=PROVIDER | Accepting second Demand Proposal...");
+                        println!("  <=PROVIDER | Accepting Demand Proposal...");
                         let bespoke_proposal = offer.clone();
                         let new_prop_id = client
                             .counter_proposal(&bespoke_proposal, &offer_id, proposal_id)
@@ -175,16 +175,29 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
         serde_json::json!({"lato":"nie"}),
         format!("(&(zima=już)(nanos={}))", nanos),
     );
-    let demand_id = client.subscribe(&demand).await?;
-    println!("REQUESTOR=>  | demand id: {}", demand_id);
+    let demand_id1 = client.subscribe(&demand).await?;
+    let demand_id2 = client.subscribe(&demand).await?;
+    println!(
+        "REQUESTOR=>  | demand ids\n\t: {}\n\t: {}",
+        demand_id1, demand_id2
+    );
+    let mut first = false;
+    let mut round_robin_demands = || {
+        first = !first;
+        if first {
+            return &demand_id1;
+        }
+        &demand_id2
+    };
 
     // requestor - get events
     'req_events: loop {
         let mut requestor_events = vec![];
+        let mut demand_id = round_robin_demands();
         while requestor_events.is_empty() {
+            demand_id = round_robin_demands();
+            println!("REQUESTOR=>  | waiting for events: {}", demand_id);
             requestor_events = client.collect(&demand_id, Some(1.0), Some(2)).await?;
-            println!("REQUESTOR=>  | waiting for events");
-            thread::sleep(Duration::from_millis(3000))
         }
         println!("REQUESTOR=>  | Yay! Got event(s): {:#?}", requestor_events);
 
@@ -208,12 +221,9 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
                             let new_proposal_id = client
                                 .counter_proposal(&bespoke_proposal, &demand_id, proposal_id)
                                 .await?;
-                            let new_proposal_id1 = client
-                                .counter_proposal(&bespoke_proposal, &demand_id, proposal_id)
-                                .await?;
                             println!(
-                                "REQUESTOR=>  | Responded with counter proposal twice (id: {} & {})",
-                                new_proposal_id, new_proposal_id1
+                                "REQUESTOR=>  | Responded with counter proposal(id: {})",
+                                new_proposal_id
                             );
                         }
                         State::Draft => {
@@ -225,7 +235,7 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
                             );
                             let agreement_id = client.create_agreement(&agreement).await?;
                             println!(
-                                "REQUESTOR=>  | agreement created {}: \n{:#?}\nConfirming...",
+                                "REQUESTOR=>  | agreement created {}: \n{:#?}\n\tConfirming...",
                                 agreement_id, &agreement
                             );
                             client.confirm_agreement(&agreement_id, None).await?;
@@ -270,7 +280,8 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
     }
 
     println!("REQUESTOR=>  | Unsunscribing...");
-    client.unsubscribe(&demand_id).await?;
+    client.unsubscribe(&demand_id1).await?;
+    client.unsubscribe(&demand_id2).await?;
     println!("REQUESTOR=>  | Unsubscribed.");
     Ok(())
 }

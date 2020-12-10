@@ -193,7 +193,7 @@ impl MarketProviderApi {
         agreement_id: &str,
         app_session_id: Option<String>,
         timeout: Option<f32>,
-    ) -> Result<()> {
+    ) -> Result<String> {
         let url = url_format!(
             "agreements/{agreement_id}/approve",
             agreement_id,
