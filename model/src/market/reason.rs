@@ -1,4 +1,5 @@
 use derive_more::Display;
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
@@ -7,7 +8,7 @@ use std::fmt::Debug;
 #[display(fmt = "'{}'", message)]
 pub struct Reason {
     pub message: String,
-    #[serde(default)]
+    #[serde(flatten)]
     pub extra: serde_json::Value,
 }
 
@@ -16,7 +17,7 @@ impl Reason {
     pub fn new(message: impl ToString) -> Reason {
         Reason {
             message: message.to_string(),
-            extra: serde_json::Value::Null,
+            extra: serde_json::json!({}),
         }
     }
 }
@@ -26,10 +27,16 @@ impl Reason {
 pub struct ReasonConversionError(String, String);
 
 impl Reason {
-    pub fn try_convert<T: Serialize + Debug>(value: &T) -> Result<Self, ReasonConversionError> {
+    pub fn from_value<T: Serialize + Debug>(value: &T) -> Result<Self, ReasonConversionError> {
         serde_json::to_value(value)
             .and_then(serde_json::from_value)
             .map_err(|e| ReasonConversionError(format!("{:?}", value), e.to_string()))
+    }
+
+    pub fn to_value<T: DeserializeOwned>(&self) -> Result<T, ReasonConversionError> {
+        serde_json::to_value(self)
+            .and_then(serde_json::from_value)
+            .map_err(|e| ReasonConversionError(format!("{:?}", self), e.to_string()))
     }
 }
 
@@ -40,7 +47,7 @@ mod test {
     #[test]
     fn test_try_convert_self() {
         let reason = Reason::new("coś");
-        assert_eq!(reason, Reason::try_convert(&reason).unwrap());
+        assert_eq!(reason, Reason::from_value(&reason).unwrap());
     }
 
     #[test]
@@ -50,7 +57,18 @@ mod test {
             message: "coś".to_string(),
             extra: serde_json::json!({"ala":"ma kota","message": "coś innego"}),
         };
-        assert_eq!(reason, Reason::try_convert(&reason).unwrap());
+        assert_eq!(
+            Reason {
+                message: "coś innego".to_string(),
+                extra: serde_json::json!({"ala":"ma kota"}),
+            },
+            Reason::from_value(&reason).unwrap()
+        );
+
+        assert_ne!(
+            reason,
+            Reason::from_value(&reason).unwrap().to_value().unwrap()
+        )
     }
 
     #[test]
@@ -61,13 +79,13 @@ mod test {
 
         assert_eq!(
             "Error converting `CustomReason` to Reason: missing field `message`",
-            &Reason::try_convert(&custom).unwrap_err().to_string()
+            &Reason::from_value(&custom).unwrap_err().to_string()
         )
     }
 
     #[test]
     fn test_try_convert_custom_reason_with_message_field() {
-        #[derive(Serialize, Deserialize, Debug)]
+        #[derive(Serialize, Deserialize, Debug, PartialEq)]
         struct CustomReason {
             message: String,
             other: bool,
@@ -77,7 +95,18 @@ mod test {
             other: false,
         };
 
-        assert_eq!(Reason::new("coś"), Reason::try_convert(&custom).unwrap())
+        assert_eq!(
+            Reason {
+                message: "coś".to_string(),
+                extra: serde_json::json!({ "other": false }),
+            },
+            Reason::from_value(&custom).unwrap()
+        );
+
+        assert_eq!(
+            custom,
+            Reason::from_value(&custom).unwrap().to_value().unwrap()
+        )
     }
 
     #[test]
@@ -91,7 +120,7 @@ mod test {
         assert_eq!(
             "Error converting `CustomReason { message: 37 }` to Reason: invalid \
             type: integer `37`, expected a string",
-            &Reason::try_convert(&custom).unwrap_err().to_string()
+            &Reason::from_value(&custom).unwrap_err().to_string()
         )
     }
 
@@ -114,10 +143,12 @@ mod test {
         };
 
         assert_eq!(
-            "Error converting `CustomReason { i: 0, b: false, s: \"\", extra: \
-            Object({\"message\": Bool(true)}) }` to Reason: invalid type: \
-            boolean `true`, expected a string",
-            &Reason::try_convert(&custom).unwrap_err().to_string()
+            format!(
+                "Error converting `{:?}` to Reason: invalid type: \
+                boolean `true`, expected a string",
+                custom
+            ),
+            Reason::from_value(&custom).unwrap_err().to_string()
         )
     }
 
@@ -139,7 +170,13 @@ mod test {
             extra: serde_json::json!({"message": "coś"}),
         };
 
-        assert_eq!(Reason::new("coś"), Reason::try_convert(&custom).unwrap())
+        assert_eq!(
+            Reason {
+                message: "coś".to_string(),
+                extra: serde_json::json!({ "i": 0, "b": false, "s": "" }),
+            },
+            Reason::from_value(&custom).unwrap()
+        )
     }
 
     #[test]
@@ -148,7 +185,7 @@ mod test {
 
         assert_eq!(
             Reason::new("coś"),
-            Reason::try_convert(&json_reason).unwrap()
+            Reason::from_value(&json_reason).unwrap()
         )
     }
 }
