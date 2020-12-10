@@ -116,13 +116,23 @@ impl PaymentRequestorApi {
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
     }
 
-    pub async fn get_invoices<Tz>(&self, after_timestamp: Option<DateTime<Tz>>, max_items: Option<i64>) -> Result<Vec<Invoice>> where Tz: TimeZone, Tz::Offset: Display, {
+    pub async fn get_invoices<Tz>(
+        &self,
+        after_timestamp: Option<DateTime<Tz>>,
+        max_items: Option<u32>,
+    ) -> Result<Vec<Invoice>>
+    where
+        Tz: TimeZone,
+        Tz::Offset: Display,
+    {
         let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
         let maxItems = max_items;
         let url = url_format!(
             "requestor/invoices",
-            #[query] afterTimestamp,
-            #[query] maxItems
+            #[query]
+            afterTimestamp,
+            #[query]
+            maxItems
         );
         self.client.get(&url).send().json().await
     }
