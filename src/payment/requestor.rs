@@ -127,12 +127,12 @@ impl PaymentRequestorApi {
     {
         let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
         let maxItems = max_items;
+
+        #[rustfmt::skip]
         let url = url_format!(
             "requestor/invoices",
-            #[query]
-            afterTimestamp,
-            #[query]
-            maxItems
+            #[query] afterTimestamp,
+            #[query] maxItems
         );
         self.client.get(&url).send().json().await
     }
