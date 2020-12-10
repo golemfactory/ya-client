@@ -38,7 +38,7 @@ security:
   - app_key: []
 
 paths:
-  /provider/debitNotes:
+  /debitNotes:
     post:
       tags:
         - provider
@@ -50,60 +50,68 @@ paths:
         201:
           $ref: '#/components/responses/DebitNote'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     get:
       tags:
+        - requestor
         - provider
-      summary: Get Debit Notes issued by this Provider.
-      operationId: getIssuedDebitNotes
+      summary: Get Debit Notes known by this node (either issued by this Provider or received by this Requestor).
+      operationId: getDebitNotes
+      parameters:
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxItems'
       responses:
         200:
           $ref: '#/components/responses/DebitNoteList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /provider/debitNotes/{debitNodeId}:
+  /debitNotes/{debitNoteId}:
     get:
       tags:
+        - requestor
         - provider
       summary: Get Debit Note.
-      operationId: getIssuedDebitNote
+      operationId: getDebitNote
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
+        - $ref: '#/components/parameters/debitNoteId'
       responses:
         200:
           $ref: '#/components/responses/DebitNote'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /provider/debitNotes/{debitNodeId}/payments:
+  /debitNotes/{debitNoteId}/payments:
     get:
       tags:
+        - requestor
         - provider
       summary: Get Payments for Debit Note.
-      operationId: getPaymentsForIssuedDebitNote
+      operationId: getPaymentsForDebitNote
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxItems'
+        - $ref: '#/components/parameters/debitNoteId'
       responses:
         200:
           $ref: '#/components/responses/PaymentList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /provider/debitNotes/{debitNodeId}/send:
+  /debitNotes/{debitNoteId}/send:
     post:
       tags:
         - provider
@@ -113,21 +121,21 @@ paths:
         This is a blocking operation. It will not return until the Requestor
         has acknowledged receiving the Debit Note or timeout has passed.
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
-        - $ref: '#/components/parameters/ackTimeout'
+        - $ref: '#/components/parameters/debitNoteId'
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       responses:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
-  /provider/debitNotes/{debitNodeId}/cancel:
+  /debitNotes/{debitNoteId}/cancel:
     post:
       tags:
         - provider
@@ -139,50 +147,55 @@ paths:
         The Requestor may refuse to cancel the Debit Note if they have already
         paid it.
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
-        - $ref: '#/components/parameters/ackTimeout'
+        - $ref: '#/components/parameters/debitNoteId'
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       responses:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         409:
           $ref: '#/components/responses/DebitNoteCancelRefused'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
-  /provider/debitNoteEvents:
+  /debitNoteEvents:
     get:
       tags:
+        - requestor
         - provider
       summary: Get Debit Note events.
-      operationId: getProviderDebitNoteEvents
+      operationId: getDebitNoteEvents
       description: >
         Listen for Debit Note-related events using long-polling. If there are
         any events the method will return them immediately. If there are none
         the method will wait until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new' events.
+        `afterTimestamp` parameter can be used in order to get just the 'new' events.
         Setting the parameter value to the timestamp of the last processed event
         ensures that no events will go unnoticed.
-
+        **Note:** The events are persistent, ie. calling the API does not remove the
+        event records from receiving queue.
       parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
+        - $ref: 'common.yaml#/parameters/pollTimeout'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxEvents'
+        - $ref: 'common.yaml#/parameters/appSessionId'
       responses:
         200:
-          $ref: '#/components/responses/InvoiceEventList'
+          $ref: '#/components/responses/DebitNoteEventList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /provider/invoices:
+  /invoices:
     post:
       tags:
+        - requestor
         - provider
       summary: Issue an Invoice.
       operationId: issueInvoice
@@ -192,61 +205,68 @@ paths:
         201:
           $ref: '#/components/responses/Invoice'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     get:
       tags:
+        - requestor
         - provider
-      summary: Get Invoices issued by this Provider.
-      operationId: getIssuedInvoices
+      summary: Get Invoices known to this node (either issued by this Provider or received by this Requestor).
+      operationId: getInvoices
+      parameters:
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxItems'
       responses:
         200:
           $ref: '#/components/responses/InvoiceList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /provider/invoices/{invoiceId}:
+  /invoices/{invoiceId}:
     get:
       tags:
+        - requestor
         - provider
       summary: Get Invoice.
-      operationId: getIssuedInvoice
+      operationId: getInvoice
       parameters:
         - $ref: '#/components/parameters/invoiceId'
       responses:
         200:
           $ref: '#/components/responses/Invoice'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /provider/invoices/{invoiceId}/payments:
+  /invoices/{invoiceId}/payments:
     get:
       tags:
+        - requestor
         - provider
-      summary: Get Payments for issued Invoice.
-      operationId: getPaymentsForIssuedInvoice
+      summary: Get Payments for Invoice.
+      operationId: getPaymentsForInvoice
       parameters:
         - $ref: '#/components/parameters/invoiceId'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxItems'
       responses:
         200:
           $ref: '#/components/responses/PaymentList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-
-  /provider/invoices/{invoiceId}/send:
+  /invoices/{invoiceId}/send:
     post:
       tags:
         - provider
@@ -257,20 +277,20 @@ paths:
         has acknowledged receiving the Invoice or timeout has passed.
       parameters:
         - $ref: '#/components/parameters/invoiceId'
-        - $ref: '#/components/parameters/ackTimeout'
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       responses:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
-  /provider/invoices/{invoiceId}/cancel:
+  /invoices/{invoiceId}/cancel:
     post:
       tags:
         - provider
@@ -283,152 +303,86 @@ paths:
         paid it.
       parameters:
         - $ref: '#/components/parameters/invoiceId'
-        - $ref: '#/components/parameters/ackTimeout'
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       responses:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         409:
           $ref: '#/components/responses/InvoiceCancelRefused'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
-  /provider/invoiceEvents:
+  /invoiceEvents:
     get:
       tags:
+        - requestor
         - provider
       summary: Get Invoice events.
-      operationId: getProviderInvoiceEvents
+      operationId: getInvoiceEvents
       description: >
         Listen for Invoice-related events using long-polling. If there are
         any events the method will return them immediately. If there are none
         the method will wait until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new' events.
+        `afterTimestamp` parameter can be used in order to get just the 'new' events.
         Setting the parameter value to the timestamp of the last processed event
         ensures that no events will go unnoticed.
-
+        **Note:** The events are persistent, ie. calling the API does not remove the
+        event records from receiving queue.
       parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
+        - $ref: 'common.yaml#/parameters/pollTimeout'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxEvents'
+        - $ref: 'common.yaml#/parameters/appSessionId'
       responses:
         200:
           $ref: '#/components/responses/InvoiceEventList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /provider/payments:
+  /payments/{paymentId}:
     get:
       tags:
+        - requestor
         - provider
-      summary: Get incoming Payments.
-      operationId: getIncomingPayments
-      description: >
-        Payments can be treated as events and this method can be used to listen
-        for new payments by long-polling.  If there are any payments the method
-        will return them immediately. If there are none the method will wait
-        until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new'
-        payments. Setting the parameter value to the timestamp of the last
-        processed payment ensures that no payments will go unnoticed.
-      parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
-      responses:
-        200:
-          $ref: '#/components/responses/PaymentList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /provider/payments/{paymentId}:
-    get:
-      tags:
-        - provider
-      summary: Get incoming Payment.
-      operationId: getIncomingPayment
+      summary: Get Payment.
+      operationId: getPayment
       parameters:
         - $ref: '#/components/parameters/paymentId'
       responses:
         200:
           $ref: '#/components/responses/Payment'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /provider/accounts:
+  /providerAccounts:
     get:
       tags:
         - provider
       summary: Get available accounts for receiving payments.
-      operationId: getReceiveAccounts
+      operationId: getProviderAccounts
       responses:
         200:
           $ref: '#/components/responses/AccountList'
         401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /requestor/debitNotes:
-    get:
-      tags:
-        - requestor
-      summary: Get Debit Notes received by this Requestor.
-      operationId: getReceivedDebitNotes
-      responses:
-        200:
-          $ref: '#/components/responses/DebitNoteList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /requestor/debitNotes/{debitNodeId}:
-    get:
-      tags:
-        - requestor
-      summary: Get Debit Note.
-      operationId: getReceivedDebitNote
-      parameters:
-        - $ref: '#/components/parameters/debitNodeId'
-      responses:
-        200:
-          $ref: '#/components/responses/DebitNote'
-        401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /requestor/debitNotes/{debitNodeId}/payments:
-    get:
-      tags:
-        - requestor
-      summary: Get Payments for Debit Note.
-      operationId: getPaymentsForReceivedDebitNote
-      parameters:
-        - $ref: '#/components/parameters/debitNodeId'
-      responses:
-        200:
-          $ref: '#/components/responses/PaymentList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /requestor/debitNotes/{debitNodeId}/accept:
+  /debitNotes/{debitNoteId}/accept:
     post:
       tags:
         - requestor
@@ -446,25 +400,25 @@ paths:
 
         NOTE: An Accepted Debit Note cannot be Rejected later.
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
-        - $ref: '#/components/parameters/ackTimeout'
+        - $ref: '#/components/parameters/debitNoteId'
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       requestBody:
         $ref: '#/components/requestBodies/Acceptance'
       responses:
         200:
           $ref: '#/components/responses/OK'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
-  /requestor/debitNotes/{debitNodeId}/reject:
+  /debitNotes/{debitNoteId}/reject:
     post:
       tags:
         - requestor
@@ -484,98 +438,25 @@ paths:
         result of some arbitrage).
 
       parameters:
-        - $ref: '#/components/parameters/debitNodeId'
-        - $ref: '#/components/parameters/ackTimeout'
+        - $ref: '#/components/parameters/debitNoteId'
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       requestBody:
         $ref: '#/components/requestBodies/Rejection'
       responses:
         200:
           $ref: '#/components/responses/OK'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
-  /requestor/debitNoteEvents:
-    get:
-      tags:
-        - requestor
-      summary: Get Debit Note events.
-      operationId: getRequestorDebitNoteEvents
-      description: >
-        Listen for Debit Note-related events using long-polling. If there are
-        any events the method will return them immediately. If there are none
-        the method will wait until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new' events.
-        Setting the parameter value to the timestamp of the last processed event
-        ensures that no events will go unnoticed.
-
-      parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
-      responses:
-        200:
-          $ref: '#/components/responses/DebitNoteEventList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /requestor/invoices:
-    get:
-      tags:
-        - requestor
-      summary: Get Invoices received by this Requestor.
-      operationId: getReceivedInvoices
-      responses:
-        200:
-          $ref: '#/components/responses/InvoiceList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /requestor/invoices/{invoiceId}:
-    get:
-      tags:
-        - requestor
-      summary: Get Invoice.
-      operationId: getReceivedInvoice
-      parameters:
-        - $ref: '#/components/parameters/invoiceId'
-      responses:
-        200:
-          $ref: '#/components/responses/Invoice'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /requestor/invoices/{invoiceId}/payments:
-    get:
-      tags:
-        - requestor
-      summary: Get Payments for received Invoice.
-      operationId: getPaymentsForReceivedInvoice
-      parameters:
-        - $ref: '#/components/parameters/invoiceId'
-      responses:
-        200:
-          $ref: '#/components/responses/PaymentList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /requestor/invoices/{invoiceId}/accept:
+  /invoices/{invoiceId}/accept:
     post:
       tags:
         - requestor
@@ -594,24 +475,24 @@ paths:
         NOTE: An Accepted Invoice cannot be Rejected later.
       parameters:
         - $ref: '#/components/parameters/invoiceId'
-        - $ref: '#/components/parameters/ackTimeout'
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       requestBody:
         $ref: '#/components/requestBodies/Acceptance'
       responses:
         200:
           $ref: '#/components/responses/OK'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
-  /requestor/invoices/{invoiceId}/reject:
+  /invoices/{invoiceId}/reject:
     post:
       tags:
         - requestor
@@ -632,66 +513,44 @@ paths:
 
       parameters:
         - $ref: '#/components/parameters/invoiceId'
-        - $ref: '#/components/parameters/ackTimeout'
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       requestBody:
         $ref: '#/components/requestBodies/Rejection'
       responses:
         200:
           $ref: '#/components/responses/OK'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
         504:
-          $ref: '#/components/responses/AckTimeout'
+          $ref: 'common.yaml#/responses/AckTimeout'
 
-  /requestor/invoiceEvents:
-    get:
-      tags:
-        - requestor
-      summary: Get Invoice events.
-      operationId: getRequestorInvoiceEvents
-      description: >
-        Listen for Invoice-related events using long-polling. If there are
-        any events the method will return them immediately. If there are none
-        the method will wait until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new' events.
-        Setting the parameter value to the timestamp of the last processed event
-        ensures that no events will go unnoticed.
-
-      parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
-      responses:
-        200:
-          $ref: '#/components/responses/InvoiceEventList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /requestor/allocations:
+  /allocations:
     post:
       tags:
         - requestor
       summary: Create Allocation.
       operationId: createAllocation
       description: Allocate funds to make sure they are not spent elsewhere.
+      parameters:
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxItems'
       requestBody:
         $ref: '#/components/requestBodies/Allocation'
       responses:
         201:
           $ref: '#/components/responses/Allocation'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     get:
       tags:
@@ -702,11 +561,11 @@ paths:
         200:
           $ref: '#/components/responses/AllocationList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /requestor/allocations/{allocationId}:
+  /allocations/{allocationId}:
     get:
       tags:
         - requestor
@@ -718,11 +577,11 @@ paths:
         200:
           $ref: '#/components/responses/Allocation'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     put:
       tags:
@@ -732,16 +591,16 @@ paths:
       parameters:
         - $ref: '#/components/parameters/allocationId'
       requestBody:
-          $ref: '#/components/requestBodies/Allocation'
+        $ref: '#/components/requestBodies/Allocation'
       responses:
         200:
           $ref: '#/components/responses/Allocation'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
     delete:
       tags:
@@ -767,75 +626,60 @@ paths:
         200:
           $ref: '#/components/responses/OK'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: 'common.yaml#/responses/NotFound'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /requestor/payments:
+  /payments:
     get:
       tags:
         - requestor
-      summary: Get outgoing Payments.
-      operationId: getOutgoingPayments
+        - provider
+      summary: Get Payments.
+      operationId: getPayments
       description: >
         Payments can be treated as events and this method can be used to listen
         for new payments by long-polling.  If there are any payments the method
         will return them immediately. If there are none the method will wait
         until one appears or timeout passes.
-        `laterThan` parameter can be used in order to get just the 'new'
+        `afterTimestamp` parameter can be used in order to get just the 'new'
         payments. Setting the parameter value to the timestamp of the last
         processed payment ensures that no payments will go unnoticed.
       parameters:
-        - $ref: '#/components/parameters/eventTimeout'
-        - $ref: '#/components/parameters/laterThan'
+        - $ref: 'common.yaml#/parameters/pollTimeout'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+        - $ref: 'common.yaml#/parameters/maxEvents'
+        - $ref: 'common.yaml#/parameters/appSessionId'
       responses:
         200:
           $ref: '#/components/responses/PaymentList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /requestor/payments/{paymentId}:
-    get:
-      tags:
-        - requestor
-      summary: Get outgoing Payment.
-      operationId: getOutgoingPayment
-      parameters:
-        - $ref: '#/components/parameters/paymentId'
-      responses:
-        200:
-          $ref: '#/components/responses/Payment'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/ServerError'
-
-  /requestor/accounts:
+  /requestorAccounts:
     get:
       tags:
         - requestor
       summary: Get available accounts for sending payments.
-      operationId: getSendAccounts
+      operationId: getRequestorAccounts
       responses:
         200:
           $ref: '#/components/responses/AccountList'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
-  /requestor/decorateDemand:
+  /demandDecorations:
     get:
       tags:
         - requestor
-      summary: Decorate market demand.
-      operationId: decorateDemand
+      summary: Obtain Demand elements specific to the given allocations, to be appended to a market Demand.
+      operationId: getDemandDecorations
       description: >
         Generate payment-related properties and constraints to be added to a
         demand published on the marketplace. As a parameter it accepts a list of
@@ -847,11 +691,11 @@ paths:
         200:
           $ref: '#/components/responses/MarketDecoration'
         400:
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'common.yaml#/responses/BadRequest'
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'common.yaml#/responses/Unauthorized'
         500:
-          $ref: '#/components/responses/ServerError'
+          $ref: 'common.yaml#/responses/ServerError'
 
 components:
   securitySchemes:
@@ -860,8 +704,8 @@ components:
 
   parameters:
 
-    debitNodeId:
-      name: debitNodeId
+    debitNoteId:
+      name: debitNoteId
       required: true
       in: path
       schema:
@@ -887,39 +731,6 @@ components:
       in: path
       schema:
         type: string
-
-    ackTimeout:
-      name: timeout
-      description: >
-        How many seconds server should wait for acknowledgement from the remote
-        party (0 means forever)
-      required: false
-      in: query
-      schema:
-        type: number
-        minimum: 0
-        default: 60
-
-    eventTimeout:
-      name: timeout
-      description: >
-        How many seconds server should wait for new events (0 means it should
-        return immediately if there are no events)
-      required: false
-      in: query
-      schema:
-        type: number
-        minimum: 0
-        default: 0
-
-    laterThan:
-      name: laterThan
-      description: Show only events later than specified timeout
-      in: query
-      required: false
-      schema:
-        type: string
-        format: date-time
 
     allocationIds:
       name: allocationIds
@@ -974,47 +785,12 @@ components:
     OK:
       description: OK
 
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    NotFound:
-      description: Object not found
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    ServerError:
-      description: Server error
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
-    AckTimeout:
-      description: The Requestor has not responded to the request within timeout.
-      content:
-        application/json:
-          schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
-
     DebitNoteCancelRefused:
       description: The Requestor has refused to cancel the Debit Note.
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     DebitNote:
       description: OK
@@ -1037,7 +813,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: 'common.yaml#/schemas/ErrorMessage'
+            $ref: 'common.yaml#/components/schemas/ErrorMessage'
 
     Invoice:
       description: OK
@@ -1076,7 +852,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Allocation'
+            $ref: '#/components/schemas/Payment'
 
     PaymentList:
       description: OK
@@ -1251,7 +1027,7 @@ components:
         - agreementId
         - amount
         - paymentDueDate
-        - status
+        #- status
 
     InvoiceStatus:
       description: >
@@ -1263,12 +1039,9 @@ components:
         be indicated as an attribute of the Accepted status. However, as they
         are specific - they shall not be standardized by the Payment API.
 
-
         A Rejected Invoice/Debit Note can subsequently be Accepted.
 
-
         An Accepted Invoice/Debit Note cannot be subsequently Rejected.
-
 
         There is a difference between Paid and Settled - depending on a Payment
         Platform. Paid indicates that the Requestor has ordered Payments of
@@ -1325,6 +1098,10 @@ components:
       properties:
         allocationId:
           type: string
+          readOnly: true
+        timestamp:
+          type: string
+          format: date-time
           readOnly: true
         address:
           type: string
@@ -1431,48 +1208,139 @@ components:
 
     DebitNoteEvent:
       type: object
-      readOnly: true
+      required:
+        - eventType
+        - eventDate
+      discriminator:
+        propertyName: eventType
+      properties:
+        eventType:
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+
+    DebitNoteReceivedEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
       properties:
         debitNoteId:
           type: string
-        timestamp:
+
+    DebitNoteAcceptedEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
+      properties:
+        debitNoteId:
           type: string
-          format: date-time
-        details:
-          type: object
-        eventType:
-          $ref: '#/components/schemas/EventType'
-      required:
-        - debitNoteId
-        - timestamp
-        - eventType
+
+    DebitNoteRejectedEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
+        rejection:
+          $ref: '#/components/schemas/Rejection'
+
+    DebitNoteFailedEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
+
+    DebitNoteSettledEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
+
+    DebitNoteCancelledEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
+      properties:
+        debitNoteId:
+          type: string
 
     InvoiceEvent:
       type: object
-      readOnly: true
+      required:
+        - eventType
+        - eventDate
+      discriminator:
+        propertyName: eventType
+      properties:
+        eventType:
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+
+    InvoiceReceivedEvent:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceEvent'
+        - type: object
       properties:
         invoiceId:
           type: string
-        timestamp:
-          type: string
-          format: date-time
-        details:
-          type: object
-        eventType:
-          $ref: '#/components/schemas/EventType'
-      required:
-        - invoiceId
-        - timestamp
-        - eventType
 
-    EventType:
-      description: Types of Debit Note/Invoice events
-      type: string
-      enum:
-        - RECEIVED
-        - ACCEPTED
-        - REJECTED
-        - CANCELLED
+    InvoiceAcceptedEvent:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceEvent'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+
+    InvoiceRejectedEvent:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceEvent'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+        rejection:
+          $ref: '#/components/schemas/Rejection'
+
+    InvoiceFailedEvent:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceEvent'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+
+    InvoiceSettledEvent:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceEvent'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+
+    InvoiceCancelledEvent:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceEvent'
+        - type: object
+      properties:
+        invoiceId:
+          type: string
+
+    PaymentReceivedEvent:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceEvent'
+        - type: object
+      properties:
+        paymentId:
+          type: string
 
     Account:
       description: Payment account (wallet)

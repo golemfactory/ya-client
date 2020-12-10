@@ -2,6 +2,8 @@
 use ya_client_model::activity::{ActivityState, ActivityUsage, ProviderEvent, ACTIVITY_API_PATH};
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
+use chrono::{DateTime, Utc};
+use std::time::Duration;
 
 #[derive(Clone)]
 pub struct ActivityProviderApi {
@@ -46,12 +48,18 @@ impl ActivityProviderApi {
     #[rustfmt::skip]
     pub async fn get_activity_events(
         &self,
-        timeout: Option<f32>,
-        max_events: Option<i32>,
+        after_timestamp: Option<DateTime<Utc>>,
+        app_session_id: Option<String>,
+        poll_timeout: Option<Duration>,
+        max_events: Option<u32>,
     ) -> Result<Vec<ProviderEvent>> {
+        let after_timestamp = after_timestamp.map(|ts| ts.to_rfc3339());
+        let poll_timeout = poll_timeout.map(|d| d.as_secs_f32());
         let url = url_format!(
             "events",
-            #[query] timeout,
+            #[query] after_timestamp,
+            #[query] app_session_id,
+            #[query] poll_timeout,
             #[query] max_events,
         );
 
