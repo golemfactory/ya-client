@@ -796,7 +796,8 @@ paths:
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: 'common.yaml#/responses/NotFound'  # for invalid appSessionId
+          $ref: 'common.yaml#/responses/NotFound'
+          description: Unknown appSessionId given.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
