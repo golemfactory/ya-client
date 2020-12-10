@@ -132,7 +132,7 @@ impl MarketProviderApi {
         subscription_id: &str,
         proposal_id: &str,
         reason: &Option<Reason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "offers/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
@@ -197,7 +197,7 @@ impl MarketProviderApi {
         agreement_id: &str,
         app_session_id: Option<String>,
         timeout: Option<f32>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/approve",
             agreement_id,
@@ -217,7 +217,7 @@ impl MarketProviderApi {
         &self,
         agreement_id: &str,
         reason: &Option<Reason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/reject", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
     }
@@ -227,7 +227,7 @@ impl MarketProviderApi {
         &self,
         agreement_id: &str,
         reason: &Option<Reason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
     }

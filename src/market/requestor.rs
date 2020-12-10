@@ -42,7 +42,7 @@ impl MarketRequestorApi {
     }
 
     /// Stop subscription by invalidating a previously published Demand.
-    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<String> {
+    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<()> {
         let url = url_format!("demands/{subscription_id}", subscription_id);
         self.client.delete(&url).send().json().await
     }
@@ -126,11 +126,7 @@ impl MarketRequestorApi {
         since = "0.4.0",
         note = "Please use the reject_proposal_with_reason function instead"
     )]
-    pub async fn reject_proposal(
-        &self,
-        subscription_id: &str,
-        proposal_id: &str,
-    ) -> Result<String> {
+    pub async fn reject_proposal(&self, subscription_id: &str, proposal_id: &str) -> Result<()> {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}",
             subscription_id,
@@ -148,9 +144,9 @@ impl MarketRequestorApi {
         subscription_id: &str,
         proposal_id: &str,
         reason: &Option<Reason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
-            "demands/{subscription_id}/proposals/{proposal_id}",
+            "demands/{subscription_id}/proposals/{proposal_id}/reject",
             subscription_id,
             proposal_id,
         );
@@ -193,7 +189,7 @@ impl MarketRequestorApi {
         &self,
         agreement_id: &str,
         app_session_id: Option<String>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/confirm",
             agreement_id,
@@ -264,7 +260,7 @@ impl MarketRequestorApi {
         agreement_id: &str,
         reason: &Option<Reason>,
     ) -> Result<()> {
-        let url = url_format!("agreements/{agreement_id}", agreement_id);
+        let url = url_format!("agreements/{agreement_id}/cancel", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
     }
 
@@ -273,7 +269,7 @@ impl MarketRequestorApi {
         &self,
         agreement_id: &str,
         reason: &Option<Reason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
     }

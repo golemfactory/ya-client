@@ -67,6 +67,8 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
     let offer_id = client.subscribe(&offer).await?;
     println!("  <=PROVIDER | offer id: {}", offer_id);
 
+    let mut first_rejected = false;
+
     // provider - get events
     'prov_events: loop {
         let mut provider_events = vec![];
@@ -91,15 +93,26 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
                     let demand_proposal = client.get_proposal(&offer_id, proposal_id).await?;
                     cmp_proposals(&demand_proposal, &proposal);
 
-                    println!("  <=PROVIDER | Huha! Got Demand Proposal. Accepting...");
-                    let bespoke_proposal = offer.clone();
-                    let new_prop_id = client
-                        .counter_proposal(&bespoke_proposal, &offer_id, proposal_id)
-                        .await?;
-                    println!(
-                        "  <=PROVIDER | Responded with Counter proposal: {}",
-                        new_prop_id
-                    );
+                    println!("  <=PROVIDER | Huha! Got Demand Proposal.");
+
+                    if !first_rejected {
+                        println!("  <=PROVIDER | Rejecting first Demand Proposal...");
+                        client
+                            .reject_proposal_with_reason(&offer_id, proposal_id, &None)
+                            .await?;
+                        println!("  <=PROVIDER | Rejected");
+                        first_rejected = true;
+                    } else {
+                        println!("  <=PROVIDER | Accepting second Demand Proposal...");
+                        let bespoke_proposal = offer.clone();
+                        let new_prop_id = client
+                            .counter_proposal(&bespoke_proposal, &offer_id, proposal_id)
+                            .await?;
+                        println!(
+                            "  <=PROVIDER | Accepted with Counter Proposal: {}",
+                            new_prop_id
+                        );
+                    }
                 }
                 // provider - agreement proposal received --> approve it
                 ProviderEvent::AgreementEvent { agreement, .. } => {
@@ -109,10 +122,10 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
                         agreement_id
                     );
 
-                    let status = client.approve_agreement(agreement_id, None, None).await?;
+                    client.approve_agreement(agreement_id, None, None).await?;
                     // one can also call:
-                    // let res = client.reject_agreement(agreement_id).await?;
-                    println!("  <=PROVIDER | Agreement {} by Requestor!", status);
+                    // client.reject_agreement(agreement_id).await?;
+                    println!("  <=PROVIDER | Agreement approved!");
 
                     println!("  <=PROVIDER | I'm done for now! Bye...");
                     break 'prov_events;
@@ -181,9 +194,12 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
                             let new_proposal_id = client
                                 .counter_proposal(&bespoke_proposal, &demand_id, proposal_id)
                                 .await?;
+                            let new_proposal_id1 = client
+                                .counter_proposal(&bespoke_proposal, &demand_id, proposal_id)
+                                .await?;
                             println!(
-                                "REQUESTOR=>  | Responded with counter proposal (id: {})",
-                                new_proposal_id
+                                "REQUESTOR=>  | Responded with counter proposal twice (id: {} & {})",
+                                new_proposal_id, new_proposal_id1
                             );
                         }
                         State::Draft => {
@@ -198,11 +214,8 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
                                 "REQUESTOR=>  | agreement created {}: \n{:#?}\nConfirming...",
                                 agreement_id, &agreement
                             );
-                            let res = client.confirm_agreement(&agreement_id, None).await?;
-                            println!(
-                                "REQUESTOR=>  | agreement {} confirmed: {}",
-                                &agreement.proposal_id, res
-                            );
+                            client.confirm_agreement(&agreement_id, None).await?;
+                            println!("REQUESTOR=>  | agreement {} confirmed", &agreement_id);
 
                             println!("REQUESTOR=>  | Waiting for Agreement approval...");
                             match client.wait_for_approval(&agreement_id, None).await {
@@ -243,8 +256,8 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
     }
 
     println!("REQUESTOR=>  | Unsunscribing...");
-    let res = client.unsubscribe(&demand_id).await?;
-    println!("REQUESTOR=>  | Unsubscribed: {}", res);
+    client.unsubscribe(&demand_id).await?;
+    println!("REQUESTOR=>  | Unsubscribed.");
     Ok(())
 }
 
