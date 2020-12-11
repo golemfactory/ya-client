@@ -1,10 +1,9 @@
 //! Requestor part of the Market API
 use ya_client_model::market::{
     Agreement, AgreementOperationEvent, AgreementProposal, Demand, NewDemand, NewProposal,
-    Proposal, RequestorEvent,
+    Proposal, Reason, RequestorEvent,
 };
 
-use crate::model::market::{convert_reason, ConvertReason};
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 use chrono::{DateTime, TimeZone};
 use std::fmt::Display;
@@ -148,18 +147,14 @@ impl MarketRequestorApi {
         &self,
         subscription_id: &str,
         proposal_id: &str,
-        reason: Option<impl ConvertReason>,
+        reason: &Option<Reason>,
     ) -> Result<String> {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}/reject",
             subscription_id,
             proposal_id,
         );
-        self.client
-            .post(&url)
-            .send_json(&convert_reason(reason)?)
-            .json()
-            .await
+        self.client.post(&url).send_json(&reason).json().await
     }
 
     /// Creates Agreement from selected Proposal.
@@ -267,28 +262,20 @@ impl MarketRequestorApi {
     pub async fn cancel_agreement_with_reason(
         &self,
         agreement_id: &str,
-        reason: Option<impl ConvertReason>,
+        reason: &Option<Reason>,
     ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/cancel", agreement_id);
-        self.client
-            .post(&url)
-            .send_json(&convert_reason(reason)?)
-            .json()
-            .await
+        self.client.post(&url).send_json(&reason).json().await
     }
 
     /// Terminates approved Agreement.
     pub async fn terminate_agreement(
         &self,
         agreement_id: &str,
-        reason: Option<impl ConvertReason>,
+        reason: &Option<Reason>,
     ) -> Result<String> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
-        self.client
-            .post(&url)
-            .send_json(&convert_reason(reason)?)
-            .json()
-            .await
+        self.client.post(&url).send_json(&reason).json().await
     }
 
     /// Collects events related to an Agreement.

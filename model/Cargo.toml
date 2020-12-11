@@ -16,6 +16,7 @@ sgx = ['secp256k1', 'openssl', 'hex', 'secp256k1/serde']
 [dependencies]
 bigdecimal = { version = "0.1.0", features = ["serde"]}
 chrono = { version = "0.4", features = ["serde"]}
+derive_more = "0.99.11"
 rand = "0.7.3"
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"

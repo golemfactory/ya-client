@@ -9,7 +9,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::market::{Agreement, JsonReason, PropertyQuery, Proposal};
+use crate::market::{Agreement, PropertyQuery, Proposal, Reason};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "eventType")]
@@ -28,7 +28,7 @@ pub enum ProviderEvent {
         #[serde(rename = "proposalId")]
         proposal_id: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
-        reason: Option<JsonReason>,
+        reason: Option<Reason>,
     },
     #[serde(rename = "AgreementEvent")]
     AgreementEvent {
@@ -63,7 +63,7 @@ pub enum RequestorEvent {
         #[serde(rename = "proposalId")]
         proposal_id: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
-        reason: Option<JsonReason>,
+        reason: Option<Reason>,
     },
     #[serde(rename = "PropertyQueryEvent")]
     PropertyQueryEvent {
