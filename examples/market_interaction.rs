@@ -3,6 +3,7 @@ use std::{env, thread, time::Duration};
 use structopt::StructOpt;
 use url::Url;
 
+use std::time::{SystemTime, UNIX_EPOCH};
 use ya_client::{
     market::{MarketProviderApi, MarketRequestorApi},
     model::market::{
@@ -13,13 +14,15 @@ use ya_client::{
     Error, Result,
 };
 
-#[derive(StructOpt)]
+#[derive(Clone, StructOpt)]
 #[structopt(name = "Market", about = "Market service properties")]
 struct Options {
     #[structopt(short, long, default_value = <MarketRequestorApi as WebInterface>::API_URL_ENV_VAR )]
     url: Url,
     #[structopt(long)]
-    app_key: Option<String>,
+    prov_app_key: String,
+    #[structopt(long)]
+    req_app_key: String,
     #[structopt(long, default_value = "info")]
     log_level: String,
 }
@@ -60,10 +63,16 @@ fn cmp_proposals(p1: &Proposal, p2: &Proposal) {
 //////////////
 // PROVIDER //
 //////////////
-async fn provider_interact(client: MarketProviderApi) -> Result<()> {
+async fn provider_interact(options: Options, nanos: u32) -> Result<()> {
+    let client: MarketProviderApi =
+        WebClient::with_token(&options.prov_app_key).interface_at(options.url)?;
+
     unsubscribe_old_offers(&client).await?;
     // provider - publish offer
-    let offer = NewOffer::new(serde_json::json!({"zima":"już"}), "(&(lato=nie))".into());
+    let offer = NewOffer::new(
+        serde_json::json!({"zima":"już", "nanos": nanos}),
+        "(&(lato=nie))".into(),
+    );
     let offer_id = client.subscribe(&offer).await?;
     println!("  <=PROVIDER | offer id: {}", offer_id);
 
@@ -111,7 +120,7 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
 
                     let status = client.approve_agreement(agreement_id, None, None).await?;
                     // one can also call:
-                    // let res = client.reject_agreement(agreement_id).await?;
+                    // client.reject_agreement(agreement_id).await?;
                     println!("  <=PROVIDER | Agreement {} by Requestor!", status);
 
                     println!("  <=PROVIDER | I'm done for now! Bye...");
@@ -135,19 +144,24 @@ async fn provider_interact(client: MarketProviderApi) -> Result<()> {
     }
 
     println!("  <=PROVIDER | Unsubscribing...");
-    let res = client.unsubscribe(&offer_id).await?;
-    println!("  <=PROVIDER | Unsubscribed: {}", res);
+    client.unsubscribe(&offer_id).await?;
+    println!("  <=PROVIDER | Unsubscribed");
     Ok(())
 }
 
 //\\\\\\\\\\\//
 // REQUESTOR //
 //\\\\\\\\\\\//
-async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
+async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
+    let client: MarketRequestorApi =
+        WebClient::with_token(&options.req_app_key).interface_at(options.url)?;
     thread::sleep(Duration::from_millis(300));
     unsubscribe_old_demands(&client).await?;
     // requestor - publish demand
-    let demand = NewDemand::new(serde_json::json!({"lato":"nie"}), "(&(zima=już))".into());
+    let demand = NewDemand::new(
+        serde_json::json!({"lato":"nie"}),
+        format!("(&(zima=już)(nanos={}))", nanos),
+    );
     let demand_id = client.subscribe(&demand).await?;
     println!("REQUESTOR=>  | demand id: {}", demand_id);
 
@@ -198,10 +212,10 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
                                 "REQUESTOR=>  | agreement created {}: \n{:#?}\nConfirming...",
                                 agreement_id, &agreement
                             );
-                            let res = client.confirm_agreement(&agreement_id, None).await?;
+                            client.confirm_agreement(&agreement_id, None).await?;
                             println!(
-                                "REQUESTOR=>  | agreement {} confirmed: {}",
-                                &agreement.proposal_id, res
+                                "REQUESTOR=>  | agreement {} confirmed",
+                                &agreement.proposal_id
                             );
 
                             println!("REQUESTOR=>  | Waiting for Agreement approval...");
@@ -243,8 +257,8 @@ async fn requestor_interact(client: MarketRequestorApi) -> Result<()> {
     }
 
     println!("REQUESTOR=>  | Unsunscribing...");
-    let res = client.unsubscribe(&demand_id).await?;
-    println!("REQUESTOR=>  | Unsubscribed: {}", res);
+    client.unsubscribe(&demand_id).await?;
+    println!("REQUESTOR=>  | Unsubscribed");
     Ok(())
 }
 
@@ -254,19 +268,18 @@ async fn main() -> Result<()> {
     println!("\nrun this example with RUST_LOG=debug to see REST calls\n");
     env::set_var(
         "RUST_LOG",
-        env::var("RUST_LOG").unwrap_or(options.log_level),
+        env::var("RUST_LOG").unwrap_or(options.log_level.clone()),
     );
     env_logger::init();
 
-    let mut client_builder = WebClient::builder();
-    if let Some(app_key) = options.app_key {
-        client_builder = client_builder.auth_token(&app_key);
-    }
-    let client = client_builder.build();
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .subsec_nanos();
 
     futures::try_join!(
-        provider_interact(client.interface_at(options.url.clone())?),
-        requestor_interact(client.interface_at(options.url)?)
+        provider_interact(options.clone(), nanos),
+        requestor_interact(options, nanos)
     )?;
 
     Ok(())

@@ -43,7 +43,7 @@ impl MarketRequestorApi {
     }
 
     /// Stop subscription by invalidating a previously published Demand.
-    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<String> {
+    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<()> {
         let url = url_format!("demands/{subscription_id}", subscription_id);
         self.client.delete(&url).send().json().await
     }
@@ -128,7 +128,7 @@ impl MarketRequestorApi {
         subscription_id: &str,
         proposal_id: &str,
         reason: Option<impl ConvertReason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}/reject",
             subscription_id,
@@ -177,7 +177,7 @@ impl MarketRequestorApi {
         &self,
         agreement_id: &str,
         app_session_id: Option<String>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/confirm",
             agreement_id,
@@ -245,7 +245,7 @@ impl MarketRequestorApi {
         &self,
         agreement_id: &str,
         reason: Option<impl ConvertReason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
         self.client
             .post(&url)
