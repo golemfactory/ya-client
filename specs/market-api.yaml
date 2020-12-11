@@ -218,27 +218,6 @@ paths:
           description: Proposal rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-    delete:
-      tags:
-        - provider
-      operationId: rejectProposalDemand
-      deprecated: true
-      summary: RejectProposalDemand - Rejects Proposal (Demand).
-      description: >
-        DEPRECATED: use `rejectProposalDemandWithReason` instead.
-        Effectively ends a Negotiation chain - it explicitly indicates that the sender
-        will not create another counter-Proposal.
-      responses:
-        204:
-          description: Proposal rejected.
-        401:
-          $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
-        410:
-          description: Proposal already rejected.
-        default:
-          $ref: 'common.yaml#/responses/UnexpectedError'
 
     post:
       tags:
@@ -272,8 +251,8 @@ paths:
     post:
       tags:
         - provider
-      operationId: rejectProposalDemandWithReason
-      summary: RejectProposalDemandReason - Rejects Proposal (Demand) allowing specifying a Reason.
+      operationId: rejectProposalDemand
+      summary: RejectProposalDemand - Rejects Proposal (Demand).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
@@ -467,27 +446,6 @@ paths:
           description: Proposal rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-    delete:
-      tags:
-        - requestor
-      operationId: rejectProposalOffer
-      deprecated: true
-      summary: RejectProposalOffer - Rejects Proposal (Offer).
-      description: >
-        DEPRECATED: use `rejectProposalOfferWithReason` instead.
-        Effectively ends a Negotiation chain - it explicitly indicates that the sender
-        will not create another counter-Proposal.
-      responses:
-        204:
-          description: Proposal rejected.
-        401:
-          $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
-        410:
-          description: Proposal already rejected.
-        default:
-          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - requestor
@@ -520,8 +478,8 @@ paths:
     post:
       tags:
         - requestor
-      operationId: rejectProposalOfferWithReason
-      summary: RejectProposalOfferReason - Rejects Proposal (Offer).
+      operationId: rejectProposalOffer
+      summary: RejectProposalOffer - Rejects Proposal (Offer).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
@@ -615,33 +573,6 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-    delete:
-      tags:
-        - requestor
-      operationId: cancelAgreement
-      deprecated: true
-      summary: CancelAgreement - Cancels Agreement.
-      description: >
-        DEPRECATED: use `cancelAgreementWithReason` instead.
-        It is only possible before Requestor confirmed or Provider approved
-        or rejected the Agreement, and before Expiration.
-
-
-        Causes:
-          - the awaiting `approveAgreement` on Provider side to return with `Cancelled` response.
-          - the awaiting `waitForApproval` local call to return with `Cancelled` response.
-      responses:
-        204:
-          description: Agreement cancelled.
-        401:
-          $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
-        410:
-          $ref: 'common.yaml#/responses/Gone'
-          description: Agreement not in `Proposal` nor `Pending` state.
-        default:
-          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}/cancel:
     parameters:
@@ -649,11 +580,11 @@ paths:
     post:
       tags:
         - requestor
-      operationId: cancelAgreementWithReason
-      summary: CancelAgreementWithReason - Cancels Agreement.
+      operationId: cancelAgreement
+      summary: CancelAgreement - Cancels Agreement.
       description: >
-        It is only possible before Requestor confirmed or Provider approved
-        or rejected the Agreement, and before Expiration.
+        It is only possible before Provider approved or rejected the Agreement,
+        and before its Expiration.
 
 
         Causes:
