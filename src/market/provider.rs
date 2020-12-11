@@ -134,7 +134,7 @@ impl MarketProviderApi {
         reason: &Option<Reason>,
     ) -> Result<String> {
         let url = url_format!(
-            "offers/{subscription_id}/proposals/{proposal_id}",
+            "offers/{subscription_id}/proposals/{proposal_id}/reject",
             subscription_id,
             proposal_id,
         );

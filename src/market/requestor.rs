@@ -150,7 +150,7 @@ impl MarketRequestorApi {
         reason: &Option<Reason>,
     ) -> Result<String> {
         let url = url_format!(
-            "demands/{subscription_id}/proposals/{proposal_id}",
+            "demands/{subscription_id}/proposals/{proposal_id}/reject",
             subscription_id,
             proposal_id,
         );
@@ -264,7 +264,7 @@ impl MarketRequestorApi {
         agreement_id: &str,
         reason: &Option<Reason>,
     ) -> Result<()> {
-        let url = url_format!("agreements/{agreement_id}", agreement_id);
+        let url = url_format!("agreements/{agreement_id}/cancel", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
     }
 
