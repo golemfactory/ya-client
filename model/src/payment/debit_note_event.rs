@@ -5,8 +5,7 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct DebitNoteEvent {
     pub debit_note_id: String,
-    pub timestamp: DateTime<Utc>,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub details: Option<serde_json::Value>,
+    pub event_date: DateTime<Utc>,
+    #[serde(flatten)]
     pub event_type: crate::payment::EventType,
 }
