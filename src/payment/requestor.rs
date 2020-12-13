@@ -77,10 +77,27 @@ impl PaymentRequestorApi {
         self.client.get(&url).send().json().await
     }
 
-    pub async fn get_payments_for_debit_note(&self, debit_note_id: &str) -> Result<Vec<Payment>> {
+    pub async fn get_payments_for_debit_note<Tz>(
+        &self,
+        debit_note_id: &str,
+        after_timestamp: Option<DateTime<Tz>>,
+        max_items: Option<u32>,
+    ) -> Result<Vec<Payment>>
+    where
+        Tz: TimeZone,
+        Tz::Offset: Display,
+    {
+        #[allow(non_snake_case)]
+        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        #[allow(non_snake_case)]
+        let maxItems = max_items;
+
+        #[rustfmt::skip]
         let url = url_format!(
             "requestor/debitNotes/{debit_note_id}/payments",
-            debit_note_id
+            debit_note_id,
+            #[query] afterTimestamp,
+            #[query] maxItems
         );
         self.client.get(&url).send().json().await
     }
