@@ -132,22 +132,30 @@ impl PaymentRequestorApi {
         self.client.post(&url).send_json(rejection).json().await
     }
 
-    #[rustfmt::skip]
     pub async fn get_debit_note_events<Tz>(
         &self,
-        later_than: Option<&DateTime<Tz>>,
+        after_timestamp: Option<&DateTime<Tz>>,
         timeout: Option<Duration>,
+        max_events: Option<u32>,
+        app_session_id: Option<String>,
     ) -> Result<Vec<DebitNoteEvent>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let later_than = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = timeout.map(|d| d.as_secs_f64());
+        #[allow(non_snake_case)]
+        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        #[allow(non_snake_case)]
+        let pollTimeout = timeout.map(|d| d.as_secs_f64());
+        #[allow(non_snake_case)]
+        let maxEvents = max_events;
+
+        #[rustfmt::skip]
         let url = url_format!(
             "requestor/debitNoteEvents",
-            #[query] later_than,
-            #[query] timeout
+            #[query] afterTimestamp,
+            #[query] pollTimeout,
+            #[query] maxEvents
         );
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
     }
@@ -211,22 +219,30 @@ impl PaymentRequestorApi {
         self.client.post(&url).send_json(rejection).json().await
     }
 
-    #[rustfmt::skip]
     pub async fn get_invoice_events<Tz>(
         &self,
-        later_than: Option<&DateTime<Tz>>,
+        after_timestamp: Option<&DateTime<Tz>>,
         timeout: Option<Duration>,
+        max_events: Option<u32>,
+        app_session_id: Option<String>,
     ) -> Result<Vec<InvoiceEvent>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let later_than = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = timeout.map(|d| d.as_secs_f64());
+        #[allow(non_snake_case)]
+        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        #[allow(non_snake_case)]
+        let pollTimeout = timeout.map(|d| d.as_secs_f64());
+        #[allow(non_snake_case)]
+        let maxEvents = max_events;
+
+        #[rustfmt::skip]
         let url = url_format!(
             "requestor/invoiceEvents",
-            #[query] later_than,
-            #[query] timeout
+            #[query] afterTimestamp,
+            #[query] pollTimeout,
+            #[query] maxEvents
         );
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
     }
@@ -259,22 +275,30 @@ impl PaymentRequestorApi {
         self.client.delete(&url).send().json().await
     }
 
-    #[rustfmt::skip]
     pub async fn get_payments<Tz>(
         &self,
-        later_than: Option<&DateTime<Tz>>,
+        after_timestamp: Option<&DateTime<Tz>>,
         timeout: Option<Duration>,
+        max_events: Option<u32>,
+        app_session_id: Option<String>,
     ) -> Result<Vec<Payment>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let later_than = later_than.map(|dt| dt.to_rfc3339());
-        let timeout = timeout.map(|d| d.as_secs_f64());
+        #[allow(non_snake_case)]
+        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        #[allow(non_snake_case)]
+        let pollTimeout = timeout.map(|d| d.as_secs_f64());
+        #[allow(non_snake_case)]
+        let maxEvents = max_events;
+
+        #[rustfmt::skip]
         let url = url_format!(
             "requestor/payments",
-            #[query] later_than,
-            #[query] timeout
+            #[query] afterTimestamp,
+            #[query] pollTimeout,
+            #[query] maxEvents
         );
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
     }
