@@ -49,8 +49,27 @@ impl PaymentRequestorApi {
         Self { client, config }
     }
 
-    pub async fn get_debit_notes(&self) -> Result<Vec<DebitNote>> {
-        self.client.get("requestor/debitNotes").send().json().await
+    pub async fn get_debit_notes<Tz>(
+        &self,
+        after_timestamp: Option<DateTime<Tz>>,
+        max_items: Option<u32>,
+    ) -> Result<Vec<DebitNote>>
+    where
+        Tz: TimeZone,
+        Tz::Offset: Display,
+    {
+        #[allow(non_snake_case)]
+        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        #[allow(non_snake_case)]
+        let maxItems = max_items;
+
+        #[rustfmt::skip]
+        let url = url_format!(
+            "requestor/debitNotes",
+            #[query] afterTimestamp,
+            #[query] maxItems
+        );
+        self.client.get(&url).send().json().await
     }
 
     pub async fn get_debit_note(&self, debit_note_id: &str) -> Result<DebitNote> {
