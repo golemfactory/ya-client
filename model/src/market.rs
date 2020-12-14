@@ -10,7 +10,7 @@ pub mod proposal;
 pub mod reason;
 
 pub use agreement::Agreement;
-pub use agreement_event::AgreementOperationEvent;
+pub use agreement_event::{AgreementEventType, AgreementOperationEvent};
 pub use agreement_proposal::AgreementProposal;
 pub use demand::Demand;
 pub use demand_offer_base::{DemandOfferBase, NewDemand, NewOffer, NewProposal};
