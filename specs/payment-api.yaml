@@ -1224,51 +1224,51 @@ components:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
         - type: object
-      properties:
-        debitNoteId:
-          type: string
+          properties:
+            debitNoteId:
+              type: string
 
     DebitNoteAcceptedEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
         - type: object
-      properties:
-        debitNoteId:
-          type: string
+          properties:
+            debitNoteId:
+              type: string
 
     DebitNoteRejectedEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
         - type: object
-      properties:
-        debitNoteId:
-          type: string
-        rejection:
-          $ref: '#/components/schemas/Rejection'
+          properties:
+            debitNoteId:
+              type: string
+            rejection:
+              $ref: '#/components/schemas/Rejection'
 
     DebitNoteFailedEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
         - type: object
-      properties:
-        debitNoteId:
-          type: string
+          properties:
+            debitNoteId:
+              type: string
 
     DebitNoteSettledEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
         - type: object
-      properties:
-        debitNoteId:
-          type: string
+          properties:
+            debitNoteId:
+              type: string
 
     DebitNoteCancelledEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
         - type: object
-      properties:
-        debitNoteId:
-          type: string
+          properties:
+            debitNoteId:
+              type: string
 
     InvoiceEvent:
       type: object
