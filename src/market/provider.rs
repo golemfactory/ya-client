@@ -1,7 +1,7 @@
 //! Provider part of the Market API
 use ya_client_model::market::{
-    convert_reason, Agreement, AgreementOperationEvent, ConvertReason, NewOffer, NewProposal,
-    Offer, Proposal, ProviderEvent, MARKET_API_PATH,
+    Agreement, AgreementOperationEvent, NewOffer, NewProposal, Offer, Proposal, ProviderEvent,
+    Reason, MARKET_API_PATH,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
@@ -41,7 +41,7 @@ impl MarketProviderApi {
     /// **Note**: this will terminate all pending `collect_demands` calls on this subscription.
     /// This implies, that client code should not `unsubscribe_offer` before it has received
     /// all expected/useful inputs from `collect_demands`.
-    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<String> {
+    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<()> {
         let url = url_format!("offers/{subscription_id}", subscription_id);
         self.client.delete(&url).send().json().await
     }
@@ -106,43 +106,18 @@ impl MarketProviderApi {
     ///
     /// Effectively ends a Negotiation chain - it explicitly indicates that
     /// the sender will not create another counter-Proposal.
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use the reject_proposal_with_reason function instead"
-    )]
     pub async fn reject_proposal(
         &self,
         subscription_id: &str,
         proposal_id: &str,
-    ) -> Result<String> {
+        reason: &Option<Reason>,
+    ) -> Result<()> {
         let url = url_format!(
-            "offers/{subscription_id}/proposals/{proposal_id}",
+            "offers/{subscription_id}/proposals/{proposal_id}/reject",
             subscription_id,
             proposal_id,
         );
-        self.client.delete(&url).send().json().await
-    }
-
-    /// Rejects Proposal (Demand).
-    ///
-    /// Effectively ends a Negotiation chain - it explicitly indicates that
-    /// the sender will not create another counter-Proposal.
-    pub async fn reject_proposal_with_reason(
-        &self,
-        subscription_id: &str,
-        proposal_id: &str,
-        reason: Option<impl ConvertReason>,
-    ) -> Result<String> {
-        let url = url_format!(
-            "offers/{subscription_id}/proposals/{proposal_id}",
-            subscription_id,
-            proposal_id,
-        );
-        self.client
-            .post(&url)
-            .send_json(&convert_reason(reason)?)
-            .json()
-            .await
+        self.client.post(&url).send_json(&reason).json().await
     }
 
     /// Responds with a bespoke Offer to received Demand.
@@ -220,28 +195,20 @@ impl MarketProviderApi {
     pub async fn reject_agreement(
         &self,
         agreement_id: &str,
-        reason: Option<impl ConvertReason>,
-    ) -> Result<String> {
+        reason: &Option<Reason>,
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/reject", agreement_id);
-        self.client
-            .post(&url)
-            .send_json(&convert_reason(reason)?)
-            .json()
-            .await
+        self.client.post(&url).send_json(&reason).json().await
     }
 
     /// Terminates approved Agreement.
     pub async fn terminate_agreement(
         &self,
         agreement_id: &str,
-        reason: Option<impl ConvertReason>,
-    ) -> Result<String> {
+        reason: &Option<Reason>,
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
-        self.client
-            .post(&url)
-            .send_json(&convert_reason(reason)?)
-            .json()
-            .await
+        self.client.post(&url).send_json(&reason).json().await
     }
 
     /// Fetches agreement with given agreement id.

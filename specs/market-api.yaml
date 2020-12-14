@@ -218,27 +218,6 @@ paths:
           description: Proposal rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-    delete:
-      tags:
-        - provider
-      operationId: rejectProposalDemand
-      deprecated: true
-      summary: RejectProposalDemand - Rejects Proposal (Demand).
-      description: >
-        DEPRECATED: use `rejectProposalDemandWithReason` instead.
-        Effectively ends a Negotiation chain - it explicitly indicates that the sender
-        will not create another counter-Proposal.
-      responses:
-        204:
-          description: Proposal rejected.
-        401:
-          $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
-        410:
-          description: Proposal already rejected.
-        default:
-          $ref: 'common.yaml#/responses/UnexpectedError'
 
     post:
       tags:
@@ -272,8 +251,8 @@ paths:
     post:
       tags:
         - provider
-      operationId: rejectProposalDemandWithReason
-      summary: RejectProposalDemandReason - Rejects Proposal (Demand) allowing specifying a Reason.
+      operationId: rejectProposalDemand
+      summary: RejectProposalDemand - Rejects Proposal (Demand).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
@@ -467,27 +446,6 @@ paths:
           description: Proposal rejected.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-    delete:
-      tags:
-        - requestor
-      operationId: rejectProposalOffer
-      deprecated: true
-      summary: RejectProposalOffer - Rejects Proposal (Offer).
-      description: >
-        DEPRECATED: use `rejectProposalOfferWithReason` instead.
-        Effectively ends a Negotiation chain - it explicitly indicates that the sender
-        will not create another counter-Proposal.
-      responses:
-        204:
-          description: Proposal rejected.
-        401:
-          $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
-        410:
-          description: Proposal already rejected.
-        default:
-          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - requestor
@@ -520,8 +478,8 @@ paths:
     post:
       tags:
         - requestor
-      operationId: rejectProposalOfferWithReason
-      summary: RejectProposalOfferReason - Rejects Proposal (Offer).
+      operationId: rejectProposalOffer
+      summary: RejectProposalOffer - Rejects Proposal (Offer).
       description: >
         Effectively ends a Negotiation chain - it explicitly indicates that the sender
         will not create another counter-Proposal.
@@ -585,7 +543,11 @@ paths:
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         409:
-          description: Proposal not in `Draft` state.
+          $ref: 'common.yaml#/responses/Conflict'
+          description: Proposal not negotiated yet (in `Initial` state).
+        410:
+          $ref: 'common.yaml#/responses/Gone'
+          description: Proposal rejected or expired.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -611,34 +573,6 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-    delete:
-      tags:
-        - requestor
-      operationId: cancelAgreement
-      deprecated: true
-      summary: CancelAgreement - Cancels Agreement.
-      description: >
-        DEPRECATED: use `cancelAgreementWithReason` instead.
-        It is only possible before Requestor confirmed or Provider approved
-        or rejected the Agreement, and before Expiration.
-
-
-        Causes:
-          - the awaiting `approveAgreement` on Provider side to return with `Cancelled` response.
-          - the awaiting `waitForApproval` local call to return with `Cancelled` response.
-      responses:
-        204:
-          description: Agreement cancelled.
-        401:
-          $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
-        409:
-          description: Agreement not in `Proposal` nor `Pending` state.
-        410:
-          $ref: 'common.yaml#/responses/Gone' # Expired
-        default:
-          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements/{agreementId}/cancel:
     parameters:
@@ -646,11 +580,11 @@ paths:
     post:
       tags:
         - requestor
-      operationId: cancelAgreementWithReason
-      summary: CancelAgreementWithReason - Cancels Agreement.
+      operationId: cancelAgreement
+      summary: CancelAgreement - Cancels Agreement.
       description: >
-        It is only possible before Requestor confirmed or Provider approved
-        or rejected the Agreement, and before Expiration.
+        It is only possible before Provider approved or rejected the Agreement,
+        and before its Expiration.
 
 
         Causes:
@@ -665,10 +599,9 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
-        409:
-          description: Agreement not in `Proposal` nor `Pending` state.
         410:
-          $ref: 'common.yaml#/responses/Gone' # Expired
+          $ref: 'common.yaml#/responses/Gone'
+          description: Agreement not in `Proposal` nor `Pending` state.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -689,13 +622,12 @@ paths:
       responses:
         204:
           description: Agreement confirmed.
-        400:
-          $ref: 'common.yaml#/responses/BadRequest' # when called for cancelled agreement
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
-        409:
+        410:
+          $ref: 'common.yaml#/responses/Gone'
           description: Agreement not in `Proposal` state.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
@@ -711,37 +643,44 @@ paths:
       summary: WaitForApproval - Waits for Agreement approval by the Provider.
       description: >
         This is a blocking operation. The call may be aborted by Requestor caller
-        code. After the call is aborted, another `waitForApproval` call can be
-        raised on the same Agreement Id.
-
-
-        It returns one of the following options:
-
-        * `Approved` - Indicates that the Agreement has been approved by the Provider.
-          - The Provider is now ready to accept a request to start an Activity
-            as described in the negotiated agreement.
-          - The Providers’s corresponding `approveAgreement` call returns `Approved` after
-            this on the Provider side.
-
-        * `Rejected` - Indicates that the Provider has called `rejectAgreement`,
-          which effectively stops the Agreement handshake. The Requestor may attempt
-          to return to the Negotiation phase by sending a new Proposal.
-
-        * `Cancelled` - Indicates that the Requestor himself has called
-          `cancelAgreement`, which effectively stops the Agreement handshake.
+        code. After the call is aborted or timed out, another `waitForApproval`
+        call can be raised on the same Agreement Id.
       responses:
-        200:
-          description: Agreement approved.
+        204:
+          description: >
+            Agreement approved by the Provider.
+
+
+            The Providers’s corresponding `approveAgreement` call returns `204`
+            (Approved) **before** this endpoint on the Requestor side.
+            The Provider is now ready to accept a request to start an Activity.
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
         408:
           $ref: 'common.yaml#/responses/Timeout'
+          description: Agreement not approved within given timeout. Try again.
         409:
-          description: Agreement not in `Pending` state.
+          $ref: 'common.yaml#/responses/Conflict'
+          description: Agreement not confirmed yet by Requestor himself.
         410:
-          $ref: 'common.yaml#/responses/Gone' # Agreement Rejected
+          $ref: 'common.yaml#/responses/Gone'
+          description: >
+            Agreement is not approved. This state is permanent.
+
+
+            Attached `ErrorMessage` contains further details:
+              - `Rejected` - Indicates that the Provider has called
+                `rejectAgreement`, which effectively stops the Agreement handshake.
+                The Requestor may attempt to return to the Negotiation phase by
+                sending a new Proposal or to the Agreement phase by creating
+                new Agreement.
+              - `Cancelled` - Indicates that the Requestor himself has called
+                `cancelAgreement`, which effectively stops the Agreement handshake.
+              - `Expired` - Indicates that Agreement validity period elapsed and it
+                was not approved, rejected nor cancelled.
+              - `Terminated` - Indicates that Agreement is already terminated.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -760,6 +699,7 @@ paths:
       description: >
         This is a blocking operation. It will not return until there is
         at least one new event. All events are appearing on both sides equally.
+
 
         Returns Agreement related events:
 
@@ -787,7 +727,8 @@ paths:
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
-          $ref: 'common.yaml#/responses/NotFound'  # for invalid appSessionId
+          $ref: 'common.yaml#/responses/NotFound'
+          description: Unknown appSessionId given.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -807,23 +748,6 @@ paths:
         call can be raised on the same `agreementId`.
 
 
-        It returns one of the following options:
-
-        * `Approved` - Indicates that the approved Agreement has been successfully
-        delivered to the Requestor and acknowledged.
-          - The Requestor side has been notified about the Provider’s commitment
-            to the Agreement.
-          - The Provider is now ready to accept a request to start an Activity
-            as described in the negotiated agreement.
-          - The Requestor’s corresponding `waitForApproval` call returns `Approved` after
-            the one on the Provider side.
-
-        * `Cancelled` - Indicates that before delivering the approved Agreement,
-        the Requestor has called `cancelAgreement`, thus invalidating the
-        Agreement. The Provider may attempt to return to the Negotiation phase
-        by sending a new Proposal.
-
-
         **Note**: It is expected from the Provider node implementation to “ring-fence”
         the resources required to fulfill the Agreement before the ApproveAgreement
         is sent. However, the resources should not be fully committed until `Approved`
@@ -832,18 +756,39 @@ paths:
 
         **Note**: Mutually exclusive with `rejectAgreement`.
       responses:
-        200:
-          description: Agreement approved.
+        204:
+          description: >
+            Agreement approved.
+
+            Indicates that the approved Agreement has been successfully
+            delivered to the Requestor and acknowledged.
+              - The Requestor side has been notified about the Provider’s commitment.
+              - The Provider is now ready to accept a request to start an Activity.
+              - The Requestor’s corresponding `waitForApproval` call returns `204`
+                (Approved) **after** this endpoint on the Provider side.
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
         408:
           $ref: 'common.yaml#/responses/Timeout'
-        409:
-          description: Agreement not in `Proposal` state.
+          description: Agreement not approved within given timeout. Try again.
         410:
-          $ref: 'common.yaml#/responses/Gone'  # Agreement Cancelled
+          $ref: 'common.yaml#/responses/Gone'
+          description: >
+            Agreement approval failed permanently.
+
+
+            Attached `ErrorMessage` contains further details:
+              - `Rejected` - Indicates that the Provider himself has already
+                called `rejectAgreement`.
+              - `Cancelled` - Indicates that before Provider approved this Agreement,
+                the Requestor has called `cancelAgreement`, thus invalidating the
+                Agreement. The Provider may attempt to return to the Negotiation phase
+                by sending a new Proposal.
+              - `Expired` - Indicates that Agreement validity period elapsed and it was
+                not approved, rejected nor cancelled.
+              - `Terminated` - Indicates that Agreement is already terminated.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -859,6 +804,7 @@ paths:
         The Requestor side is notified about the Provider’s decision to reject
         a negotiated agreement. This effectively stops the Agreement handshake.
 
+
         **Note**: Mutually exclusive with `approveAgreement`.
       requestBody:
         $ref: '#/components/requestBodies/Reason'
@@ -869,10 +815,22 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
-        409:
-          description: Agreement not in `Proposal` state.
         410:
-          $ref: 'common.yaml#/responses/Gone' # Expired
+          $ref: 'common.yaml#/responses/Gone'
+          description: >
+            Agreement rejection failed permanently.
+
+
+            Attached `ErrorMessage` contains further details:
+              - `Rejected` - Indicates that the Provider himself has already
+                called `rejectAgreement`.
+              - `Cancelled` - Indicates that before Provider rejected this Agreement,
+                the Requestor has called `cancelAgreement`, thus invalidating the
+                Agreement. The Provider may attempt to return to the Negotiation phase
+                by sending a new Proposal.
+              - `Expired` - Indicates that Agreement validity period elapsed and it was
+                not approved, rejected nor cancelled.
+              - `Terminated` - Indicates that Agreement is already terminated.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -888,11 +846,14 @@ paths:
       description: >
         Method to finish/close the Agreement while in `Approved` state.
 
+
         The other party gets notified about calling party decision to
         terminate a "running" agreement.
 
+
         **Note**: Can be invoked at any time after Agreement was approved
         by both sides.
+
 
         **Note**: Financial and reputational consequences are not
         defined by this specification.
@@ -906,9 +867,20 @@ paths:
         404:
           $ref: 'common.yaml#/responses/NotFound'
         409:
-          description: Agreement not in `Approved` state.
+          $ref: 'common.yaml#/responses/Conflict'
+          description: Agreement can not be terminated yet (is in `Proposal` or `Pending` state).
         410:
           $ref: 'common.yaml#/responses/Gone'
+          description: >
+            Agreement termination failed permanently.
+
+
+            Attached `ErrorMessage` contains further details:
+              - `Rejected` - Indicates that the Provider has rejected this Agreement.
+              - `Cancelled` - Indicates the Requestor has called cancelled this Agreement.
+              - `Expired` - Indicates that Agreement validity period elapsed and it was
+                not approved, rejected nor cancelled.
+              - `Terminated` - Indicates that Agreement is already terminated.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -1063,7 +1035,8 @@ components:
       description: >
         End of validity period.
 
-        Agreement needs to be accepted, rejected or cancelled before this date;
+
+        Agreement needs to be approved, rejected or cancelled before this date;
         otherwise will expire.
 
 
@@ -1223,7 +1196,7 @@ components:
           type: string
           enum: [Proposal, Pending, Cancelled, Rejected, Approved, Expired, Terminated]
           description: >
-            * `Proposal` - newly created by a Requestor (based on Proposal)
+            * `Proposal` - newly created by a Requestor (draft based on Proposal)
 
             * `Pending` - confirmed by a Requestor and send to Provider for approval
 
@@ -1233,7 +1206,7 @@ components:
 
             * `Approved` by both sides
 
-            * `Expired` - not accepted, rejected nor cancelled within validity period
+            * `Expired` - not approved, rejected nor cancelled within validity period
 
             * `Terminated` - finished after approval.
         timestamp:

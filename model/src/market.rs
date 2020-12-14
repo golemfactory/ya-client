@@ -10,7 +10,7 @@ pub mod proposal;
 pub mod reason;
 
 pub use agreement::Agreement;
-pub use agreement_event::AgreementOperationEvent;
+pub use agreement_event::{AgreementEventType, AgreementOperationEvent};
 pub use agreement_proposal::AgreementProposal;
 pub use demand::Demand;
 pub use demand_offer_base::{DemandOfferBase, NewDemand, NewOffer, NewProposal};
@@ -18,6 +18,6 @@ pub use event::{ProviderEvent, RequestorEvent};
 pub use offer::Offer;
 pub use property_query::PropertyQuery;
 pub use proposal::Proposal;
-pub use reason::{convert_reason, ConvertReason, JsonReason, Reason};
+pub use reason::Reason;
 
 pub const MARKET_API_PATH: &str = "market-api/v1/";

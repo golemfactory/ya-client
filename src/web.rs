@@ -1,8 +1,6 @@
 //! Web utils
-use crate::{Error, Result};
-use awc::http::header::qitem;
 use awc::{
-    error::PayloadError,
+    error::{PayloadError, SendRequestError},
     http::{header, HeaderMap, HeaderName, HeaderValue, Method, StatusCode},
     ClientRequest, ClientResponse, SendClientRequest,
 };
@@ -17,6 +15,9 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::{env, rc::Rc, str::FromStr, time::Duration};
 use url::{form_urlencoded, Url};
+
+use crate::model::ErrorMessage;
+use crate::{Error, Result};
 
 pub const YAGNA_API_URL_ENV_VAR: &str = "YAGNA_API_URL";
 pub const DEFAULT_YAGNA_API_URL: &str = "http://127.0.0.1:7465";
@@ -56,9 +57,29 @@ pub trait WebInterface {
     fn from_client(client: WebClient) -> Self;
 }
 
+#[derive(Clone)]
+pub struct WebRequestMeta {
+    method: Method,
+    url: String,
+}
+
+impl WebRequestMeta {
+    fn new(method: Method, url: String) -> Self {
+        WebRequestMeta { method, url }
+    }
+
+    fn as_request_err(&self, err: SendRequestError) -> Error {
+        Error::from_request(err, self.method.clone(), self.url.clone())
+    }
+
+    fn as_response_err(&self, code: StatusCode, msg: String) -> Error {
+        Error::from_response(code, msg, self.method.clone(), self.url.clone())
+    }
+}
+
 pub struct WebRequest<T> {
     inner_request: T,
-    url: String,
+    meta: WebRequestMeta,
 }
 
 impl WebClient {
@@ -81,23 +102,23 @@ impl WebClient {
         let url = self.url(url).unwrap().to_string();
         log::debug!("doing {} on {}", method, url);
         WebRequest {
-            inner_request: self.awc.request(method, &url),
-            url,
+            inner_request: self.awc.request(method.clone(), &url),
+            meta: WebRequestMeta::new(method, url),
         }
     }
 
     pub async fn event_stream(&self, url: &str) -> Result<impl Stream<Item = Result<Event>>> {
         let url = self.url(url).unwrap().to_string();
         log::debug!("event stream at {}", url);
+        let method = Method::GET;
         let request = self
             .awc
-            .request(Method::GET, &url)
-            .set(awc::http::header::Accept(vec![qitem(
-                mime::TEXT_EVENT_STREAM,
-            )]));
+            .request(method.clone(), &url)
+            .set(header::Accept(vec![header::qitem(mime::TEXT_EVENT_STREAM)]));
         let stream = request
             .send()
-            .await?
+            .await
+            .map_err(|e| Error::from_request(e, method, url))?
             .into_stream()
             .map_err(Error::from)
             .event_stream();
@@ -143,86 +164,70 @@ impl WebRequest<ClientRequest> {
         log::trace!("sending payload: {:?}", value);
         WebRequest {
             inner_request: self.inner_request.send_json(value),
-            url: self.url,
+            meta: self.meta,
         }
     }
 
     pub fn send_bytes(self, bytes: Vec<u8>) -> WebRequest<SendClientRequest> {
-        let url = self.url;
         let inner_request = self
             .inner_request
             .content_type("application/octet-stream")
             .send_body(bytes);
-        WebRequest { url, inner_request }
+        WebRequest {
+            inner_request,
+            meta: self.meta,
+        }
     }
 
     pub fn send(self) -> WebRequest<SendClientRequest> {
         WebRequest {
             inner_request: self.inner_request.send(),
-            url: self.url,
-        }
-    }
-}
-
-async fn filter_http_status<T>(
-    mut response: ClientResponse<T>,
-    url: String,
-) -> Result<ClientResponse<T>>
-where
-    T: Stream<Item = std::result::Result<Bytes, PayloadError>> + Unpin,
-{
-    log::trace!("{:?}", response.headers());
-    if response.status().is_success() {
-        Ok(response)
-    } else {
-        if response
-            .headers()
-            .get("content-type")
-            .map(|v| v.as_bytes() == b"application/json")
-            .unwrap_or_default()
-        {
-            Err((response.status(), url, response.json().await).into())
-        } else {
-            match response.body().await {
-                Ok(ref bytes) => {
-                    let message = String::from_utf8_lossy(&bytes);
-                    Err(Error::HttpStatusCode {
-                        code: response.status(),
-                        url,
-                        msg: message.to_string(),
-                    })
-                }
-                Err(_e) => Err(Error::HttpStatusCode {
-                    code: response.status(),
-                    url,
-                    msg: response.status().as_str().to_string(),
-                }),
-            }
+            meta: self.meta,
         }
     }
 }
 
 impl WebRequest<SendClientRequest> {
-    pub async fn bytes(self) -> Result<Vec<u8>> {
-        let url = self.url.clone();
-        let response = self
+    async fn request(
+        self,
+    ) -> Result<ClientResponse<impl Stream<Item = std::result::Result<Bytes, PayloadError>>>> {
+        let meta = self.meta.clone();
+        let mut response = self
             .inner_request
             .await
-            .map_err(|e| Error::from((e, url.clone())))?;
+            .map_err(|e| meta.as_request_err(e))?;
 
-        let mut response = filter_http_status(response, url).await?;
-        let raw_body = response.body().await?;
-        Ok(raw_body.to_vec())
+        log::trace!("{:?}", response.headers());
+        if response.status().is_success() {
+            Ok(response)
+        } else {
+            let msg = if response
+                .headers()
+                .get(header::CONTENT_TYPE)
+                .map(|v| v.as_bytes() == b"application/json")
+                .unwrap_or_default()
+            {
+                let err_msg = response.json().await;
+                err_msg
+                    .map(|e: ErrorMessage| e.message.unwrap_or_default())
+                    .unwrap_or_else(|e| format!("error parsing error msg: {}", e))
+            } else {
+                match response.body().limit(MAX_BODY_SIZE).await {
+                    Ok(ref bytes) => String::from_utf8_lossy(&bytes).to_string(),
+                    Err(e) => e.to_string(),
+                }
+            };
+            Err(meta.as_response_err(response.status(), msg))
+        }
+    }
+
+    pub async fn bytes(self) -> Result<Vec<u8>> {
+        Ok(self.request().await?.body().await?.to_vec())
     }
 
     pub async fn json<T: DeserializeOwned>(self) -> Result<T> {
-        let url = self.url.clone();
-        let response = self
-            .inner_request
-            .await
-            .map_err(|e| Error::from((e, url.clone())))?;
-
-        let mut response = filter_http_status(response, url).await?;
+        let meta = self.meta.clone();
+        let mut response = self.request().await?;
 
         // allow empty body and no content (204) to pass smoothly
         if StatusCode::NO_CONTENT == response.status()
@@ -232,16 +237,14 @@ impl WebRequest<SendClientRequest> {
                     .get(header::CONTENT_LENGTH)
                     .and_then(|h| h.to_str().ok())
         {
-            return Ok(serde_json::from_str(&format!(
-                "\"[ EMPTY BODY (http: {}) ]\"",
-                response.status()
-            ))?);
+            return Ok(serde_json::from_value(serde_json::json!(()))?);
         }
         let raw_body = response.body().limit(MAX_BODY_SIZE).await?;
         let body = std::str::from_utf8(&raw_body)?;
         log::debug!(
-            "WebRequest.json(). url={}, resp={}",
-            self.url,
+            "WebRequest.json(). method={} url={}, resp='{}'",
+            meta.method,
+            meta.url,
             body.split_at(512.min(body.len())).0
         );
         Ok(serde_json::from_str(body)?)

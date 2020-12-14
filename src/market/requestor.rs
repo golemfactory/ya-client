@@ -1,10 +1,9 @@
 //! Requestor part of the Market API
 use ya_client_model::market::{
     Agreement, AgreementOperationEvent, AgreementProposal, Demand, NewDemand, NewProposal,
-    Proposal, RequestorEvent,
+    Proposal, Reason, RequestorEvent,
 };
 
-use crate::model::market::{convert_reason, ConvertReason};
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 use chrono::{DateTime, TimeZone};
 use std::fmt::Display;
@@ -43,7 +42,7 @@ impl MarketRequestorApi {
     }
 
     /// Stop subscription by invalidating a previously published Demand.
-    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<String> {
+    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<()> {
         let url = url_format!("demands/{subscription_id}", subscription_id);
         self.client.delete(&url).send().json().await
     }
@@ -123,43 +122,18 @@ impl MarketRequestorApi {
     ///
     /// Effectively ends a Negotiation chain - it explicitly indicates that
     /// the sender will not create another counter-Proposal.
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use the reject_proposal_with_reason function instead"
-    )]
     pub async fn reject_proposal(
         &self,
         subscription_id: &str,
         proposal_id: &str,
-    ) -> Result<String> {
+        reason: &Option<Reason>,
+    ) -> Result<()> {
         let url = url_format!(
-            "demands/{subscription_id}/proposals/{proposal_id}",
+            "demands/{subscription_id}/proposals/{proposal_id}/reject",
             subscription_id,
             proposal_id,
         );
-        self.client.delete(&url).send().json().await
-    }
-
-    /// Rejects Proposal (Offer)
-    ///
-    /// Effectively ends a Negotiation chain - it explicitly indicates that
-    /// the sender will not create another counter-Proposal.
-    pub async fn reject_proposal_with_reason(
-        &self,
-        subscription_id: &str,
-        proposal_id: &str,
-        reason: Option<impl ConvertReason>,
-    ) -> Result<String> {
-        let url = url_format!(
-            "demands/{subscription_id}/proposals/{proposal_id}",
-            subscription_id,
-            proposal_id,
-        );
-        self.client
-            .post(&url)
-            .send_json(&convert_reason(reason)?)
-            .json()
-            .await
+        self.client.post(&url).send_json(&reason).json().await
     }
 
     /// Creates Agreement from selected Proposal.
@@ -198,7 +172,7 @@ impl MarketRequestorApi {
         &self,
         agreement_id: &str,
         app_session_id: Option<String>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/confirm",
             agreement_id,
@@ -248,47 +222,23 @@ impl MarketRequestorApi {
     ///
     /// Causes the awaiting `wait_for_approval` call to return with `Cancelled` response.
     /// Also the Provider's corresponding `approve_agreement` returns `Cancelled`.
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use the cancel_agreement_with_reason function instead"
-    )]
-    pub async fn cancel_agreement(&self, agreement_id: &str) -> Result<()> {
-        let url = url_format!("agreements/{agreement_id}", agreement_id);
-        self.client.delete(&url).send().json().await
-    }
-
-    /// Cancels Agreement.
-    ///
-    /// It is only possible before Requestor confirmed or Provider approved
-    /// or rejected the Agreement, and before Expiration.
-    ///
-    /// Causes the awaiting `wait_for_approval` call to return with `Cancelled` response.
-    /// Also the Provider's corresponding `approve_agreement` returns `Cancelled`.
-    pub async fn cancel_agreement_with_reason(
+    pub async fn cancel_agreement(
         &self,
         agreement_id: &str,
-        reason: Option<impl ConvertReason>,
+        reason: &Option<Reason>,
     ) -> Result<()> {
-        let url = url_format!("agreements/{agreement_id}", agreement_id);
-        self.client
-            .post(&url)
-            .send_json(&convert_reason(reason)?)
-            .json()
-            .await
+        let url = url_format!("agreements/{agreement_id}/cancel", agreement_id);
+        self.client.post(&url).send_json(&reason).json().await
     }
 
     /// Terminates approved Agreement.
     pub async fn terminate_agreement(
         &self,
         agreement_id: &str,
-        reason: Option<impl ConvertReason>,
-    ) -> Result<String> {
+        reason: &Option<Reason>,
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
-        self.client
-            .post(&url)
-            .send_json(&convert_reason(reason)?)
-            .json()
-            .await
+        self.client.post(&url).send_json(&reason).json().await
     }
 
     /// Collects events related to an Agreement.
