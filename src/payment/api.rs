@@ -116,7 +116,7 @@ impl PaymentApi {
         self.client.delete(&url).send().json().await
     }
 
-    pub async fn decorate_demand(&self, allocation_ids: Vec<String>) -> Result<MarketDecoration> {
+    pub async fn get_demand_decorations(&self, allocation_ids: Vec<String>) -> Result<MarketDecoration> {
         #[allow(non_snake_case)]
         let allocationIds = Some(allocation_ids.join(","));
         let url = url_format!(
