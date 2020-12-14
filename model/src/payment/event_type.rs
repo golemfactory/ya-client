@@ -2,12 +2,14 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "UPPERCASE", tag = "event_type")]
 pub enum EventType {
     Received,
     Accepted,
-    Rejected,
+    Rejected {
+        rejection: crate::payment::Rejection,
+    },
     Cancelled,
     Settled,
 }
@@ -23,7 +25,8 @@ impl TryFrom<String> for EventType {
         match value.as_str() {
             "RECEIVED" => Ok(EventType::Received),
             "ACCEPTED" => Ok(EventType::Accepted),
-            "REJECTED" => Ok(EventType::Rejected),
+            // TODO: Re-enable when implemented on server
+            // "REJECTED" => Ok(EventType::Rejected(Rejection{})),
             "CANCELLED" => Ok(EventType::Cancelled),
             "SETTLED" => Ok(EventType::Settled),
             _ => Err(InvalidOption(value)),
@@ -33,16 +36,12 @@ impl TryFrom<String> for EventType {
 
 impl From<EventType> for String {
     fn from(event_type: EventType) -> Self {
-        event_type.to_string()
+        event_type.to_string().to_uppercase()
     }
 }
 
 impl Display for EventType {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        let str = serde_json::to_string(self)
-            .unwrap()
-            .trim_matches('"')
-            .to_owned();
-        write!(f, "{}", str)
+        write!(f, "{:?}", self)
     }
 }
