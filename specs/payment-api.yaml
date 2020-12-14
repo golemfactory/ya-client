@@ -1288,59 +1288,59 @@ components:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
         - type: object
-      properties:
-        invoiceId:
-          type: string
+          properties:
+            invoiceId:
+              type: string
 
     InvoiceAcceptedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
         - type: object
-      properties:
-        invoiceId:
-          type: string
+          properties:
+            invoiceId:
+              type: string
 
     InvoiceRejectedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
         - type: object
-      properties:
-        invoiceId:
-          type: string
-        rejection:
-          $ref: '#/components/schemas/Rejection'
+          properties:
+            invoiceId:
+              type: string
+            rejection:
+              $ref: '#/components/schemas/Rejection'
 
     InvoiceFailedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
         - type: object
-      properties:
-        invoiceId:
-          type: string
+          properties:
+            invoiceId:
+              type: string
 
     InvoiceSettledEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
         - type: object
-      properties:
-        invoiceId:
-          type: string
+          properties:
+            invoiceId:
+              type: string
 
     InvoiceCancelledEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
         - type: object
-      properties:
-        invoiceId:
-          type: string
+          properties:
+            invoiceId:
+              type: string
 
     PaymentReceivedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
         - type: object
-      properties:
-        paymentId:
-          type: string
+          properties:
+            paymentId:
+              type: string
 
     Account:
       description: Payment account (wallet)
