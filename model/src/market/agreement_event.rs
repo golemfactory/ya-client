@@ -12,39 +12,33 @@ use serde::{Deserialize, Serialize};
 use crate::market::Reason;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct AgreementOperationEvent {
+    #[serde(rename = "eventDate")]
+    pub event_date: DateTime<Utc>,
+    #[serde(rename = "agreementId")]
+    pub agreement_id: String,
+    #[serde(flatten)]
+    pub event_type: AgreementEventType,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
 #[serde(tag = "eventtype")]
-pub enum AgreementOperationEvent {
+pub enum AgreementEventType {
     #[serde(rename = "AgreementApprovedEvent")]
-    AgreementApprovedEvent {
-        #[serde(rename = "eventDate")]
-        event_date: DateTime<Utc>,
-        #[serde(rename = "agreementId")]
-        agreement_id: String,
-    },
+    AgreementApprovedEvent,
     #[serde(rename = "AgreementRejectedEvent")]
     AgreementRejectedEvent {
-        #[serde(rename = "eventDate")]
-        event_date: DateTime<Utc>,
-        #[serde(rename = "agreementId")]
-        agreement_id: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
         reason: Option<Reason>,
     },
     #[serde(rename = "AgreementCancelledEvent")]
     AgreementCancelledEvent {
-        #[serde(rename = "eventDate")]
-        event_date: DateTime<Utc>,
-        #[serde(rename = "agreementId")]
-        agreement_id: String,
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
         reason: Option<Reason>,
     },
     #[serde(rename = "AgreementTerminatedEvent")]
     AgreementTerminatedEvent {
-        #[serde(rename = "eventDate")]
-        event_date: DateTime<Utc>,
-        #[serde(rename = "agreementId")]
-        agreement_id: String,
         #[serde(rename = "terminator")]
         terminator: AgreementTerminator,
         #[serde(rename = "signature")]
