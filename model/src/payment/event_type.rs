@@ -25,6 +25,7 @@ impl TryFrom<String> for EventType {
         match value.as_str() {
             "RECEIVED" => Ok(EventType::Received),
             "ACCEPTED" => Ok(EventType::Accepted),
+            // TODO: Re-enable when implemented on server
             // "REJECTED" => Ok(EventType::Rejected(Rejection{})),
             "CANCELLED" => Ok(EventType::Cancelled),
             "SETTLED" => Ok(EventType::Settled),
