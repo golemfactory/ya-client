@@ -1,5 +1,7 @@
 //! Requestor state part of Activity API
-use ya_client_model::activity::{ActivityState, ExeScriptCommandState, ACTIVITY_API_PATH};
+use ya_client_model::activity::{
+    ActivityState, ActivityUsage, ExeScriptCommandState, ACTIVITY_API_PATH,
+};
 
 use crate::{web::WebClient, web::WebInterface, Result};
 
@@ -32,7 +34,7 @@ impl ActivityRequestorStateApi {
     }
 
     /// Get usage of specified Activity.
-    pub async fn get_usage(&self, activity_id: &str) -> Result<Vec<f64>> {
+    pub async fn get_usage(&self, activity_id: &str) -> Result<ActivityUsage> {
         let uri = url_format!("activity/{activity_id}/usage", activity_id);
         self.client.get(&uri).send().json().await
     }
