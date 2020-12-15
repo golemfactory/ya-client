@@ -35,13 +35,13 @@ pub struct Provider;
 impl ApiClient for Requestor {
     type Market = market::MarketRequestorApi;
     type Activity = activity::ActivityRequestorApi;
-    type Payment = payment::PaymentRequestorApi;
+    type Payment = payment::PaymentApi;
 }
 
 impl ApiClient for Provider {
     type Market = market::MarketProviderApi;
     type Activity = activity::ActivityProviderApi;
-    type Payment = payment::PaymentProviderApi;
+    type Payment = payment::PaymentApi;
 }
 
 #[derive(StructOpt, Clone)]
