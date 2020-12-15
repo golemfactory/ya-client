@@ -398,15 +398,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                description: Returns the current vector of usage counters consumed
-                  by the Activity. The sequence of values corresponds to Usage Vector
-                  property (golem.usage.vector) as indicated in the Agreement (Offer
-                  part).
-                example: '[123.5, 34000]'
-                items:
-                  type: number
-                  format: double
+                $ref: '#/components/schemas/ActivityUsage'
         404:
           description: Not Found
           content:
@@ -558,7 +550,11 @@ components:
       properties:
         currentUsage:
           type: array
-          description: Current usage vector
+          description: Current vector of usage counters consumed
+            by the Activity. The sequence of values corresponds to Usage Vector
+            property (golem.usage.vector) as indicated in the Agreement (Offer
+            part).
+          example: '[123.5, 34000]'
           items:
             type: number
             format: double
