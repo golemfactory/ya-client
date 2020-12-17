@@ -189,24 +189,33 @@ impl MarketRequestorApi {
     ///
     /// It returns one of the following options:
     ///
-    /// * `Approved` - Indicates that the Agreement has been approved by the Provider.
-    ///   - The Provider is now ready to accept a request to start an Activity
-    ///     as described in the negotiated agreement.
-    ///   - The Requestor’s corresponding `wait_for_approval` call returns Ok after
-    ///     this on the Provider side.
+    /// * `Ok` Agreement approved by the Provider.
+    ///  The Providers’s corresponding `approveAgreement` call returns `204`
+    ///  (Approved) **before** this endpoint on the Requestor side.
+    ///  The Provider is now ready to accept a request to start an Activity.
     ///
-    /// * `Rejected` - Indicates that the Provider has called `reject_agreement`,
-    /// which effectively stops the Agreement handshake. The Requestor may attempt
-    /// to return to the Negotiation phase by sending a new Proposal.
+    /// * `Err` - Indicates that Agreement is not approved.
+    ///   - `408` Agreement not approved within given timeout. Try again.
+    ///   - `409` Agreement not confirmed yet by Requestor himself.
+    ///   - `410` Agreement is not approved. This state is permanent.
     ///
-    /// * `Cancelled` - Indicates that the Requestor himself has called
-    /// `cancel_agreement`, which effectively stops the Agreement handshake.
+    /// Attached `ErrorMessage` contains further details:
+    /// - `Rejected` - Indicates that the Provider has called
+    /// `rejectAgreement`, which effectively stops the Agreement handshake.
+    /// The Requestor may attempt to return to the Negotiation phase by
+    /// sending a new Proposal or to the Agreement phase by creating
+    /// new Agreement.
+    /// - `Cancelled` - Indicates that the Requestor himself has called
+    /// `cancelAgreement`, which effectively stops the Agreement handshake.
+    /// - `Expired` - Indicates that Agreement validity period elapsed and it
+    /// was not approved, rejected nor cancelled.
+    /// - `Terminated` - Indicates that Agreement is already terminated.
     #[rustfmt::skip]
     pub async fn wait_for_approval(
         &self,
         agreement_id: &str,
         timeout: Option<f32>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/wait",
             agreement_id,

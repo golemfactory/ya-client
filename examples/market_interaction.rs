@@ -108,7 +108,7 @@ async fn provider_interact(options: Options, nanos: u32) -> Result<()> {
                     if first_rejected {
                         println!("  <=PROVIDER | Rejecting Demand Proposal...");
                         client
-                            .reject_proposal_with_reason(&offer_id, proposal_id, &None)
+                            .reject_proposal(&offer_id, proposal_id, &Some("zima".into()))
                             .await?;
                         println!("  <=PROVIDER | Rejected");
                     } else {
@@ -247,13 +247,19 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
                                     println!(
                                         "REQUESTOR=>  | Timeout waiting for Agreement approval..."
                                     );
-                                    Ok("".into())
+                                    Ok(())
                                 }
-                                Ok(status) => {
-                                    println!("REQUESTOR=>  | Agreement {} by Provider!", status);
-                                    Ok(status)
+                                Ok(r) => {
+                                    println!("REQUESTOR=>  | Agreement approved by Provider!");
+                                    Ok(r)
                                 }
-                                e => e,
+                                Err(e) => {
+                                    println!(
+                                        "REQUESTOR=>  | Agreement not approved by Provider: {}",
+                                        e
+                                    );
+                                    Err(e)
+                                }
                             }?;
 
                             println!("REQUESTOR=>  | I'm done for now! Bye...");
