@@ -45,8 +45,8 @@ pub enum Error {
     Utf8Error(#[from] std::str::Utf8Error),
     #[error("Url parse error: {0}")]
     UrlParseError(#[from] url::ParseError),
-    #[error("Yagna model error: {0}")]
-    ModelError(#[from] ErrorMessage),
+    #[error(transparent)]
+    ApiErrorMessage(#[from] ErrorMessage),
     #[error("Internal ya-client error: {0}")]
     InternalError(String),
     #[error("Event stream error: {0}")]
