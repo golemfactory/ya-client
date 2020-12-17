@@ -150,33 +150,33 @@ impl MarketProviderApi {
     ///
     /// It returns one of the following options:
     ///
-    /// * `Approved` - Indicates that the approved Agreement has been successfully
-    /// delivered to the Requestor and acknowledged.
-    ///   - The Requestor side has been notified about the Provider’s commitment
-    ///     to the Agreement.
-    ///   - The Provider is now ready to accept a request to start an Activity
-    ///     as described in the negotiated agreement.
-    ///   - The Requestor’s corresponding `wait_for_approval` call returns Ok after
-    ///     the one on the Provider side.
+    /// * `Ok` Agreement approved. Indicates that the approved Agreement has been
+    ///  successfully delivered to the Requestor and acknowledged.
+    ///    - The Requestor side has been notified about the Provider’s commitment.
+    ///    - The Provider is now ready to accept a request to start an Activity.
+    ///    - The Requestor’s corresponding `wait_for_approval` call returns `Ok`
+    ///    (Approved) **after** this endpoint on the Provider side.
     ///
-    /// * `Cancelled` - Indicates that before delivering the approved Agreement,
-    /// the Requestor has called `cancel_agreement`, thus invalidating the
-    /// Agreement. The Provider may attempt to return to the Negotiation phase
-    /// by sending a new Proposal.
-    ///
-    /// **Note**: It is expected from the Provider node implementation to “ring-fence”
-    /// the resources required to fulfill the Agreement before the `approve_agreement`
-    /// is sent. However, the resources should not be fully committed until `Ok`
-    /// response is received from the `approve_agreement` call.
-    ///
-    /// **Note**: Mutually exclusive with `reject_agreement`.
+    /// * `Err` - Indicates that Agreement is not approved.
+    ///   - `408` Agreement not approved within given timeout. Try again.
+    ///   - `410` Agreement approval failed permanently.
+    /// Attached `ErrorMessage` contains further details:
+    ///   - `Rejected` - Indicates that the Provider himself has already
+    ///     called `reject_agreement`.
+    ///   - `Cancelled` - Indicates that before Provider approved this Agreement,
+    ///     the Requestor has called `cancel_agreement`, thus invalidating the
+    ///     Agreement. The Provider may attempt to return to the Negotiation phase
+    ///     by sending a new Proposal.
+    ///   - `Expired` - Indicates that Agreement validity period elapsed and it was
+    ///     not approved, rejected nor cancelled.
+    ///   - `Terminated` - Indicates that Agreement is already terminated.
     #[rustfmt::skip]
     pub async fn approve_agreement(
         &self,
         agreement_id: &str,
         app_session_id: Option<String>,
         timeout: Option<f32>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/approve",
             agreement_id,
