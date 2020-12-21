@@ -6,6 +6,16 @@ use serde::{Deserialize, Serialize};
 pub struct DebitNoteEvent {
     pub debit_note_id: String,
     pub event_date: DateTime<Utc>,
-    #[serde(flatten)]
-    pub event_type: crate::payment::EventType,
+    pub event_type: DebitNoteEventType,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum DebitNoteEventType {
+    DebitNoteReceivedEvent,
+    DebitNoteAcceptedEvent,
+    DebitNoteRejectedEvent {
+        rejection: crate::payment::Rejection,
+    },
+    DebitNoteCancelledEvent,
+    DebitNoteSettledEvent,
 }

@@ -86,16 +86,13 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        #[allow(non_snake_case)]
-        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        #[allow(non_snake_case)]
-        let maxItems = max_items;
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
 
         #[rustfmt::skip]
         let url = url_format!(
             "allocations",
-            #[query] afterTimestamp,
-            #[query] maxItems
+            #[query] after_timestamp,
+            #[query] max_items
         );
         self.client.get(&url).send().json().await
     }
@@ -116,13 +113,15 @@ impl PaymentApi {
         self.client.delete(&url).send().json().await
     }
 
-    pub async fn get_demand_decorations(&self, allocation_ids: Vec<String>) -> Result<MarketDecoration> {
-        #[allow(non_snake_case)]
-        let allocationIds = Some(allocation_ids.join(","));
+    pub async fn get_demand_decorations(
+        &self,
+        allocation_ids: Vec<String>,
+    ) -> Result<MarketDecoration> {
+        let allocation_ids = Some(allocation_ids.join(","));
+        #[rustfmt::skip]
         let url = url_format!(
             "demandDecorations",
-            #[query]
-            allocationIds
+            #[query] allocation_ids
         );
         self.client.get(&url).send().json().await
     }
@@ -139,16 +138,13 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        #[allow(non_snake_case)]
-        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        #[allow(non_snake_case)]
-        let maxItems = max_items;
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
 
         #[rustfmt::skip]
         let url = url_format!(
             "debitNotes",
-            #[query] afterTimestamp,
-            #[query] maxItems
+            #[query] after_timestamp,
+            #[query] max_items
         );
         self.client.get(&url).send().json().await
     }
@@ -169,17 +165,14 @@ impl PaymentApi {
         Tz::Offset: Display,
     {
         // NOT IMPLEMENTED ON SERVER
-        #[allow(non_snake_case)]
-        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        #[allow(non_snake_case)]
-        let maxItems = max_items;
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
 
         #[rustfmt::skip]
         let url = url_format!(
             "debitNotes/{debit_note_id}/payments",
             debit_note_id,
-            #[query] afterTimestamp,
-            #[query] maxItems
+            #[query] after_timestamp,
+            #[query] max_items
         );
         self.client.get(&url).send().json().await
     }
@@ -195,22 +188,16 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        #[allow(non_snake_case)]
-        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        #[allow(non_snake_case)]
-        let pollTimeout = timeout.map(|d| d.as_secs_f64());
-        #[allow(non_snake_case)]
-        let maxEvents = max_events;
-        #[allow(non_snake_case)]
-        let appSessionId = app_session_id;
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        let poll_timeout = timeout.map(|d| d.as_secs_f64());
 
         #[rustfmt::skip]
         let url = url_format!(
             "debitNoteEvents",
-            #[query] afterTimestamp,
-            #[query] pollTimeout,
-            #[query] maxEvents,
-            #[query] appSessionId
+            #[query] after_timestamp,
+            #[query] poll_timeout,
+            #[query] max_events,
+            #[query] app_session_id
         );
         self.client
             .get(&url)
@@ -298,16 +285,13 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        #[allow(non_snake_case)]
-        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        #[allow(non_snake_case)]
-        let maxItems = max_items;
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
 
         #[rustfmt::skip]
         let url = url_format!(
             "invoices",
-            #[query] afterTimestamp,
-            #[query] maxItems
+            #[query] after_timestamp,
+            #[query] max_items
         );
         self.client.get(&url).send().json().await
     }
@@ -328,17 +312,14 @@ impl PaymentApi {
         Tz::Offset: Display,
     {
         // NOT IMPLEMENTED ON SERVER
-        #[allow(non_snake_case)]
-        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        #[allow(non_snake_case)]
-        let maxItems = max_items;
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
 
         #[rustfmt::skip]
         let url = url_format!(
             "invoices/{invoice_id}/payments",
             invoice_id,
-            #[query] afterTimestamp,
-            #[query] maxItems
+            #[query] after_timestamp,
+            #[query] max_items
         );
         self.client.get(&url).send().json().await
     }
@@ -354,22 +335,16 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        #[allow(non_snake_case)]
-        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        #[allow(non_snake_case)]
-        let pollTimeout = timeout.map(|d| d.as_secs_f64());
-        #[allow(non_snake_case)]
-        let maxEvents = max_events;
-        #[allow(non_snake_case)]
-        let appSessionId = app_session_id;
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        let poll_timeout = timeout.map(|d| d.as_secs_f64());
 
         #[rustfmt::skip]
         let url = url_format!(
             "invoiceEvents",
-            #[query] afterTimestamp,
-            #[query] pollTimeout,
-            #[query] maxEvents,
-            #[query] appSessionId
+            #[query] after_timestamp,
+            #[query] poll_timeout,
+            #[query] max_events,
+            #[query] app_session_id
         );
         self.client
             .get(&url)
@@ -446,22 +421,16 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        #[allow(non_snake_case)]
-        let afterTimestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        #[allow(non_snake_case)]
-        let pollTimeout = timeout.map(|d| d.as_secs_f64());
-        #[allow(non_snake_case)]
-        let maxEvents = max_events;
-        #[allow(non_snake_case)]
-        let appSessionId = app_session_id;
+        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
+        let poll_timeout = timeout.map(|d| d.as_secs_f64());
 
         #[rustfmt::skip]
         let url = url_format!(
             "payments",
-            #[query] afterTimestamp,
-            #[query] pollTimeout,
-            #[query] maxEvents,
-            #[query] appSessionId
+            #[query] after_timestamp,
+            #[query] poll_timeout,
+            #[query] max_events,
+            #[query] app_session_id
         );
         self.client
             .get(&url)
