@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE", tag = "event_type")]
+#[serde(rename_all = "UPPERCASE", tag = "eventType")]
 pub enum EventType {
     Received,
     Accepted,
