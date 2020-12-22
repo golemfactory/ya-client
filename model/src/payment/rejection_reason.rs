@@ -7,3 +7,9 @@ pub enum RejectionReason {
     BadService,
     IncorrectAmount,
 }
+
+impl Default for RejectionReason {
+    fn default() -> Self {
+        RejectionReason::UnsolicitedService
+    }
+}
