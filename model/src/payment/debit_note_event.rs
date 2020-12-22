@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use strum_macros::{EnumString, ToString};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -9,18 +10,18 @@ pub struct DebitNoteEvent {
     pub event_type: DebitNoteEventType,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, EnumString, ToString)]
 pub enum DebitNoteEventType {
-    #[serde(alias = "RECEIVED")]
+    #[strum(to_string = "RECEIVED")]
     DebitNoteReceivedEvent,
-    #[serde(alias = "ACCEPTED")]
+    #[strum(to_string = "ACCEPTED")]
     DebitNoteAcceptedEvent,
-    #[serde(alias = "REJECTED")]
+    #[strum(to_string = "REJECTED")]
     DebitNoteRejectedEvent {
         rejection: crate::payment::Rejection,
     },
-    #[serde(alias = "CANCELLED")]
+    #[strum(to_string = "CANCELLED")]
     DebitNoteCancelledEvent,
-    #[serde(alias = "SETTLED")]
+    #[strum(to_string = "SETTLED")]
     DebitNoteSettledEvent,
 }

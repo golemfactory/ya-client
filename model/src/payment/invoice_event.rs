@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use strum_macros::{EnumString, ToString};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -9,19 +10,19 @@ pub struct InvoiceEvent {
     pub event_type: InvoiceEventType,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, EnumString, ToString)]
 pub enum InvoiceEventType {
-    #[serde(alias = "RECEIVED")]
+    #[strum(to_string = "RECEIVED")]
     InvoiceReceivedEvent,
-    #[serde(alias = "ACCEPTED")]
+    #[strum(to_string = "ACCEPTED")]
     InvoiceAcceptedEvent,
-    #[serde(alias = "REJECTED")]
+    #[strum(to_string = "REJECTED")]
     InvoiceRejectedEvent {
         rejection: crate::payment::Rejection,
     },
-    #[serde(alias = "CANCELLED")]
+    #[strum(to_string = "CANCELLED")]
     InvoiceCancelledEvent,
-    #[serde(alias = "SETTLED")]
+    #[strum(to_string = "SETTLED")]
     InvoiceSettledEvent,
 }
 
@@ -100,8 +101,13 @@ mod test {
     }
 
     #[test]
-    fn test_deserialize_event_from_alias() {
-        let iet: InvoiceEventType = serde_json::from_str("\"RECEIVED\"").unwrap();
+    fn test_deserialize_from_str() {
+        let iet: InvoiceEventType = "RECEIVED".parse().unwrap();
         assert_eq!(InvoiceEventType::InvoiceReceivedEvent, iet);
+    }
+
+    #[test]
+    fn test_deserialize_to_string() {
+        assert_eq!(InvoiceEventType::InvoiceSettledEvent.to_string(), "SETTLED");
     }
 }
