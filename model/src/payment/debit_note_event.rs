@@ -11,11 +11,16 @@ pub struct DebitNoteEvent {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum DebitNoteEventType {
+    #[serde(alias = "RECEIVED")]
     DebitNoteReceivedEvent,
+    #[serde(alias = "ACCEPTED")]
     DebitNoteAcceptedEvent,
+    #[serde(alias = "REJECTED")]
     DebitNoteRejectedEvent {
         rejection: crate::payment::Rejection,
     },
+    #[serde(alias = "CANCELLED")]
     DebitNoteCancelledEvent,
+    #[serde(alias = "SETTLED")]
     DebitNoteSettledEvent,
 }

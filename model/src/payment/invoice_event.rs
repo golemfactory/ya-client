@@ -11,12 +11,17 @@ pub struct InvoiceEvent {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum InvoiceEventType {
+    #[serde(alias = "RECEIVED")]
     InvoiceReceivedEvent,
+    #[serde(alias = "ACCEPTED")]
     InvoiceAcceptedEvent,
+    #[serde(alias = "REJECTED")]
     InvoiceRejectedEvent {
         rejection: crate::payment::Rejection,
     },
+    #[serde(alias = "CANCELLED")]
     InvoiceCancelledEvent,
+    #[serde(alias = "SETTLED")]
     InvoiceSettledEvent,
 }
 
@@ -91,6 +96,12 @@ mod test {
     #[test]
     fn test_deserialize_event() {
         let iet: InvoiceEventType = serde_json::from_str("\"InvoiceReceivedEvent\"").unwrap();
+        assert_eq!(InvoiceEventType::InvoiceReceivedEvent, iet);
+    }
+
+    #[test]
+    fn test_deserialize_event_from_alias() {
+        let iet: InvoiceEventType = serde_json::from_str("\"RECEIVED\"").unwrap();
         assert_eq!(InvoiceEventType::InvoiceReceivedEvent, iet);
     }
 }
