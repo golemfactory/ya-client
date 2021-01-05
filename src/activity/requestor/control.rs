@@ -326,7 +326,7 @@ pub mod sgx {
         pub async fn get_running_command(
             &self,
             timeout: Option<f32>,
-        ) -> Result<ExeScriptCommandState> {
+        ) -> Result<Vec<ExeScriptCommandState>> {
             let request = enc::Request {
                 activity_id: self.session.activity_id.clone(),
                 batch_id: String::new(),

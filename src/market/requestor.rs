@@ -42,7 +42,7 @@ impl MarketRequestorApi {
     }
 
     /// Stop subscription by invalidating a previously published Demand.
-    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<String> {
+    pub async fn unsubscribe(&self, subscription_id: &str) -> Result<()> {
         let url = url_format!("demands/{subscription_id}", subscription_id);
         self.client.delete(&url).send().json().await
     }
@@ -122,33 +122,12 @@ impl MarketRequestorApi {
     ///
     /// Effectively ends a Negotiation chain - it explicitly indicates that
     /// the sender will not create another counter-Proposal.
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use the reject_proposal_with_reason function instead"
-    )]
     pub async fn reject_proposal(
         &self,
         subscription_id: &str,
         proposal_id: &str,
-    ) -> Result<String> {
-        let url = url_format!(
-            "demands/{subscription_id}/proposals/{proposal_id}",
-            subscription_id,
-            proposal_id,
-        );
-        self.client.delete(&url).send().json().await
-    }
-
-    /// Rejects Proposal (Offer)
-    ///
-    /// Effectively ends a Negotiation chain - it explicitly indicates that
-    /// the sender will not create another counter-Proposal.
-    pub async fn reject_proposal_with_reason(
-        &self,
-        subscription_id: &str,
-        proposal_id: &str,
         reason: &Option<Reason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "demands/{subscription_id}/proposals/{proposal_id}/reject",
             subscription_id,
@@ -193,7 +172,7 @@ impl MarketRequestorApi {
         &self,
         agreement_id: &str,
         app_session_id: Option<String>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/confirm",
             agreement_id,
@@ -210,24 +189,33 @@ impl MarketRequestorApi {
     ///
     /// It returns one of the following options:
     ///
-    /// * `Approved` - Indicates that the Agreement has been approved by the Provider.
-    ///   - The Provider is now ready to accept a request to start an Activity
-    ///     as described in the negotiated agreement.
-    ///   - The Requestor’s corresponding `wait_for_approval` call returns Ok after
-    ///     this on the Provider side.
+    /// * `Ok` Agreement approved by the Provider.
+    ///  The Providers’s corresponding `approveAgreement` call returns `204`
+    ///  (Approved) **before** this endpoint on the Requestor side.
+    ///  The Provider is now ready to accept a request to start an Activity.
     ///
-    /// * `Rejected` - Indicates that the Provider has called `reject_agreement`,
-    /// which effectively stops the Agreement handshake. The Requestor may attempt
-    /// to return to the Negotiation phase by sending a new Proposal.
+    /// * `Err` - Indicates that Agreement is not approved.
+    ///   - `408` Agreement not approved within given timeout. Try again.
+    ///   - `409` Agreement not confirmed yet by Requestor himself.
+    ///   - `410` Agreement is not approved. This state is permanent.
     ///
-    /// * `Cancelled` - Indicates that the Requestor himself has called
-    /// `cancel_agreement`, which effectively stops the Agreement handshake.
+    /// Attached `ErrorMessage` contains further details:
+    /// - `Rejected` - Indicates that the Provider has called
+    /// `rejectAgreement`, which effectively stops the Agreement handshake.
+    /// The Requestor may attempt to return to the Negotiation phase by
+    /// sending a new Proposal or to the Agreement phase by creating
+    /// new Agreement.
+    /// - `Cancelled` - Indicates that the Requestor himself has called
+    /// `cancelAgreement`, which effectively stops the Agreement handshake.
+    /// - `Expired` - Indicates that Agreement validity period elapsed and it
+    /// was not approved, rejected nor cancelled.
+    /// - `Terminated` - Indicates that Agreement is already terminated.
     #[rustfmt::skip]
     pub async fn wait_for_approval(
         &self,
         agreement_id: &str,
         timeout: Option<f32>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/wait",
             agreement_id,
@@ -243,23 +231,7 @@ impl MarketRequestorApi {
     ///
     /// Causes the awaiting `wait_for_approval` call to return with `Cancelled` response.
     /// Also the Provider's corresponding `approve_agreement` returns `Cancelled`.
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use the cancel_agreement_with_reason function instead"
-    )]
-    pub async fn cancel_agreement(&self, agreement_id: &str) -> Result<()> {
-        let url = url_format!("agreements/{agreement_id}", agreement_id);
-        self.client.delete(&url).send().json().await
-    }
-
-    /// Cancels Agreement.
-    ///
-    /// It is only possible before Requestor confirmed or Provider approved
-    /// or rejected the Agreement, and before Expiration.
-    ///
-    /// Causes the awaiting `wait_for_approval` call to return with `Cancelled` response.
-    /// Also the Provider's corresponding `approve_agreement` returns `Cancelled`.
-    pub async fn cancel_agreement_with_reason(
+    pub async fn cancel_agreement(
         &self,
         agreement_id: &str,
         reason: &Option<Reason>,
@@ -273,7 +245,7 @@ impl MarketRequestorApi {
         &self,
         agreement_id: &str,
         reason: &Option<Reason>,
-    ) -> Result<String> {
+    ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
     }

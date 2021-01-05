@@ -11,6 +11,7 @@ pub struct Allocation {
     pub total_amount: BigDecimal,
     pub spent_amount: BigDecimal,
     pub remaining_amount: BigDecimal,
+    pub timestamp: DateTime<Utc>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub timeout: Option<DateTime<Utc>>,
     pub make_deposit: bool,

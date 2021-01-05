@@ -237,15 +237,12 @@ impl WebRequest<SendClientRequest> {
                     .get(header::CONTENT_LENGTH)
                     .and_then(|h| h.to_str().ok())
         {
-            return Ok(serde_json::from_str(&format!(
-                "\"[ EMPTY BODY (http: {}) ]\"",
-                response.status()
-            ))?);
+            return Ok(serde_json::from_value(serde_json::json!(()))?);
         }
         let raw_body = response.body().limit(MAX_BODY_SIZE).await?;
         let body = std::str::from_utf8(&raw_body)?;
         log::debug!(
-            "WebRequest.json(). method={} url={}, resp={}",
+            "WebRequest.json(). method={} url={}, resp='{}'",
             meta.method,
             meta.url,
             body.split_at(512.min(body.len())).0
