@@ -9,6 +9,7 @@ pub mod document_status;
 pub mod invoice;
 pub mod invoice_event;
 pub mod market_decoration;
+pub mod params;
 pub mod payment;
 pub mod rejection;
 pub mod rejection_reason;
