@@ -7,10 +7,12 @@ use strum_macros::{EnumString, ToString};
 pub struct DebitNoteEvent {
     pub debit_note_id: String,
     pub event_date: DateTime<Utc>,
+    #[serde(flatten)]
     pub event_type: DebitNoteEventType,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, EnumString, ToString)]
+#[serde(tag = "eventType")]
 pub enum DebitNoteEventType {
     #[strum(to_string = "RECEIVED")]
     DebitNoteReceivedEvent,
@@ -24,4 +26,41 @@ pub enum DebitNoteEventType {
     DebitNoteCancelledEvent,
     #[strum(to_string = "SETTLED")]
     DebitNoteSettledEvent,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::payment::{Rejection, RejectionReason};
+    use bigdecimal::BigDecimal;
+    use chrono::TimeZone;
+
+    #[test]
+    fn test_serialize_rejected_event_has_flat_rejection() {
+        let ie = DebitNoteEvent {
+            debit_note_id: "ajdik".to_string(),
+            event_date: Utc
+                .datetime_from_str("2020-12-21T15:51:21.126645Z", "%+")
+                .unwrap(),
+            event_type: DebitNoteEventType::DebitNoteRejectedEvent {
+                rejection: Rejection {
+                    rejection_reason: RejectionReason::UnsolicitedService,
+                    total_amount_accepted: BigDecimal::from(3.14),
+                    message: None,
+                },
+            },
+        };
+
+        assert_eq!(
+            "{\"debitNoteId\":\"ajdik\",\
+                \"eventDate\":\"2020-12-21T15:51:21.126645Z\",\
+                \"eventType\":\"DebitNoteRejectedEvent\",\
+                \"rejection\":{\
+                    \"rejectionReason\":\"UNSOLICITED_SERVICE\",\
+                    \"totalAmountAccepted\":\"3.140000000000000\"\
+                }\
+             }",
+            serde_json::to_string(&ie).unwrap()
+        );
+    }
 }
