@@ -5,4 +5,9 @@ use serde::{Deserialize, Serialize};
 pub struct Account {
     pub platform: String,
     pub address: String,
+    pub driver: String,
+    pub network: String,
+    pub token: String,
+    pub send: bool,
+    pub receive: bool,
 }
