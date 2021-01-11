@@ -7,10 +7,12 @@ use strum_macros::{EnumString, ToString};
 pub struct InvoiceEvent {
     pub invoice_id: String,
     pub event_date: DateTime<Utc>,
+    #[serde(flatten)]
     pub event_type: InvoiceEventType,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, EnumString, ToString)]
+#[serde(tag = "eventType")]
 pub enum InvoiceEventType {
     #[strum(to_string = "RECEIVED")]
     InvoiceReceivedEvent,
@@ -30,31 +32,43 @@ pub enum InvoiceEventType {
 mod test {
     use super::*;
     use crate::payment::{Rejection, RejectionReason};
+    use bigdecimal::BigDecimal;
     use chrono::TimeZone;
 
     #[test]
-    fn test_serialize() {
+    fn test_serialize_rejected_event_has_flat_rejection() {
         let ie = InvoiceEvent {
             invoice_id: "ajdik".to_string(),
             event_date: Utc
                 .datetime_from_str("2020-12-21T15:51:21.126645Z", "%+")
                 .unwrap(),
-            event_type: InvoiceEventType::InvoiceSettledEvent,
+            event_type: InvoiceEventType::InvoiceRejectedEvent {
+                rejection: Rejection {
+                    rejection_reason: RejectionReason::UnsolicitedService,
+                    total_amount_accepted: BigDecimal::from(3.14),
+                    message: None,
+                },
+            },
         };
 
         assert_eq!(
             "{\"invoiceId\":\"ajdik\",\
-              \"eventDate\":\"2020-12-21T15:51:21.126645Z\",\
-              \"eventType\":\"InvoiceSettledEvent\"\
+                \"eventDate\":\"2020-12-21T15:51:21.126645Z\",\
+                \"eventType\":\"InvoiceRejectedEvent\",\
+                \"rejection\":{\
+                    \"rejectionReason\":\"UNSOLICITED_SERVICE\",\
+                    \"totalAmountAccepted\":\"3.140000000000000\"\
+                }\
              }",
             serde_json::to_string(&ie).unwrap()
         );
     }
 
     #[test]
-    fn test_deserialize() {
+    fn test_deserialize_event() {
         let ie: InvoiceEvent = serde_json::from_str(
-            "{\"invoiceId\":\"ajdik\",\
+            "{\
+                \"invoiceId\":\"ajdik\",\
                 \"eventDate\":\"2020-12-21T15:51:21.126645Z\",\
                 \"eventType\":\"InvoiceAcceptedEvent\"\
             }",
@@ -74,40 +88,34 @@ mod test {
     }
 
     #[test]
-    fn test_serialize_event() {
-        let iet = InvoiceEventType::InvoiceRejectedEvent {
-            rejection: Rejection {
-                rejection_reason: RejectionReason::UnsolicitedService,
-                total_amount_accepted: Default::default(),
-                message: None,
-            },
-        };
+    fn test_serialize_event_type() {
+        let iet = InvoiceEventType::InvoiceSettledEvent;
         assert_eq!(
-            "{\"InvoiceRejectedEvent\":\
-                {\"rejection\":\
-                    {\"rejectionReason\":\"UNSOLICITED_SERVICE\",\
-                        \"totalAmountAccepted\":\"0\"\
-                    }\
-                }\
-            }",
+            "{\"eventType\":\"InvoiceSettledEvent\"}",
             serde_json::to_string(&iet).unwrap()
         );
     }
 
     #[test]
-    fn test_deserialize_event() {
-        let iet: InvoiceEventType = serde_json::from_str("\"InvoiceReceivedEvent\"").unwrap();
+    fn test_deserialize_event_type() {
+        let iet: InvoiceEventType =
+            serde_json::from_str("{\"eventType\":\"InvoiceReceivedEvent\"}").unwrap();
         assert_eq!(InvoiceEventType::InvoiceReceivedEvent, iet);
     }
 
     #[test]
-    fn test_deserialize_from_str() {
-        let iet: InvoiceEventType = "RECEIVED".parse().unwrap();
-        assert_eq!(InvoiceEventType::InvoiceReceivedEvent, iet);
+    fn test_deserialize_event_type_from_str() {
+        let iet: InvoiceEventType = "REJECTED".parse().unwrap();
+        assert_eq!(
+            InvoiceEventType::InvoiceRejectedEvent {
+                rejection: Default::default()
+            },
+            iet
+        );
     }
 
     #[test]
-    fn test_deserialize_to_string() {
+    fn test_deserialize_event_type_to_string() {
         assert_eq!(InvoiceEventType::InvoiceSettledEvent.to_string(), "SETTLED");
     }
 }
