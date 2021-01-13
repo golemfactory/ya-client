@@ -9,6 +9,7 @@ use futures::stream::Peekable;
 use futures::{Stream, StreamExt, TryStreamExt};
 use heck::MixedCase;
 use serde::{de::DeserializeOwned, Serialize};
+use serde_qs;
 use std::cmp::max;
 use std::convert::TryFrom;
 use std::pin::Pin;
@@ -510,6 +511,18 @@ macro_rules! url_format {
         }
         url
     }};
+}
+
+pub fn url_format_obj<T>(base: &str, params: &T) -> String
+where
+    T: Serialize,
+{
+    let qs = serde_qs::to_string(params).unwrap_or("".to_string());
+    if qs.len() > 0 {
+        format!("{}?{}", base, qs)
+    } else {
+        base.to_string()
+    }
 }
 
 #[cfg(test)]
