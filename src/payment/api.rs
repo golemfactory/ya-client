@@ -1,9 +1,12 @@
 //!  part of the Payment API
-use chrono::{DateTime, TimeZone};
+use chrono::{DateTime, TimeZone, Utc};
 use std::fmt::Display;
 use std::sync::Arc;
 
-use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
+use crate::{
+    web::{default_on_timeout, url_format_obj, WebClient, WebInterface},
+    Result,
+};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use ya_client_model::payment::*;
@@ -86,14 +89,11 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-
-        #[rustfmt::skip]
-        let url = url_format!(
-            "allocations",
-            #[query] after_timestamp,
-            #[query] max_items
-        );
+        let input = params::FilterParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            max_items,
+        };
+        let url = url_format_obj("allocations", &input);
         self.client.get(&url).send().json().await
     }
 
@@ -117,12 +117,8 @@ impl PaymentApi {
         &self,
         allocation_ids: Vec<String>,
     ) -> Result<MarketDecoration> {
-        let allocation_ids = Some(allocation_ids.join(","));
-        #[rustfmt::skip]
-        let url = url_format!(
-            "demandDecorations",
-            #[query] allocation_ids
-        );
+        let input = params::AllocationIds { allocation_ids };
+        let url = url_format_obj("demandDecorations", &input);
         self.client.get(&url).send().json().await
     }
 
@@ -138,14 +134,11 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-
-        #[rustfmt::skip]
-        let url = url_format!(
-            "debitNotes",
-            #[query] after_timestamp,
-            #[query] max_items
-        );
+        let input = params::FilterParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            max_items,
+        };
+        let url = url_format_obj("debitNotes", &input);
         self.client.get(&url).send().json().await
     }
 
@@ -165,22 +158,19 @@ impl PaymentApi {
         Tz::Offset: Display,
     {
         // NOT IMPLEMENTED ON SERVER
-        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-
-        #[rustfmt::skip]
-        let url = url_format!(
-            "debitNotes/{debit_note_id}/payments",
-            debit_note_id,
-            #[query] after_timestamp,
-            #[query] max_items
-        );
+        let input = params::FilterParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            max_items,
+        };
+        let base_url = format!("debitNotes/{}/payments", debit_note_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.get(&url).send().json().await
     }
 
     pub async fn get_debit_note_events<Tz>(
         &self,
         after_timestamp: Option<&DateTime<Tz>>,
-        timeout: Option<Duration>,
+        poll_timeout: Option<Duration>,
         max_events: Option<u32>,
         app_session_id: Option<String>,
     ) -> Result<Vec<DebitNoteEvent>>
@@ -188,17 +178,13 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        let poll_timeout = timeout.map(|d| d.as_secs_f64());
-
-        #[rustfmt::skip]
-        let url = url_format!(
-            "debitNoteEvents",
-            #[query] after_timestamp,
-            #[query] poll_timeout,
-            #[query] max_events,
-            #[query] app_session_id
-        );
+        let input = params::EventParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            poll_timeout: poll_timeout.map(|d| d.as_secs_f64()),
+            max_events,
+            app_session_id,
+        };
+        let url = url_format_obj("debitNoteEvents", &input);
         self.client
             .get(&url)
             .send()
@@ -219,24 +205,20 @@ impl PaymentApi {
     }
 
     pub async fn send_debit_note(&self, debit_note_id: &str) -> Result<()> {
-        let timeout = self.config.send_debit_note_timeout;
-        #[rustfmt::skip]
-        let url = url_format!(
-            "debitNotes/{debit_note_id}/send",
-            debit_note_id,
-            #[query] timeout
-        );
+        let input = params::Timeout {
+            timeout: self.config.send_debit_note_timeout,
+        };
+        let base_url = format!("debitNotes/{}/send", debit_note_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.post(&url).send().json().await
     }
 
     pub async fn cancel_debit_note(&self, debit_note_id: &str) -> Result<()> {
-        let timeout = self.config.cancel_debit_note_timeout;
-        #[rustfmt::skip]
-        let url = url_format!(
-            "debitNotes/{debit_note_id}/cancel",
-            debit_note_id,
-            #[query] timeout
-        );
+        let input = params::Timeout {
+            timeout: self.config.cancel_debit_note_timeout,
+        };
+        let base_url = format!("debitNotes/{}/cancel", debit_note_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.post(&url).send().json().await
     }
 
@@ -248,13 +230,11 @@ impl PaymentApi {
         debit_note_id: &str,
         acceptance: &Acceptance,
     ) -> Result<()> {
-        let timeout = self.config.accept_debit_note_timeout;
-        #[rustfmt::skip]
-        let url = url_format!(
-            "debitNotes/{debit_note_id}/accept",
-            debit_note_id,
-            #[query] timeout
-        );
+        let input = params::Timeout {
+            timeout: self.config.accept_debit_note_timeout,
+        };
+        let base_url = format!("debitNotes/{}/accept", debit_note_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.post(&url).send_json(acceptance).json().await
     }
 
@@ -263,13 +243,11 @@ impl PaymentApi {
         debit_note_id: &str,
         rejection: &Rejection,
     ) -> Result<()> {
-        let timeout = self.config.reject_debit_note_timeout;
-        #[rustfmt::skip]
-        let url = url_format!(
-            "debitNotes/{debit_note_id}/reject",
-            debit_note_id,
-            #[query] timeout
-        );
+        let input = params::Timeout {
+            timeout: self.config.reject_debit_note_timeout,
+        };
+        let base_url = format!("debitNotes/{}/reject", debit_note_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.post(&url).send_json(rejection).json().await
     }
 
@@ -285,14 +263,11 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-
-        #[rustfmt::skip]
-        let url = url_format!(
-            "invoices",
-            #[query] after_timestamp,
-            #[query] max_items
-        );
+        let input = params::FilterParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            max_items,
+        };
+        let url = url_format_obj("invoices", &input);
         self.client.get(&url).send().json().await
     }
 
@@ -312,22 +287,19 @@ impl PaymentApi {
         Tz::Offset: Display,
     {
         // NOT IMPLEMENTED ON SERVER
-        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-
-        #[rustfmt::skip]
-        let url = url_format!(
-            "invoices/{invoice_id}/payments",
-            invoice_id,
-            #[query] after_timestamp,
-            #[query] max_items
-        );
+        let input = params::FilterParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            max_items,
+        };
+        let base_url = format!("invoices/{}/payments", invoice_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.get(&url).send().json().await
     }
 
     pub async fn get_invoice_events<Tz>(
         &self,
         after_timestamp: Option<&DateTime<Tz>>,
-        timeout: Option<Duration>,
+        poll_timeout: Option<Duration>,
         max_events: Option<u32>,
         app_session_id: Option<String>,
     ) -> Result<Vec<InvoiceEvent>>
@@ -335,17 +307,14 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        let poll_timeout = timeout.map(|d| d.as_secs_f64());
+        let input = params::EventParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            poll_timeout: poll_timeout.map(|d| d.as_secs_f64()),
+            max_events,
+            app_session_id,
+        };
 
-        #[rustfmt::skip]
-        let url = url_format!(
-            "invoiceEvents",
-            #[query] after_timestamp,
-            #[query] poll_timeout,
-            #[query] max_events,
-            #[query] app_session_id
-        );
+        let url = url_format_obj("invoiceEvents", &input);
         self.client
             .get(&url)
             .send()
@@ -362,24 +331,20 @@ impl PaymentApi {
     }
 
     pub async fn send_invoice(&self, invoice_id: &str) -> Result<()> {
-        let timeout = self.config.send_invoice_timeout;
-        #[rustfmt::skip]
-        let url = url_format!(
-            "invoices/{invoice_id}/send",
-            invoice_id,
-            #[query] timeout
-        );
+        let input = params::Timeout {
+            timeout: self.config.send_invoice_timeout,
+        };
+        let base_url = format!("invoices/{}/send", invoice_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.post(&url).send().json().await
     }
 
     pub async fn cancel_invoice(&self, invoice_id: &str) -> Result<()> {
-        let timeout = self.config.cancel_invoice_timeout;
-        #[rustfmt::skip]
-        let url = url_format!(
-            "invoices/{invoice_id}/cancel",
-            invoice_id,
-            #[query] timeout
-        );
+        let input = params::Timeout {
+            timeout: self.config.cancel_invoice_timeout,
+        };
+        let base_url = format!("invoices/{}/cancel", invoice_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.post(&url).send().json().await
     }
 
@@ -387,24 +352,20 @@ impl PaymentApi {
     // Requestor
 
     pub async fn accept_invoice(&self, invoice_id: &str, acceptance: &Acceptance) -> Result<()> {
-        let timeout = self.config.accept_invoice_timeout;
-        #[rustfmt::skip]
-        let url = url_format!(
-            "invoices/{invoice_id}/accept",
-            invoice_id,
-            #[query] timeout
-        );
+        let input = params::Timeout {
+            timeout: self.config.accept_invoice_timeout,
+        };
+        let base_url = format!("invoices/{}/accept", invoice_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.post(&url).send_json(acceptance).json().await
     }
 
     pub async fn reject_invoice(&self, invoice_id: &str, rejection: &Rejection) -> Result<()> {
-        let timeout = self.config.reject_invoice_timeout;
-        #[rustfmt::skip]
-        let url = url_format!(
-            "invoices/{invoice_id}/reject",
-            invoice_id,
-            #[query] timeout
-        );
+        let input = params::Timeout {
+            timeout: self.config.reject_invoice_timeout,
+        };
+        let base_url = format!("invoices/{}/reject", invoice_id);
+        let url = url_format_obj(&base_url, &input);
         self.client.post(&url).send_json(rejection).json().await
     }
 
@@ -413,7 +374,7 @@ impl PaymentApi {
     pub async fn get_payments<Tz>(
         &self,
         after_timestamp: Option<&DateTime<Tz>>,
-        timeout: Option<Duration>,
+        poll_timeout: Option<Duration>,
         max_events: Option<u32>,
         app_session_id: Option<String>,
     ) -> Result<Vec<Payment>>
@@ -421,17 +382,13 @@ impl PaymentApi {
         Tz: TimeZone,
         Tz::Offset: Display,
     {
-        let after_timestamp = after_timestamp.map(|dt| dt.to_rfc3339());
-        let poll_timeout = timeout.map(|d| d.as_secs_f64());
-
-        #[rustfmt::skip]
-        let url = url_format!(
-            "payments",
-            #[query] after_timestamp,
-            #[query] poll_timeout,
-            #[query] max_events,
-            #[query] app_session_id
-        );
+        let input = params::EventParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            poll_timeout: poll_timeout.map(|d| d.as_secs_f64()),
+            max_events,
+            app_session_id,
+        };
+        let url = url_format_obj("payments", &input);
         self.client
             .get(&url)
             .send()
