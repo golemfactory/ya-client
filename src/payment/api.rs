@@ -113,12 +113,17 @@ impl PaymentApi {
         self.client.delete(&url).send().json().await
     }
 
+    #[rustfmt::skip]
     pub async fn get_demand_decorations(
         &self,
         allocation_ids: Vec<String>,
     ) -> Result<MarketDecoration> {
-        let input = params::AllocationIds { allocation_ids };
-        let url = url_format_obj("demandDecorations", &input);
+        // *Not* using url_format_obj because serde_qs doesn't support comma-separated list serialization
+        let allocation_ids = Some(allocation_ids.join(","));
+        let url = url_format!(
+            "demandDecorations",
+            #[query] allocation_ids
+        );
         self.client.get(&url).send().json().await
     }
 
