@@ -1,8 +1,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 
-pub const DEFAULT_ACK_TIMEOUT: f64 = 60.0; // seconds
-pub const DEFAULT_EVENT_TIMEOUT: f64 = 0.0; // seconds
+pub const DEFAULT_ACK_TIMEOUT: f64 = 5.0; // seconds
+pub const DEFAULT_EVENT_TIMEOUT: f64 = 5.0; // seconds
 
 #[derive(Deserialize, Serialize)]
 pub struct DebitNoteId {
