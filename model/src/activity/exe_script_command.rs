@@ -10,12 +10,18 @@
 
 use crate::activity::ExeScriptCommandState;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ExeScriptCommand {
     Sign {},
-    Deploy {},
+    Deploy {
+        #[serde(default)]
+        net: Vec<Network>,
+        #[serde(default)]
+        hosts: HashMap<String, String>, // hostname -> IP
+    },
     Start {
         #[serde(default)]
         args: Vec<String>,
@@ -35,6 +41,16 @@ pub enum ExeScriptCommand {
         args: TransferArgs,
     },
     Terminate {},
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Network {
+    pub id: String,
+    pub ip: String,
+    pub mask: String,
+    #[serde(default)]
+    pub nodes: HashMap<String, String>, // NetworkId -> (IP -> NodeId)
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]

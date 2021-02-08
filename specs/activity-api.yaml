@@ -447,7 +447,11 @@ components:
         ```
         [
         {
-            "deploy": {}
+            "deploy": {
+              "net": [{ "id": "id", "ip": "10.0.0.2", "mask": "255.255.0.0" }],
+              "hosts": {"master": "10.0.0.1"},
+              "nodes": {"10.0.0.1": "0xdeadbeef"}
+            }
         },
         {
             "start": {
@@ -496,7 +500,37 @@ components:
             - deploy
           properties:
             deploy:
-              type: object
+              $ref: '#/components/schemas/DeployCommandBody'
+
+    DeployCommandBody:
+      type: object
+      properties:
+        net:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeployNetwork'
+        hosts:
+          type: object
+          additionalProperties:
+            type: string
+        nodes:
+          type: object
+          additionalProperties:
+            type: string
+
+    DeployNetwork:
+      type: object
+      required:
+        - id
+        - ip
+        - mask
+      properties:
+        id:
+          type: string
+        ip:
+          type: string
+        mask:
+          type: string
 
     StartCommand:
       allOf:
