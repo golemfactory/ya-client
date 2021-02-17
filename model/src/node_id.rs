@@ -4,9 +4,21 @@ use std::mem::MaybeUninit;
 use std::str::FromStr;
 use std::{fmt, str};
 
-#[derive(Debug, thiserror::Error, PartialEq)]
-#[error("NodeId parsing error: {0}")]
-pub struct ParseError(String);
+#[derive(Clone, Debug, thiserror::Error, PartialEq, Serialize, Deserialize)]
+#[error("NodeId `{original_str}` parsing error: {msg}")]
+pub struct ParseError {
+    original_str: String,
+    msg: String,
+}
+
+impl ParseError {
+    fn new(original_str: impl Into<String>, msg: impl Into<String>) -> Self {
+        Self {
+            original_str: original_str.into(),
+            msg: msg.into(),
+        }
+    }
+}
 
 /// Yagna node identity compliant with [Ethereum addresses](https://en.wikipedia.org/wiki/Ethereum#Addresses)
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
@@ -84,11 +96,10 @@ fn hex_to_dec(hex: u8, s: &str) -> Result<u8, ParseError> {
         b'A'..=b'F' => Ok(hex - b'A' + 10),
         b'a'..=b'f' => Ok(hex - b'a' + 10),
         b'0'..=b'9' => Ok(hex - b'0'),
-        _ => Err(ParseError(format!(
-            "expected hex chars, but got: `{}` within {}",
-            char::from(hex),
-            s
-        ))),
+        _ => Err(ParseError::new(
+            s,
+            format!("expected hex chars, but got: `{}`", char::from(hex)),
+        )),
     }
 }
 
@@ -99,15 +110,11 @@ impl str::FromStr for NodeId {
         let bytes = s.as_bytes();
 
         if bytes.len() != 42 {
-            return Err(ParseError(format!(
-                "expected size 42 chars, but {} given: {}",
-                s.len(),
-                s
-            )));
+            return Err(ParseError::new(s, "expected length is 42 chars"));
         }
 
         if bytes[0] != b'0' || bytes[1] != b'x' {
-            return Err(ParseError(format!("expected 0x prefix, but got: {}", s)));
+            return Err(ParseError::new(s, "expected 0x prefix"));
         }
 
         let mut inner = [0u8; 20];
@@ -257,7 +264,7 @@ mod tests {
     fn parse_empty_str() {
         assert_eq!(
             "".parse::<NodeId>().unwrap_err().to_string(),
-            "NodeId parsing error: expected size 42 chars, but 0 given: ".to_string()
+            "NodeId `` parsing error: expected length is 42 chars".to_string()
         );
     }
 
@@ -265,7 +272,7 @@ mod tests {
     fn parse_short_str() {
         assert_eq!(
             "short".parse::<NodeId>().unwrap_err().to_string(),
-            "NodeId parsing error: expected size 42 chars, but 5 given: short".to_string()
+            "NodeId `short` parsing error: expected length is 42 chars".to_string()
         );
     }
 
@@ -276,7 +283,7 @@ mod tests {
                 .parse::<NodeId>()
                 .unwrap_err()
                 .to_string(),
-            "NodeId parsing error: expected size 42 chars, but 43 given: 0123456789012345678901234567890123456789123".to_string()
+            "NodeId `0123456789012345678901234567890123456789123` parsing error: expected length is 42 chars".to_string()
         );
     }
 
@@ -287,7 +294,8 @@ mod tests {
                 .parse::<NodeId>()
                 .unwrap_err()
                 .to_string(),
-            "NodeId parsing error: expected 0x prefix, but got: 012345678901234567890123456789012345678912".to_string()
+            "NodeId `012345678901234567890123456789012345678912` parsing error: expected 0x prefix"
+                .to_string()
         );
     }
 
@@ -298,7 +306,7 @@ mod tests {
                 .parse::<NodeId>()
                 .unwrap_err()
                 .to_string(),
-            "NodeId parsing error: expected hex chars, but got: `x` within 0xx000000000000000000000000000000000000000".to_string()
+            "NodeId `0xx000000000000000000000000000000000000000` parsing error: expected hex chars, but got: `x`".to_string()
         );
     }
 

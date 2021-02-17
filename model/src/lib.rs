@@ -5,4 +5,4 @@ pub mod node_id;
 pub mod payment;
 
 pub use error_message::ErrorMessage;
-pub use node_id::NodeId;
+pub use node_id::{NodeId, ParseError};
