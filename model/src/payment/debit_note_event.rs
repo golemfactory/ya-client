@@ -32,7 +32,7 @@ pub enum DebitNoteEventType {
 mod test {
     use super::*;
     use crate::payment::{Rejection, RejectionReason};
-    use bigdecimal::BigDecimal;
+    use bigdecimal::{BigDecimal, FromPrimitive};
     use chrono::TimeZone;
 
     #[test]
@@ -45,7 +45,7 @@ mod test {
             event_type: DebitNoteEventType::DebitNoteRejectedEvent {
                 rejection: Rejection {
                     rejection_reason: RejectionReason::UnsolicitedService,
-                    total_amount_accepted: BigDecimal::from(3.14),
+                    total_amount_accepted: BigDecimal::from_f32(3.14).unwrap(),
                     message: None,
                 },
             },
@@ -57,7 +57,7 @@ mod test {
                 \"eventType\":\"DebitNoteRejectedEvent\",\
                 \"rejection\":{\
                     \"rejectionReason\":\"UNSOLICITED_SERVICE\",\
-                    \"totalAmountAccepted\":\"3.140000000000000\"\
+                    \"totalAmountAccepted\":\"3.140000\"\
                 }\
              }",
             serde_json::to_string(&ie).unwrap()

@@ -175,7 +175,7 @@ impl PaymentApi {
     pub async fn get_debit_note_events<Tz>(
         &self,
         after_timestamp: Option<&DateTime<Tz>>,
-        poll_timeout: Option<Duration>,
+        timeout: Option<Duration>,
         max_events: Option<u32>,
         app_session_id: Option<String>,
     ) -> Result<Vec<DebitNoteEvent>>
@@ -185,7 +185,7 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            poll_timeout: poll_timeout.map(|d| d.as_secs_f64()),
+            timeout: timeout.map(|d| d.as_secs_f64()),
             max_events,
             app_session_id,
         };
@@ -304,7 +304,7 @@ impl PaymentApi {
     pub async fn get_invoice_events<Tz>(
         &self,
         after_timestamp: Option<&DateTime<Tz>>,
-        poll_timeout: Option<Duration>,
+        timeout: Option<Duration>,
         max_events: Option<u32>,
         app_session_id: Option<String>,
     ) -> Result<Vec<InvoiceEvent>>
@@ -314,7 +314,7 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            poll_timeout: poll_timeout.map(|d| d.as_secs_f64()),
+            timeout: timeout.map(|d| d.as_secs_f64()),
             max_events,
             app_session_id,
         };
@@ -379,7 +379,7 @@ impl PaymentApi {
     pub async fn get_payments<Tz>(
         &self,
         after_timestamp: Option<&DateTime<Tz>>,
-        poll_timeout: Option<Duration>,
+        timeout: Option<Duration>,
         max_events: Option<u32>,
         app_session_id: Option<String>,
     ) -> Result<Vec<Payment>>
@@ -389,7 +389,7 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            poll_timeout: poll_timeout.map(|d| d.as_secs_f64()),
+            timeout: timeout.map(|d| d.as_secs_f64()),
             max_events,
             app_session_id,
         };
