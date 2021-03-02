@@ -50,16 +50,16 @@ impl ActivityProviderApi {
         &self,
         after_timestamp: Option<DateTime<Utc>>,
         app_session_id: Option<String>,
-        poll_timeout: Option<Duration>,
+        timeout: Option<Duration>,
         max_events: Option<u32>,
     ) -> Result<Vec<ProviderEvent>> {
         let after_timestamp = after_timestamp.map(|ts| ts.to_rfc3339());
-        let poll_timeout = poll_timeout.map(|d| d.as_secs_f32());
+        let timeout = timeout.map(|d| d.as_secs_f32());
         let url = url_format!(
             "events",
             #[query] after_timestamp,
             #[query] app_session_id,
-            #[query] poll_timeout,
+            #[query] timeout,
             #[query] max_events,
         );
 
