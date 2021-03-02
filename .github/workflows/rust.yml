@@ -17,9 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # commented bc of too much spend on Macos which is counted 10x, Windows is 2x
-        # os: [macos-latest, windows-latest, ubuntu-latest]
-        os: [windows-latest, ubuntu-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
 
     steps:
       - name: Checkout
