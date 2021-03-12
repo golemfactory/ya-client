@@ -1,6 +1,6 @@
 use crate::payment::network::Network;
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DriverDetails {
