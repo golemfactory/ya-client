@@ -43,6 +43,8 @@ paths:
       description: '**Note:** This call shall get routed as a provider event (see
         ProviderEvent structure).'
       operationId: createActivity
+      parameters:
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       requestBody:
         content:
           application/json:
@@ -216,6 +218,7 @@ paths:
           required: true
           schema:
             type: string
+        - $ref: 'common.yaml#/parameters/ackTimeout'
       responses:
         200:
           description: Success
