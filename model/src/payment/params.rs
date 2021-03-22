@@ -44,7 +44,7 @@ pub struct Timeout {
 #[serde(rename_all = "camelCase")]
 pub struct EventParams {
     #[serde(default)]
-    pub poll_timeout: Option<f64>,
+    pub timeout: Option<f64>,
     #[serde(default)]
     pub after_timestamp: Option<DateTime<Utc>>,
     #[serde(default)]
