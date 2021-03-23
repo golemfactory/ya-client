@@ -1,6 +1,6 @@
 [package]
 name = "ya-client-model"
-version = "0.3.1"
+version = "0.3.2"
 description = "Yagna REST API data model"
 authors = ["Golem Factory <contact@golem.network>"]
 homepage = "https://github.com/golemfactory/ya-client"
