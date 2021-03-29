@@ -48,9 +48,11 @@ pub enum ExeScriptCommand {
 pub struct Network {
     pub id: String,
     pub ip: String,
-    pub mask: String,
+    pub mask: Option<String>,
+    pub gateway: Option<String>,
+    pub node_ip: String,
     #[serde(default)]
-    pub nodes: HashMap<String, String>, // NetworkId -> (IP -> NodeId)
+    pub nodes: HashMap<String, String>, // IP -> NodeId
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
