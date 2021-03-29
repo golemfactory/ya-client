@@ -94,7 +94,7 @@ impl NetRequestorApi {
         let (mut res, conn) = self.client.ws(&url).await?;
 
         let status = res.status();
-        if status.is_success().not() {
+        if status.is_success().not() && status.is_informational().not() {
             let body = res.body().limit(16384 as usize).await?;
             return Err(Error::HttpError {
                 code: status,
