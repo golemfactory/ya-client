@@ -21,11 +21,10 @@ members = [
 [dependencies]
 ya-client-model = { version= "^0.3", path = "model" }
 
-awc = "1.0"
+awc = "2.0"
 bytes = "0.5"
 chrono = "0.4"
 envy = "0.4"
-failure = "0.1.6"
 futures = "0.3"
 hex = "0.4"
 heck = "0.3.1"
@@ -45,7 +44,7 @@ structopt = { version = "0.3.12", optional = true }
 openssl = { version = "0.10", optional = true }
 
 [dev-dependencies]
-actix-rt = "1.0"
+actix-rt = "1.1"
 anyhow = "1.0"
 env_logger = "0.7"
 structopt = "0.3"
