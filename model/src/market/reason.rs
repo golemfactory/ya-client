@@ -80,7 +80,7 @@ mod test {
     #[test]
     fn test_try_convert_custom_reason_wo_message_field() {
         #[derive(Serialize, Deserialize, Debug)]
-        struct CustomReason {};
+        struct CustomReason {}
         let custom = CustomReason {};
 
         assert_eq!(
@@ -95,7 +95,7 @@ mod test {
         struct CustomReason {
             message: String,
             other: bool,
-        };
+        }
         let custom = CustomReason {
             message: "coś".to_string(),
             other: false,
@@ -120,7 +120,7 @@ mod test {
         #[derive(Serialize, Deserialize, Debug)]
         struct CustomReason {
             message: u8,
-        };
+        }
         let custom = CustomReason { message: 37 };
 
         assert_eq!(

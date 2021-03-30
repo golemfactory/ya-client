@@ -297,7 +297,7 @@ impl WebClientBuilder {
     }
 
     pub fn build(self) -> WebClient {
-        let mut builder = awc::Client::build();
+        let mut builder = awc::ClientBuilder::new();
 
         if let Some(timeout) = self.timeout {
             builder = builder.timeout(timeout);
