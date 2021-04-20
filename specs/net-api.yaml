@@ -1,0 +1,228 @@
+openapi: 3.0.2
+info:
+  version: 0.1.0
+  title: Yagna Net API
+  description: '
+    Yagna Net API
+'
+
+servers:
+  - url: /net-api/v1
+
+security:
+  - app_key: []
+
+tags:
+  - name: requestor
+    description: Requestor part
+
+paths:
+  /net:
+    get:
+      tags:
+        - requestor
+      operationId: getNetworks
+      summary: GetNetworks - Fetches Virtual Private Network created by the Requestor.
+      responses:
+        200:
+          $ref: '#/components/responses/NetworkList'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+    post:
+      tags:
+        - requestor
+      operationId: createNetwork
+      summary: CreateNetwork - Creates a new Virtual Private Network.
+      requestBody:
+        $ref: '#/components/requestBodies/Network'
+      responses:
+        200:
+          description: Network created.
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /net/{networkId}/address:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+
+    post:
+      tags:
+        - requestor
+      operationId: addAddress
+      summary: AddAddress - Assigns a new IP address to the Requestor in a Virtual Private Network.
+      requestBody:
+        $ref: '#/components/requestBodies/Address'
+      responses:
+        200:
+          description: Address assigned.
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        409:
+          $ref: 'common.yaml#/responses/Conflict'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /net/{networkId}/node:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+
+    post:
+      tags:
+        - requestor
+      operationId: addNode
+      summary: AddNode - Adds and advertises new Node information in a Virtual Private Network.
+      requestBody:
+        $ref: '#/components/requestBodies/Node'
+      responses:
+        200:
+          description: Node added.
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        409:
+          $ref: 'common.yaml#/responses/Conflict'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+
+components:
+
+  securitySchemes:
+    app_key:
+      $ref: 'common.yaml#/components/securitySchemes/app_key'
+
+  parameters:
+
+    networkId:
+      name: networkId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  requestBodies:
+
+    Address:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Address'
+
+    Network:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Network'
+
+    Node:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Node'
+
+  responses:
+
+    NetworkList:
+      description: List of Networks created by the Requestor.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Network'
+
+    NodeList:
+      description: List of nodes in a Virtual Private Network.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Node'
+
+    ConnectionList:
+      description: List of established connections within a Virtual Private Network.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Connection'
+
+  schemas:
+
+    Address:
+      type: object
+      required:
+        - ip
+      properties:
+        ip:
+          type: string
+
+    Connection:
+      type: object
+      required:
+        - protocol
+        - localIp
+        - localPort
+        - remoteIp
+        - remotePort
+      properties:
+        protocol:
+          type: integer
+          readOnly: true
+        localIp:
+          type: string
+          readOnly: true
+        localPort:
+          type: integer
+          readOnly: true
+        remoteIp:
+          type: string
+          readOnly: true
+        remotePort:
+          type: integer
+          readOnly: true
+
+    Network:
+      type: object
+      required:
+        - id
+        - ip
+      properties:
+        id:
+          type: string
+        ip:
+          type: string
+        mask:
+          type: string
+        gateway:
+          type: string
+
+    Node:
+      type: object
+      required:
+        - id
+        - ip
+      properties:
+        id:
+          type: string
+        ip:
+          type: string
