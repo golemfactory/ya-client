@@ -1,0 +1,10 @@
+
+/.github/                                @golemfactory/ya-client
+
+# Rust code
+/examples                                @golemfactory/ya-client-rust
+/model                                   @golemfactory/ya-client-rust
+/src                                     @golemfactory/ya-client-rust
+
+# Yaml specs
+/specs                                   @golemfactory/ya-client-spec
