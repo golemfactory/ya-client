@@ -4,7 +4,7 @@ use awc::{
     http::{header, HeaderMap, HeaderName, HeaderValue, Method, StatusCode},
     ClientRequest, ClientResponse, SendClientRequest,
 };
-use bytes::{Buf, Bytes, BytesMut};
+use bytes::{Bytes, BytesMut};
 use futures::stream::Peekable;
 use futures::{Stream, StreamExt, TryStreamExt};
 use heck::MixedCase;
@@ -115,7 +115,7 @@ impl WebClient {
         let request = self
             .awc
             .request(method.clone(), &url)
-            .set(header::Accept(vec![header::qitem(mime::TEXT_EVENT_STREAM)]));
+            .insert_header((&header::ACCEPT, mime::TEXT_EVENT_STREAM));
         let stream = request
             .send()
             .await
@@ -437,7 +437,7 @@ where
 
     fn next_event(&mut self, start_idx: usize) -> Option<Result<Event>> {
         let idx = max(0, start_idx as i64 - 1) as usize;
-        if let Some(idx) = Self::find(self.buffer.bytes(), b"\n\n", idx) {
+        if let Some(idx) = Self::find(&self.buffer, b"\n\n", idx) {
             let bytes = self.buffer.split_to(idx);
             return String::from_utf8(bytes.to_vec())
                 .map(Event::try_from)
