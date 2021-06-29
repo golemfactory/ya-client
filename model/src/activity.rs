@@ -15,7 +15,7 @@ mod sgx_credentials;
 pub use self::activity_state::{ActivityState, State, StatePair};
 pub use self::activity_usage::ActivityUsage;
 pub use self::create_activity::{CreateActivityRequest, CreateActivityResult, Credentials};
-pub use self::exe_script_command::{Capture, CaptureFormat, CaptureMode, CapturePart};
+pub use self::exe_script_command::{Capture, CaptureFormat, CaptureMode, CapturePart, Network};
 pub use self::exe_script_command::{ExeScriptCommand, FileSet, SetEntry, SetObject, TransferArgs};
 pub use self::exe_script_command_result::{CommandOutput, CommandResult, ExeScriptCommandResult};
 pub use self::exe_script_command_state::ExeScriptCommandState;

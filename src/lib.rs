@@ -5,6 +5,7 @@ pub mod web;
 
 pub mod activity;
 pub mod market;
+pub mod net;
 pub mod payment;
 
 pub mod error;
