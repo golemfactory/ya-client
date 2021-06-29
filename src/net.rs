@@ -49,31 +49,31 @@ impl NetRequestorApi {
 
     /// Retrieves requestor's addresses in a virtual private network.
     pub async fn get_addresses(&self, network_id: &str) -> Result<Vec<Address>> {
-        let url = url_format!("net/{network_id}/address", network_id);
+        let url = url_format!("net/{network_id}/addresses", network_id);
         self.client.get(&url).send().json().await
     }
 
     /// Assigns a new address of the requestor in an existing private network.
     pub async fn add_address(&self, network_id: &str, address: &Address) -> Result<()> {
-        let url = url_format!("net/{network_id}/address", network_id);
+        let url = url_format!("net/{network_id}/addresses", network_id);
         self.client.post(&url).send_json(&address).json().await
     }
 
     /// Retrieves nodes within a virtual private network.
     pub async fn get_nodes(&self, network_id: &str) -> Result<Vec<Node>> {
-        let url = url_format!("net/{network_id}/node", network_id);
+        let url = url_format!("net/{network_id}/nodes", network_id);
         self.client.get(&url).send().json().await
     }
 
     /// Registers a node in a virtual private network.
     pub async fn add_node(&self, network_id: &str, node: &Node) -> Result<()> {
-        let url = url_format!("net/{network_id}/node", network_id);
+        let url = url_format!("net/{network_id}/nodes", network_id);
         self.client.post(&url).send_json(&node).json().await
     }
 
     /// Unregisters an existing node in a virtual private network.
     pub async fn remove_node(&self, network_id: &str, node_id: &str) -> Result<()> {
-        let url = url_format!("net/{network_id}/node/{node_id}", network_id, node_id);
+        let url = url_format!("net/{network_id}/nodes/{node_id}", network_id, node_id);
         self.client.post(&url).send().json().await
     }
 

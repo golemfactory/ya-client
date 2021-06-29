@@ -22,7 +22,7 @@ paths:
       tags:
         - requestor
       operationId: getNetworks
-      summary: GetNetworks - Fetches Virtual Private Network created by the Requestor.
+      summary: GetNetworks - Fetches Networks created by the Requestor.
       responses:
         200:
           $ref: '#/components/responses/NetworkList'
@@ -30,8 +30,6 @@ paths:
           $ref: 'common.yaml#/responses/BadRequest'
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -39,7 +37,7 @@ paths:
       tags:
         - requestor
       operationId: createNetwork
-      summary: CreateNetwork - Creates a new Virtual Private Network.
+      summary: CreateNetwork - Creates a new Network.
       requestBody:
         $ref: '#/components/requestBodies/Network'
       responses:
@@ -52,15 +50,70 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /net/{networkId}/address:
+  /net/{networkId}:
     parameters:
       - $ref: '#/components/parameters/networkId'
+
+    get:
+      tags:
+        - requestor
+      operationId: getNetwork
+      summary: GetNetwork - Fetches a Network created by the Requestor.
+      responses:
+        200:
+          $ref: '#/components/responses/Network'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+    delete:
+      tags:
+        - requestor
+      operationId: removeNetwork
+      summary: RemoveNetwork - Removes a Network created by the Requestor.
+      responses:
+        200:
+          description: Network removed.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /net/{networkId}/addresses:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+
+    get:
+      tags:
+        - requestor
+      operationId: getAddresses
+      summary: GetAddresses - Fetches Requestor's IP addresses in a Network.
+      responses:
+        200:
+          $ref: '#/components/responses/AddressList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
     post:
       tags:
         - requestor
       operationId: addAddress
-      summary: AddAddress - Assigns a new IP address to the Requestor in a Virtual Private Network.
+      summary: AddAddress - Assigns a new IP address to the Requestor in a Network.
       requestBody:
         $ref: '#/components/requestBodies/Address'
       responses:
@@ -75,15 +128,32 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /net/{networkId}/node:
+  /net/{networkId}/nodes:
     parameters:
       - $ref: '#/components/parameters/networkId'
+
+    get:
+      tags:
+        - requestor
+      operationId: getNodes
+      summary: GetNodes - Fetches Nodes added to a Network.
+      responses:
+        200:
+          $ref: '#/components/responses/NodeList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
     post:
       tags:
         - requestor
       operationId: addNode
-      summary: AddNode - Adds and advertises new Node information in a Virtual Private Network.
+      summary: AddNode - Advertises and adds a new Node to a Network.
       requestBody:
         $ref: '#/components/requestBodies/Node'
       responses:
@@ -98,6 +168,57 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
+  /net/{networkId}/nodes/{nodeId}:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+      - $ref: '#/components/parameters/nodeId'
+
+    delete:
+      tags:
+        - requestor
+      operationId: removeNode
+      summary: RemoveNode - Advertises and removes a Node from a Network.
+      responses:
+        200:
+          description: Node removed.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /net/{networkId}/tcp:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+
+    get:
+      tags:
+        - requestor
+      operationId: getConnections
+      summary: GetConnections - Fetches Requestor's TCP connections in a Network.
+      responses:
+        200:
+          $ref: '#/components/responses/ConnectionList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /net/{networkId}/tcp/{ip}/{port}:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+      - $ref: '#/components/parameters/ip'
+      - $ref: '#/components/parameters/port'
+
+    description: >
+      WebSocket endpoint for establishing a TCP connection to `{ip}:{port}`.
 
 components:
 
@@ -113,6 +234,29 @@ components:
       required: true
       schema:
         type: string
+
+    nodeId:
+      name: nodeId
+      in: path
+      required: true
+      schema:
+        type: string
+
+    ip:
+      name: ip
+      in: path
+      required: true
+      schema:
+        type: string
+
+    port:
+      name: port
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 65535
 
   requestBodies:
 
@@ -138,6 +282,22 @@ components:
             $ref: '#/components/schemas/Node'
 
   responses:
+
+    AddressList:
+      description: List of Requestor's Addresses in a Virtual Private Network.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Address'
+
+    Network:
+      description: Network information.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Network'
 
     NetworkList:
       description: List of Networks created by the Requestor.
