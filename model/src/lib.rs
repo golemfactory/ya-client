@@ -1,6 +1,7 @@
 pub mod activity;
 pub mod error_message;
 pub mod market;
+pub mod net;
 pub mod node_id;
 pub mod payment;
 
