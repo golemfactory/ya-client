@@ -31,6 +31,8 @@ pub enum Error {
         method: Method,
         url: String,
     },
+    #[error("WebSocket error: {0}")]
+    WebSocketError(String),
     #[error("Serde JSON error: {0}")]
     SerdeJsonError(serde_json::Error),
     #[error("Invalid address: {0}")]
@@ -62,6 +64,12 @@ impl From<PayloadError> for Error {
 impl From<JsonPayloadError> for Error {
     fn from(e: JsonPayloadError) -> Self {
         Error::JsonPayloadError(e)
+    }
+}
+
+impl From<awc::error::WsClientError> for Error {
+    fn from(e: awc::error::WsClientError) -> Self {
+        Error::WebSocketError(e.to_string())
     }
 }
 

@@ -1,8 +1,10 @@
 //! Web utils
+use actix_codec::Framed;
 use awc::{
     error::{PayloadError, SendRequestError},
     http::{header, HeaderMap, HeaderName, HeaderValue, Method, StatusCode},
-    ClientRequest, ClientResponse, SendClientRequest,
+    ws::Codec,
+    BoxedSocket, ClientRequest, ClientResponse, SendClientRequest,
 };
 use bytes::{Buf, Bytes, BytesMut};
 use futures::stream::Peekable;
@@ -124,6 +126,13 @@ impl WebClient {
             .map_err(Error::from)
             .event_stream();
         Ok(stream)
+    }
+
+    pub async fn ws(&self, url: &str) -> Result<(ClientResponse, Framed<BoxedSocket, Codec>)> {
+        let mut url = self.base_url.join(url).unwrap();
+        url.set_scheme("ws")
+            .map_err(|_| Error::InternalError(format!("Invalid URL: {}", url)))?;
+        Ok(self.awc.ws(url.to_string()).connect().await?)
     }
 
     pub fn get(&self, url: &str) -> WebRequest<ClientRequest> {
