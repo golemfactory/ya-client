@@ -31,7 +31,7 @@ impl NetRequestorApi {
     }
 
     /// Registers a new virtual private network overlay on the network.
-    pub async fn create_network(&self, network: &Network) -> Result<()> {
+    pub async fn create_network(&self, network: &NewNetwork) -> Result<Network> {
         self.client.post("net").send_json(&network).json().await
     }
 

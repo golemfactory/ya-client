@@ -42,7 +42,7 @@ paths:
         $ref: '#/components/requestBodies/Network'
       responses:
         200:
-          description: Network created.
+          $ref: '#/components/responses/Network'
         400:
           $ref: 'common.yaml#/responses/BadRequest'
         401:
@@ -364,7 +364,6 @@ components:
     Network:
       type: object
       required:
-        - id
         - ip
       properties:
         id:
