@@ -7,6 +7,14 @@ pub const NET_API_PATH: &str = "/net-api/v1/";
 pub struct Network {
     pub id: String,
     pub ip: String,
+    pub mask: String,
+    pub gateway: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewNetwork {
+    pub ip: String,
     pub mask: Option<String>,
     pub gateway: Option<String>,
 }
