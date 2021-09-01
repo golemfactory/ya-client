@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Yagna Activity API
-  version: 1.6.1
+  version: 1.6.2
   description: '
       The Activity API can be perceived as controls which a Requestor-side application
       has to steer the execution of an Activity as specified in an Agreement which
@@ -474,7 +474,11 @@ components:
         {
             "run": {
                 "entry_point": "rust-wasi-tutorial",
-                "args": ["/input/file_in", "/output/file_cp"]
+                "args": ["/input/file_in", "/output/file_cp"],
+                "capture": {
+                  "stdout": {"stream": {}},
+                  "stderr": {"stream": {}}
+                }
             }
         },
         {
@@ -615,6 +619,56 @@ components:
           type: array
           items:
             type: string
+        capture:
+          $ref: '#/components/schemas/Capture'
+
+    Capture:
+      type: object
+      properties:
+        stdout:
+          $ref: '#/components/schemas/CaptureMode'
+        stderr:
+          $ref: '#/components/schemas/CaptureMode'
+
+    CaptureMode:
+      type: object
+      properties:
+        atEnd:
+          $ref: '#/components/schemas/CaptureAtEndBody'
+        stream:
+          $ref: '#/components/schemas/CaptureStreamBody'
+
+    CaptureAtEndBody:
+      type: object
+      properties:
+        part:
+          $ref: '#/components/schemas/CapturePart'
+        format:
+          $ref: '#/components/schemas/CaptureFormat'
+
+    CaptureStreamBody:
+      type: object
+      properties:
+        limit:
+          type: number
+        format:
+          $ref: '#/components/schemas/CaptureFormat'
+
+    CaptureFormat:
+      type: string
+      enum:
+        - string
+        - binary
+
+    CapturePart:
+      type: object
+      properties:
+        head:
+          type: number
+        tail:
+          type: number
+        headtail:
+          type: number
 
     SignCommand:
       allOf:
