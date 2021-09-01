@@ -1,7 +1,7 @@
 /*
  * Yagna Activity API
  *
- * It conforms with capability level 1 of the [Activity API specification](https://docs.google.com/document/d/1BXaN32ediXdBHljEApmznSfbuudTU8TmvOmHKl0gmQM).
+ * It conforms with capability level 1 of the [Activity API specification](https://golem-network.gitbook.io/golem-internal-documentation-test/golem-activity-protocol/golem-activity-api).
  *
  * The version of the OpenAPI document: v1
  *
