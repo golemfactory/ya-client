@@ -667,7 +667,7 @@ components:
           type: number
         tail:
           type: number
-        headtail:
+        headTail:
           type: number
 
     SignCommand:
