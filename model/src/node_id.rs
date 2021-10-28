@@ -69,6 +69,12 @@ impl AsRef<[u8]> for NodeId {
     }
 }
 
+impl AsRef<[u8; 20]> for NodeId {
+    fn as_ref(&self) -> &[u8; 20] {
+        &self.inner
+    }
+}
+
 impl From<[u8; 20]> for NodeId {
     fn from(inner: [u8; 20]) -> Self {
         NodeId { inner }
