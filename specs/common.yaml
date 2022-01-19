@@ -76,6 +76,24 @@ parameters:
     schema:
       type: string
 
+  network:
+    name: network
+    description: Network identifier used for filtering payments made via the specified network
+    in: query
+    required: false
+    schema:
+      type: string
+      enum: [mainnet, rinkeby, goerli, polygon, mumbai]
+
+  driver:
+    name: driver
+    description: Driver identifier used for filtering payments made with the selected driver
+    in: query
+    required: false
+    schema:
+      type: string
+      enum: [zksync, erc20]
+
 responses:
   BadRequest:
     description: (400) Bad request

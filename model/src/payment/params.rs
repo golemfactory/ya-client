@@ -63,6 +63,17 @@ pub struct FilterParams {
 }
 
 #[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DriverNetworkParams {
+    #[serde(flatten)]
+    pub event_params: EventParams,
+    #[serde(default)]
+    pub network: Option<String>,
+    #[serde(default)]
+    pub driver: Option<String>,
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct AllocationIds {
     #[serde(
         rename = "allocationIds",
