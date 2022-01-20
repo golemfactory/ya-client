@@ -21,6 +21,13 @@ impl ParseError {
     }
 }
 
+#[derive(Clone, Debug, thiserror::Error, PartialEq, Serialize, Deserialize)]
+#[error("NodeId `{input:?}` parsing error: {msg}")]
+pub struct InvalidLengthError {
+    input: Vec<u8>,
+    msg: String,
+}
+
 /// Yagna node identity compliant with [Ethereum addresses](https://en.wikipedia.org/wiki/Ethereum#Addresses)
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct NodeId {
@@ -83,10 +90,13 @@ impl From<[u8; 20]> for NodeId {
 }
 
 impl TryFrom<&Vec<u8>> for NodeId {
-    type Error = &'static str;
-    fn try_from(inner: &Vec<u8>) -> Result<Self, Self::Error> {
+    type Error = InvalidLengthError;
+    fn try_from(inner: &Vec<u8>) -> Result<Self, InvalidLengthError> {
         if inner.len() != 20 {
-            return Err("Invalid length, NodeId requires 20.");
+            return Err(InvalidLengthError {
+                input: inner.clone(),
+                msg: "Invalid length, NodeId requires 20.".to_string(),
+            });
         }
         Ok(Self::from(inner.as_ref()))
     }
