@@ -5,6 +5,8 @@ use std::mem::MaybeUninit;
 use std::str::FromStr;
 use std::{fmt, str};
 
+const NODE_ID_LENGTH: usize = 20;
+
 #[derive(Clone, Debug, thiserror::Error, PartialEq, Serialize, Deserialize)]
 #[error("NodeId `{original_str}` parsing error: {msg}")]
 pub struct ParseError {
@@ -31,7 +33,7 @@ pub struct InvalidLengthError {
 /// Yagna node identity compliant with [Ethereum addresses](https://en.wikipedia.org/wiki/Ethereum#Addresses)
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct NodeId {
-    inner: [u8; 20],
+    inner: [u8; NODE_ID_LENGTH],
 }
 
 impl NodeId {
@@ -60,14 +62,16 @@ impl NodeId {
     }
 
     #[inline]
-    pub fn into_array(self) -> [u8; 20] {
+    pub fn into_array(self) -> [u8; NODE_ID_LENGTH] {
         self.inner
     }
 }
 
 impl Default for NodeId {
     fn default() -> Self {
-        NodeId { inner: [0; 20] }
+        NodeId {
+            inner: [0; NODE_ID_LENGTH],
+        }
     }
 }
 
@@ -77,14 +81,14 @@ impl AsRef<[u8]> for NodeId {
     }
 }
 
-impl AsRef<[u8; 20]> for NodeId {
-    fn as_ref(&self) -> &[u8; 20] {
+impl AsRef<[u8; NODE_ID_LENGTH]> for NodeId {
+    fn as_ref(&self) -> &[u8; NODE_ID_LENGTH] {
         &self.inner
     }
 }
 
-impl From<[u8; 20]> for NodeId {
-    fn from(inner: [u8; 20]) -> Self {
+impl From<[u8; NODE_ID_LENGTH]> for NodeId {
+    fn from(inner: [u8; NODE_ID_LENGTH]) -> Self {
         NodeId { inner }
     }
 }
@@ -92,10 +96,10 @@ impl From<[u8; 20]> for NodeId {
 impl TryFrom<&Vec<u8>> for NodeId {
     type Error = InvalidLengthError;
     fn try_from(inner: &Vec<u8>) -> Result<Self, InvalidLengthError> {
-        if inner.len() != 20 {
+        if inner.len() != NODE_ID_LENGTH {
             return Err(InvalidLengthError {
                 input: inner.clone(),
-                msg: "Invalid length, NodeId requires 20.".to_string(),
+                msg: format!("Invalid length, NodeId requires {}.", NODE_ID_LENGTH),
             });
         }
         Ok(Self::from(inner.as_ref()))
@@ -104,7 +108,7 @@ impl TryFrom<&Vec<u8>> for NodeId {
 
 impl<'a> From<&'a [u8]> for NodeId {
     fn from(it: &'a [u8]) -> Self {
-        let mut inner = [0; 20];
+        let mut inner = [0; NODE_ID_LENGTH];
         inner.copy_from_slice(it);
 
         NodeId { inner }
@@ -136,7 +140,8 @@ impl str::FromStr for NodeId {
     fn from_str(s: &str) -> Result<Self, ParseError> {
         let bytes = s.as_bytes();
 
-        if bytes.len() != 42 {
+        // String representation is 2x the byte length + 2 extra for prefix
+        if bytes.len() != 2 + NODE_ID_LENGTH * 2 {
             return Err(ParseError::new(s, "expected length is 42 chars"));
         }
 
@@ -144,7 +149,7 @@ impl str::FromStr for NodeId {
             return Err(ParseError::new(s, "expected 0x prefix"));
         }
 
-        let mut inner = [0u8; 20];
+        let mut inner = [0u8; NODE_ID_LENGTH];
         let mut p = 0;
 
         for b in bytes[2..].chunks(2) {
@@ -152,7 +157,7 @@ impl str::FromStr for NodeId {
             inner[p] = (hi << 4) | lo;
             p += 1;
         }
-        assert_eq!(p, 20);
+        assert_eq!(p, NODE_ID_LENGTH);
 
         Ok(NodeId { inner })
     }
@@ -207,8 +212,8 @@ impl<'de> de::Visitor<'de> for NodeIdVisit {
     where
         E: de::Error,
     {
-        if v.len() == 20 {
-            let mut inner: [u8; 20] = unsafe { MaybeUninit::uninit().assume_init() };
+        if v.len() == NODE_ID_LENGTH {
+            let mut inner: [u8; NODE_ID_LENGTH] = unsafe { MaybeUninit::uninit().assume_init() };
             inner.copy_from_slice(v);
             Ok(NodeId { inner })
         } else {
