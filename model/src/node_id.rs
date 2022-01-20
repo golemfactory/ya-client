@@ -24,7 +24,7 @@ impl ParseError {
 }
 
 #[derive(Clone, Debug, thiserror::Error, PartialEq, Serialize, Deserialize)]
-#[error("NodeId `{input:?}` parsing error: {msg}")]
+#[error("NodeId `{input:x?}` parsing error: {msg}")]
 pub struct InvalidLengthError {
     input: Vec<u8>,
     msg: String,
