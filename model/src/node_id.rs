@@ -24,9 +24,8 @@ impl ParseError {
 }
 
 #[derive(Clone, Debug, thiserror::Error, PartialEq, Serialize, Deserialize)]
-#[error("NodeId `{input:x?}` parsing error: {msg}")]
+#[error("NodeId parsing error: {msg}")]
 pub struct InvalidLengthError {
-    input: Vec<u8>,
     msg: String,
 }
 
@@ -98,8 +97,11 @@ impl TryFrom<&Vec<u8>> for NodeId {
     fn try_from(inner: &Vec<u8>) -> Result<Self, InvalidLengthError> {
         if inner.len() != NODE_ID_LENGTH {
             return Err(InvalidLengthError {
-                input: inner.clone(),
-                msg: format!("Invalid length, NodeId requires {}.", NODE_ID_LENGTH),
+                msg: format!(
+                    "Invalid length: {}, NodeId requires {}.",
+                    inner.len(),
+                    NODE_ID_LENGTH
+                ),
             });
         }
         Ok(Self::from(inner.as_ref()))
@@ -291,6 +293,7 @@ mod sql {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::convert::TryInto;
 
     #[test]
     fn parse_empty_str() {
@@ -350,6 +353,21 @@ mod tests {
                 .unwrap()
                 .to_string(),
             "0xbabe000000000000000000000000000000000000".to_string()
+        );
+    }
+
+    #[test]
+    fn try_from_too_long_vec() {
+        let test_vec: Vec<u8> = vec![
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+        ];
+        let result: Result<NodeId, InvalidLengthError> = (&test_vec).try_into();
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            format!(
+                "NodeId parsing error: Invalid length: 22, NodeId requires {}.",
+                NODE_ID_LENGTH
+            )
         );
     }
 }
