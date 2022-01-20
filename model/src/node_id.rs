@@ -1,5 +1,6 @@
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::borrow::Cow;
+use std::convert::TryFrom;
 use std::mem::MaybeUninit;
 use std::str::FromStr;
 use std::{fmt, str};
@@ -78,6 +79,16 @@ impl AsRef<[u8; 20]> for NodeId {
 impl From<[u8; 20]> for NodeId {
     fn from(inner: [u8; 20]) -> Self {
         NodeId { inner }
+    }
+}
+
+impl TryFrom<&Vec<u8>> for NodeId {
+    type Error = &'static str;
+    fn try_from(inner: &Vec<u8>) -> Result<Self, Self::Error> {
+        if inner.len() != 20 {
+            return Err("Invalid length, NodeId requires 20.");
+        }
+        Ok(Self::from(inner.as_ref()))
     }
 }
 
