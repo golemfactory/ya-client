@@ -1,0 +1,44 @@
+openapi: 3.0.1
+info:
+  title: Yagna Capabilities API
+  version: 1.0.0
+  description: The Capabilities API defines a way to query the yagna daemon for capabilities of the daemon and its modules.
+
+servers:
+- url: /capability-api/v1
+
+security:
+  - app_key: []
+
+paths:
+  /caps/:
+    get:
+      summary: Retrieve the capabilities map
+      description: Returns the full tree or a subtree of the capabilities map.
+      operationId: getCaps
+      parameters:
+        - name: path
+          in: query
+          required: false
+          description: a slash-delimited path to the subtree
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Capabilities'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+
+components:
+  securitySchemes:
+    app_key:
+      $ref: 'common.yaml#/components/securitySchemes/app_key'
+
+  schemas:
+    Capabilities:
+      type: object
+      additionalProperties: true
