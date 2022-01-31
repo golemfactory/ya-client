@@ -667,11 +667,14 @@ paths:
         `afterTimestamp` parameter can be used in order to get just the 'new'
         payments. Setting the parameter value to the timestamp of the last
         processed payment ensures that no payments will go unnoticed.
+        `network` and `driver` parameters can be used in order to filter payments.
       parameters:
         - $ref: 'common.yaml#/parameters/pollTimeout'
         - $ref: 'common.yaml#/parameters/afterTimestamp'
         - $ref: 'common.yaml#/parameters/maxEvents'
         - $ref: 'common.yaml#/parameters/appSessionId'
+        - $ref: 'common.yaml#/parameters/network'
+        - $ref: 'common.yaml#/parameters/driver'
       responses:
         200:
           $ref: '#/components/responses/PaymentList'
