@@ -83,7 +83,6 @@ parameters:
     required: false
     schema:
       type: string
-      enum: [mainnet, rinkeby, goerli, polygon, mumbai]
 
   driver:
     name: driver
@@ -92,7 +91,6 @@ parameters:
     required: false
     schema:
       type: string
-      enum: [zksync, erc20]
 
 responses:
   BadRequest:
