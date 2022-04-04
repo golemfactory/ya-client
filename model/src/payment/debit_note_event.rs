@@ -6,9 +6,6 @@ use strum_macros::{EnumString, ToString};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DebitNoteEvent {
-    pub node_id: NodeId,
-    pub agreement_id: String,
-    pub activity_id: String,
     pub debit_note_id: String,
     pub event_date: DateTime<Utc>,
     #[serde(flatten)]
@@ -60,10 +57,7 @@ mod test {
         };
 
         assert_eq!(
-            "{\"nodeId\":\"0x0000000000000000000000000000000000000000\",\
-            \"agreementId\":\"538115101743e2e79e9d34b554079f070d286a98f6542c50e7ad61c19538ee16\",\
-            \"activityId\":\"12345\",\
-            \"debitNoteId\":\"ajdik\",\
+            "{\"debitNoteId\":\"ajdik\",\
                 \"eventDate\":\"2020-12-21T15:51:21.126645Z\",\
                 \"eventType\":\"DebitNoteRejectedEvent\",\
                 \"rejection\":{\
