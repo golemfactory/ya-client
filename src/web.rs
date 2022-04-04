@@ -189,6 +189,11 @@ impl WebRequest<ClientRequest> {
         }
     }
 
+    pub fn add_header(mut self, name: &str, value: &str) -> Self {
+        self.inner_request = self.inner_request.set_header(name, value);
+        self
+    }
+
     pub fn send(self) -> WebRequest<SendClientRequest> {
         WebRequest {
             inner_request: self.inner_request.send(),

@@ -1,12 +1,15 @@
 //!  part of the Payment API
 use chrono::{DateTime, TimeZone, Utc};
+use std::borrow::Borrow;
 use std::fmt::Display;
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 use crate::{
     web::{default_on_timeout, url_format_obj, WebClient, WebInterface},
     Result,
 };
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use ya_client_model::payment::*;
@@ -170,6 +173,47 @@ impl PaymentApi {
         let base_url = format!("debitNotes/{}/payments", debit_note_id);
         let url = url_format_obj(&base_url, &input);
         self.client.get(&url).send().json().await
+    }
+
+    ///
+    /// ## Example
+    ///
+    /// ```rust
+    /// use std::time::Duration;
+    /// use chrono::{DateTime, Utc};
+    /// use ya_client::payment::PaymentApi;
+    /// use ya_client_model::payment::{DebitNoteEvent, DebitNoteEventType, InvoiceEvent};
+    ///
+    /// async fn my_get_events(payment_api : PaymentApi) -> anyhow::Result<Vec<DebitNoteEvent>> {
+    ///     let ts = Utc::now() - chrono::Duration::days(1);
+    ///
+    ///     let events = payment_api.events()
+    ///         .after_timestamp(&ts)
+    ///         .timeout(Duration::from_secs(60))
+    ///         .max_events(100)
+    ///         .provider_events(&[
+    ///             DebitNoteEventType::DebitNoteReceivedEvent,
+    ///             DebitNoteEventType::DebitNoteAcceptedEvent,
+    ///             DebitNoteEventType::DebitNoteSettledEvent])
+    ///         .requestor_events(vec![
+    ///              DebitNoteEventType::DebitNoteReceivedEvent,
+    ///             DebitNoteEventType::DebitNoteAcceptedEvent,
+    ///             DebitNoteEventType::DebitNoteSettledEvent])
+    ///         .get().await?;
+    ///     Ok(events)
+    /// }
+    ///
+    /// async fn my_last_invoice(payment_api : PaymentApi) {
+    ///     if let Some(invoiceEvent)  = payment_api.events::<InvoiceEvent>()
+    ///         .max_events(1)
+    ///         .get().await
+    ///         .unwrap().into_iter().next() {
+    ///         eprintln!("first invoice id: {}", invoiceEvent.invoice_id);
+    ///     }
+    /// }
+    /// ```
+    pub fn events<Evtype: PaymentEvent>(&self) -> EventsBuilder<Evtype> {
+        EventsBuilder::with_client(&self.client)
     }
 
     pub async fn get_debit_note_events<Tz>(
@@ -405,5 +449,115 @@ impl PaymentApi {
     pub async fn get_payment(&self, payment_id: &str) -> Result<Payment> {
         let url = url_format!("payments/{payment_id}", payment_id);
         self.client.get(&url).send().json().await
+    }
+}
+
+pub trait PaymentEvent: DeserializeOwned {
+    const PATH: &'static str;
+    type EventType: ToString;
+}
+
+impl PaymentEvent for DebitNoteEvent {
+    const PATH: &'static str = "debitNoteEvents";
+    type EventType = DebitNoteEventType;
+}
+
+impl PaymentEvent for InvoiceEvent {
+    const PATH: &'static str = "invoiceEvents";
+    type EventType = InvoiceEventType;
+}
+
+pub struct EventsBuilder<'a, Event: PaymentEvent> {
+    event_type: PhantomData<Event>,
+    client: &'a WebClient,
+    after_timestamp: Option<DateTime<Utc>>,
+    timeout: Option<Duration>,
+    max_events: Option<u32>,
+    app_session_id: Option<String>,
+    requestor_events: Option<String>,
+    provider_events: Option<String>,
+}
+
+impl<'a, EvType: PaymentEvent> EventsBuilder<'a, EvType> {
+    fn with_client(client: &'a WebClient) -> Self {
+        let event_type = Default::default();
+        EventsBuilder {
+            event_type,
+            client,
+            after_timestamp: None,
+            timeout: None,
+            max_events: None,
+            app_session_id: None,
+            requestor_events: None,
+            provider_events: None,
+        }
+    }
+
+    pub fn after_timestamp<Tz: TimeZone>(mut self, ts: &DateTime<Tz>) -> Self {
+        self.after_timestamp = Some(ts.with_timezone(&Utc));
+        self
+    }
+
+    pub fn timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = Some(timeout);
+        self
+    }
+
+    pub fn max_events(mut self, max_events: u32) -> Self {
+        self.max_events = Some(max_events);
+        self
+    }
+
+    fn join_events(
+        events: impl IntoIterator<Item = impl Borrow<EvType::EventType>>,
+    ) -> Option<String> {
+        let mut buf = String::new();
+        for ev in events {
+            let ename = ev.borrow().to_string();
+            if !buf.is_empty() {
+                buf.push(',');
+            }
+            buf.push_str(&ename)
+        }
+        if buf.is_empty() {
+            None
+        } else {
+            Some(buf)
+        }
+    }
+
+    pub fn provider_events(
+        mut self,
+        events: impl IntoIterator<Item = impl Borrow<EvType::EventType>>,
+    ) -> Self {
+        self.provider_events = Self::join_events(events);
+        self
+    }
+
+    pub fn requestor_events(
+        mut self,
+        events: impl IntoIterator<Item = impl Borrow<EvType::EventType>>,
+    ) -> Self {
+        self.requestor_events = Self::join_events(events);
+        self
+    }
+
+    pub async fn get(self) -> Result<Vec<EvType>> {
+        let input = params::EventParams {
+            after_timestamp: self.after_timestamp,
+            timeout: self.timeout.map(|d| d.as_secs_f64()),
+            max_events: self.max_events,
+            app_session_id: self.app_session_id,
+        };
+        let url = url_format_obj(EvType::PATH, &input);
+        let mut req = self.client.get(&url);
+        if let Some(requestor_events) = self.requestor_events {
+            req = req.add_header("X-Requestor-Events", requestor_events.as_str())
+        }
+        if let Some(provider_events) = self.provider_events {
+            req = req.add_header("X-Provider-Events", provider_events.as_str())
+        }
+
+        req.send().json().await.or_else(default_on_timeout)
     }
 }

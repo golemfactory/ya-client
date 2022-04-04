@@ -1,7 +1,7 @@
+use crate::NodeId;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use strum_macros::{EnumString, ToString};
-use crate::NodeId;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -43,7 +43,8 @@ mod test {
     fn test_serialize_rejected_event_has_flat_rejection() {
         let ie = DebitNoteEvent {
             node_id: NodeId::default(),
-            agreement_id: "538115101743e2e79e9d34b554079f070d286a98f6542c50e7ad61c19538ee16".to_string(),
+            agreement_id: "538115101743e2e79e9d34b554079f070d286a98f6542c50e7ad61c19538ee16"
+                .to_string(),
             activity_id: "12345".to_string(),
             debit_note_id: "ajdik".to_string(),
             event_date: Utc
