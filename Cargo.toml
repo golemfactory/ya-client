@@ -19,7 +19,7 @@ members = [
 ]
 
 [dependencies]
-ya-client-model = { version= "^0.3", path = "model" }
+ya-client-model = { version= "^0.4", path = "model" }
 
 awc = "2.0"
 actix-codec = "0.3"
