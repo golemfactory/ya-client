@@ -1,14 +1,10 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use strum_macros::{EnumString, ToString};
-use crate::NodeId;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DebitNoteEvent {
-    pub node_id: NodeId,
-    pub agreement_id: String,
-    pub activity_id: String,
     pub debit_note_id: String,
     pub event_date: DateTime<Utc>,
     #[serde(flatten)]
@@ -42,9 +38,6 @@ mod test {
     #[test]
     fn test_serialize_rejected_event_has_flat_rejection() {
         let ie = DebitNoteEvent {
-            node_id: NodeId::default(),
-            agreement_id: "538115101743e2e79e9d34b554079f070d286a98f6542c50e7ad61c19538ee16".to_string(),
-            activity_id: "12345".to_string(),
             debit_note_id: "ajdik".to_string(),
             event_date: Utc
                 .datetime_from_str("2020-12-21T15:51:21.126645Z", "%+")
@@ -59,10 +52,7 @@ mod test {
         };
 
         assert_eq!(
-            "{\"nodeId\":\"0x0000000000000000000000000000000000000000\",\
-            \"agreementId\":\"538115101743e2e79e9d34b554079f070d286a98f6542c50e7ad61c19538ee16\",\
-            \"activityId\":\"12345\",\
-            \"debitNoteId\":\"ajdik\",\
+            "{\"debitNoteId\":\"ajdik\",\
                 \"eventDate\":\"2020-12-21T15:51:21.126645Z\",\
                 \"eventType\":\"DebitNoteRejectedEvent\",\
                 \"rejection\":{\
