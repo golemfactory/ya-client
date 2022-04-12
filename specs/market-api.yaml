@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 1.6.1
+  version: 1.6.2
   title: Yagna Market API
   description: '
     ## Yagna Market
@@ -19,7 +19,7 @@ info:
 
 
     This version of Market API conforms with capability level 1 of the
-    <a href="https://docs.google.com/document/d/1Zny_vfgWV-hcsKS7P-Kdr3Fb0dwfl-6T_cYKVQ9mkNg">
+    <a href="https://golem-network.gitbook.io/golem-internal-documentation-test/golem-computing-resource-standards/golem-market-api">
     Market API specification</a>.
 
 
