@@ -1,6 +1,6 @@
 [package]
 name = "ya-client"
-version = "0.5.3"
+version = "0.6.0"
 description = "Yagna REST API client async binding"
 authors = ["Golem Factory <contact@golem.network>"]
 homepage = "https://github.com/golemfactory/ya-client"
@@ -19,7 +19,7 @@ members = [
 ]
 
 [dependencies]
-ya-client-model = { version= "^0.3", path = "model" }
+ya-client-model = { version= "^0.4", path = "model" }
 
 awc = "3"
 actix-codec = "0.5"
@@ -51,5 +51,5 @@ env_logger = "0.9"
 structopt = "0.3"
 
 [package.metadata.release]
-no-dev-version = true
+dev-version = false
 enable-all-features = true

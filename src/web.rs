@@ -2,8 +2,8 @@
 use actix_codec::Framed;
 use awc::{
     error::{PayloadError, SendRequestError},
-    http::{Method, StatusCode, header},
-    http::header::{HeaderMap, HeaderName, HeaderValue, },
+    http::header::{HeaderMap, HeaderName, HeaderValue},
+    http::{header, Method, StatusCode},
     ws::Codec,
     BoxedSocket, ClientRequest, ClientResponse, SendClientRequest,
 };
