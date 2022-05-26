@@ -37,4 +37,4 @@ pub use self::payment::Payment;
 pub use self::rejection::Rejection;
 pub use self::rejection_reason::RejectionReason;
 
-pub const PAYMENT_API_PATH: &str = "payment-api/v1/";
+pub const PAYMENT_API_PATH: &str = "/payment-api/v1";

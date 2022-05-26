@@ -25,4 +25,4 @@ pub use self::runtime_event::{RuntimeEvent, RuntimeEventKind};
 #[cfg(feature = "sgx")]
 pub use self::sgx_credentials::SgxCredentials;
 
-pub const ACTIVITY_API_PATH: &str = "/activity-api/v1/";
+pub const ACTIVITY_API_PATH: &str = "/activity-api/v1";
