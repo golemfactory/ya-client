@@ -55,7 +55,8 @@ pub trait WebInterface {
         if let Some(url) = std::env::var(Self::API_URL_ENV_VAR).ok() {
             return Ok(Url::from_str(&url)?.into());
         }
-        Ok(base_url.join(Self::API_SUFFIX)?.into())
+        let with_trailing = format!("{}/", Self::API_SUFFIX);
+        Ok(base_url.join(&with_trailing)?.into())
     }
 
     fn from_client(client: WebClient) -> Self;
