@@ -2,9 +2,7 @@ openapi: 3.0.2
 info:
   version: 0.1.0
   title: Yagna Net API
-  description: '
-    Yagna Net API
-'
+  description: 'Yagna Net API'
 
 servers:
   - url: /net-api/v1

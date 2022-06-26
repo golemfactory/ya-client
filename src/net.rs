@@ -7,24 +7,52 @@ use awc::ws::Codec;
 use awc::BoxedSocket;
 use std::ops::Not;
 
+pub const NET_URL_ENV_VAR: &str = "YAGNA_NET_URL";
+
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Bindings for Requestor part of the Net API.
 #[derive(Clone)]
-pub struct NetRequestorApi {
+pub struct NetApi {
     client: WebClient,
 }
 
-impl WebInterface for NetRequestorApi {
+impl WebInterface for NetApi {
     const API_URL_ENV_VAR: &'static str = "YAGNA_NET_URL";
-    const API_SUFFIX: &'static str = ya_client_model::net::NET_API_PATH;
+    const API_SUFFIX: &'static str = ya_client_model::net::NET_API_V2_NET_PATH;
 
     fn from_client(client: WebClient) -> Self {
-        NetRequestorApi { client }
+        NetApi { client }
     }
 }
 
-impl NetRequestorApi {
+impl NetApi {
+    /// Retrieves connection info.
+    pub async fn get_info(&self) -> Result<Info> {
+        self.client.get("info").send().json().await
+    }
+}
+
+/// Bindings for Requestor part of the Net VPN API.
+#[deprecated(since="0.6.0", note="Please use `NetVpnApi` instead")]
+pub type NetRequestorApi = NetVpnApi;
+
+/// Bindings for Requestor part of the Net VPN API.
+#[derive(Clone)]
+pub struct NetVpnApi {
+    client: WebClient,
+}
+
+impl WebInterface for NetVpnApi {
+    const API_URL_ENV_VAR: &'static str = "YAGNA_NET_URL";
+    const API_SUFFIX: &'static str = ya_client_model::net::NET_API_V2_VPN_PATH;
+
+    fn from_client(client: WebClient) -> Self {
+        NetVpnApi { client }
+    }
+}
+
+impl NetVpnApi {
     /// Retrieves requestor's virtual private networks.
     pub async fn get_networks(&self) -> Result<Vec<Network>> {
         self.client.get("net").send().json().await
