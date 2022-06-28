@@ -1,6 +1,6 @@
 [package]
 name = "ya-client-model"
-version = "0.3.2"
+version = "0.4.0"
 description = "Yagna REST API data model"
 authors = ["Golem Factory <contact@golem.network>"]
 homepage = "https://github.com/golemfactory/ya-client"
@@ -16,10 +16,10 @@ sgx = ['secp256k1', 'openssl', 'hex', 'secp256k1/serde']
 [dependencies]
 bigdecimal = { version = "0.2", features = ["serde"]}
 chrono = { version = "0.4", features = ["serde"]}
-derive_more = "0.99.11"
-rand = "0.7.3"
-serde = { version = "^1.0", features = ["derive"] }
-serde_json = "^1.0"
+derive_more = "0.99"
+rand = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 strum = "0.19"
 strum_macros = "0.19"
 thiserror = "1.0"
@@ -30,5 +30,5 @@ secp256k1 = { version = "0.19", optional = true }
 openssl = { version = "0.10", optional = true }
 
 [package.metadata.release]
-no-dev-version = true
+dev-version = false
 enable-all-features = true

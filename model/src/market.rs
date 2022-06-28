@@ -20,4 +20,4 @@ pub use property_query::PropertyQuery;
 pub use proposal::Proposal;
 pub use reason::Reason;
 
-pub const MARKET_API_PATH: &str = "market-api/v1/";
+pub const MARKET_API_PATH: &str = "/market-api/v1";

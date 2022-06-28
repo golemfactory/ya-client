@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-pub const NET_API_PATH: &str = "/net-api/v1/";
+pub const NET_API_PATH: &str = "/net-api/v1";
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
