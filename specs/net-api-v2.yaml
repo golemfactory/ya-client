@@ -1,0 +1,414 @@
+openapi: 3.0.2
+info:
+  version: 0.1.0
+  title: Yagna Net API
+  description: 'Yagna Net API'
+
+servers:
+  - url: /net-api/v2
+
+security:
+  - app_key: []
+
+tags:
+  - name: requestor
+    description: Requestor part
+
+paths:
+  /net/info:
+    get:
+      tags:
+        - provider
+      operationId: getInfo
+      summary: GetInfo - Fetches Provider connection info.
+      responses:
+        200:
+          $ref:  '#/components/responses/Info'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+      
+
+  /vpn/net:
+    get:
+      tags:
+        - requestor
+      operationId: getNetworks
+      summary: GetNetworks - Fetches Networks created by the Requestor.
+      responses:
+        200:
+          $ref: '#/components/responses/NetworkList'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+    post:
+      tags:
+        - requestor
+      operationId: createNetwork
+      summary: CreateNetwork - Creates a new Network.
+      requestBody:
+        $ref: '#/components/requestBodies/Network'
+      responses:
+        200:
+          $ref: '#/components/responses/Network'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /vpn/net/{networkId}:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+
+    get:
+      tags:
+        - requestor
+      operationId: getNetwork
+      summary: GetNetwork - Fetches a Network created by the Requestor.
+      responses:
+        200:
+          $ref: '#/components/responses/Network'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+    delete:
+      tags:
+        - requestor
+      operationId: removeNetwork
+      summary: RemoveNetwork - Removes a Network created by the Requestor.
+      responses:
+        200:
+          description: Network removed.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /vpn/net/{networkId}/addresses:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+
+    get:
+      tags:
+        - requestor
+      operationId: getAddresses
+      summary: GetAddresses - Fetches Requestor's IP addresses in a Network.
+      responses:
+        200:
+          $ref: '#/components/responses/AddressList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+    post:
+      tags:
+        - requestor
+      operationId: addAddress
+      summary: AddAddress - Assigns a new IP address to the Requestor in a Network.
+      requestBody:
+        $ref: '#/components/requestBodies/Address'
+      responses:
+        200:
+          description: Address assigned.
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        409:
+          $ref: 'common.yaml#/responses/Conflict'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /vpn/net/{networkId}/nodes:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+
+    get:
+      tags:
+        - requestor
+      operationId: getNodes
+      summary: GetNodes - Fetches Nodes added to a Network.
+      responses:
+        200:
+          $ref: '#/components/responses/NodeList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+    post:
+      tags:
+        - requestor
+      operationId: addNode
+      summary: AddNode - Advertises and adds a new Node to a Network.
+      requestBody:
+        $ref: '#/components/requestBodies/Node'
+      responses:
+        200:
+          description: Node added.
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        409:
+          $ref: 'common.yaml#/responses/Conflict'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /vpn/net/{networkId}/nodes/{nodeId}:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+      - $ref: '#/components/parameters/nodeId'
+
+    delete:
+      tags:
+        - requestor
+      operationId: removeNode
+      summary: RemoveNode - Advertises and removes a Node from a Network.
+      responses:
+        200:
+          description: Node removed.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /vpn/net/{networkId}/tcp:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+
+    get:
+      tags:
+        - requestor
+      operationId: getConnections
+      summary: GetConnections - Fetches Requestor's TCP connections in a Network.
+      responses:
+        200:
+          $ref: '#/components/responses/ConnectionList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /vpn/net/{networkId}/tcp/{ip}/{port}:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+      - $ref: '#/components/parameters/ip'
+      - $ref: '#/components/parameters/port'
+
+    description: >
+      WebSocket endpoint for establishing a TCP connection to `{ip}:{port}`.
+
+components:
+
+  securitySchemes:
+    app_key:
+      $ref: 'common.yaml#/components/securitySchemes/app_key'
+
+  parameters:
+
+    networkId:
+      name: networkId
+      in: path
+      required: true
+      schema:
+        type: string
+
+    nodeId:
+      name: nodeId
+      in: path
+      required: true
+      schema:
+        type: string
+
+    ip:
+      name: ip
+      in: path
+      required: true
+      schema:
+        type: string
+
+    port:
+      name: port
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 65535
+
+  requestBodies:
+
+    Address:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Address'
+
+    Network:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Network'
+
+    Node:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Node'
+
+  responses:
+    
+    Info:
+      description: Connection info.
+      content:
+        application/json:
+          schema: '#/components/schemas/Info'
+
+    AddressList:
+      description: List of Requestor's Addresses in a Virtual Private Network.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Address'
+
+    Network:
+      description: Network information.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Network'
+
+    NetworkList:
+      description: List of Networks created by the Requestor.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Network'
+
+    NodeList:
+      description: List of nodes in a Virtual Private Network.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Node'
+
+    ConnectionList:
+      description: List of established connections within a Virtual Private Network.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Connection'
+
+  schemas:
+    
+    Info:
+      type: object
+      properties:
+        publicIp:
+          type: string
+
+    Address:
+      type: object
+      required:
+        - ip
+      properties:
+        ip:
+          type: string
+
+    Connection:
+      type: object
+      required:
+        - protocol
+        - localIp
+        - localPort
+        - remoteIp
+        - remotePort
+      properties:
+        protocol:
+          type: integer
+          readOnly: true
+        localIp:
+          type: string
+          readOnly: true
+        localPort:
+          type: integer
+          readOnly: true
+        remoteIp:
+          type: string
+          readOnly: true
+        remotePort:
+          type: integer
+          readOnly: true
+
+    Network:
+      type: object
+      required:
+        - ip
+      properties:
+        id:
+          type: string
+        ip:
+          type: string
+        mask:
+          type: string
+        gateway:
+          type: string
+
+    Node:
+      type: object
+      required:
+        - id
+        - ip
+      properties:
+        id:
+          type: string
+        ip:
+          type: string
