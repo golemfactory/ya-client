@@ -1,7 +1,7 @@
 use structopt::StructOpt;
 use url::Url;
 
-use crate::{activity, market, payment, net, web::WebClient, web::WebInterface};
+use crate::{activity, market, net, payment, web::WebClient, web::WebInterface};
 use std::convert::TryFrom;
 
 use crate::activity::ACTIVITY_URL_ENV_VAR;

@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 0.1.0
+  version: 0.2.0
   title: Yagna Net API
   description: 'Yagna Net API'
 
@@ -13,24 +13,27 @@ security:
 tags:
   - name: requestor
     description: Requestor part
+  - name: provider
+    description: Provider part
 
 paths:
-  /net/info:
+  /net/status:
     get:
       tags:
         - provider
-      operationId: getInfo
-      summary: GetInfo - Fetches Provider connection info.
+        - requestor
+      operationId: getStatus
+      summary: GetStatus - Fetches connection status.
       responses:
         200:
-          $ref:  '#/components/responses/Info'
+          $ref: '#/components/responses/Status'
         400:
           $ref: 'common.yaml#/responses/BadRequest'
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-      
+
 
   /vpn/net:
     get:
@@ -297,12 +300,12 @@ components:
             $ref: '#/components/schemas/Node'
 
   responses:
-    
-    Info:
-      description: Connection info.
+
+    Status:
+      description: Connection status.
       content:
         application/json:
-          schema: '#/components/schemas/Info'
+          schema: '#/components/schemas/Status'
 
     AddressList:
       description: List of Requestor's Addresses in a Virtual Private Network.
@@ -348,12 +351,24 @@ components:
               $ref: '#/components/schemas/Connection'
 
   schemas:
-    
-    Info:
+
+    Status:
       type: object
+      required:
+        - nodeId
+        - sessions
       properties:
+        nodeId:
+          type: string
+          description: 'Ethereum address (40 hexadecimal digits with "0x" prefix)'
+          maxLength: 42
+        listenIp:
+          type: string
         publicIp:
           type: string
+        sessions:
+          type: integer
+          minimum: 0
 
     Address:
       type: object

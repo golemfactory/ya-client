@@ -27,14 +27,14 @@ impl WebInterface for NetApi {
 }
 
 impl NetApi {
-    /// Retrieves connection info.
-    pub async fn get_info(&self) -> Result<Info> {
-        self.client.get("info").send().json().await
+    /// Retrieves connection status.
+    pub async fn get_status(&self) -> Result<Status> {
+        self.client.get("status").send().json().await
     }
 }
 
 /// Bindings for Requestor part of the Net VPN API.
-#[deprecated(since="0.6.0", note="Please use `NetVpnApi` instead")]
+#[deprecated(since = "0.7.0", note = "Please use `NetVpnApi` instead")]
 pub type NetRequestorApi = NetVpnApi;
 
 /// Bindings for Requestor part of the Net VPN API.
