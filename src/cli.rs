@@ -1,11 +1,12 @@
 use structopt::StructOpt;
 use url::Url;
 
-use crate::{activity, market, payment, web::WebClient, web::WebInterface};
+use crate::{activity, market, net, payment, web::WebClient, web::WebInterface};
 use std::convert::TryFrom;
 
 use crate::activity::ACTIVITY_URL_ENV_VAR;
 use crate::market::MARKET_URL_ENV_VAR;
+use crate::net::NET_URL_ENV_VAR;
 use crate::payment::PAYMENT_URL_ENV_VAR;
 use crate::web::{DEFAULT_YAGNA_API_URL, YAGNA_API_URL_ENV_VAR};
 
@@ -15,6 +16,7 @@ pub trait ApiClient: Clone {
     type Market: WebInterface;
     type Activity: WebInterface;
     type Payment: WebInterface;
+    type Net: WebInterface;
 }
 
 #[derive(Clone)]
@@ -22,6 +24,7 @@ pub struct Api<T: ApiClient> {
     pub market: T::Market,
     pub activity: T::Activity,
     pub payment: T::Payment,
+    pub net: T::Net,
 }
 
 pub type RequestorApi = Api<Requestor>;
@@ -36,12 +39,14 @@ impl ApiClient for Requestor {
     type Market = market::MarketRequestorApi;
     type Activity = activity::ActivityRequestorApi;
     type Payment = payment::PaymentApi;
+    type Net = net::NetApi;
 }
 
 impl ApiClient for Provider {
     type Market = market::MarketProviderApi;
     type Activity = activity::ActivityProviderApi;
     type Payment = payment::PaymentApi;
+    type Net = net::NetApi;
 }
 
 #[derive(StructOpt, Clone)]
@@ -71,6 +76,10 @@ pub struct ApiOpts {
     /// Payment API URL
     #[structopt(long, env = PAYMENT_URL_ENV_VAR, hide_env_values = true)]
     payment_url: Option<Url>,
+
+    /// Net API URL
+    #[structopt(long, env = NET_URL_ENV_VAR, hide_env_values = true)]
+    net_url: Option<Url>,
 }
 
 impl<T: ApiClient> TryFrom<&ApiOpts> for Api<T> {
@@ -86,6 +95,7 @@ impl<T: ApiClient> TryFrom<&ApiOpts> for Api<T> {
             market: client.interface_at(cli.market_url.clone())?,
             activity: client.interface_at(cli.activity_url.clone())?,
             payment: client.interface_at(cli.payment_url.clone())?,
+            net: client.interface_at(cli.net_url.clone())?,
         })
     }
 }

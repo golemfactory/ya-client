@@ -1,11 +1,11 @@
 openapi: 3.0.2
 info:
-  version: 0.1.0
+  version: 0.2.0
   title: Yagna Net API
   description: 'Yagna Net API'
 
 servers:
-  - url: /net-api/v1
+  - url: /net-api/v2
 
 security:
   - app_key: []
@@ -13,9 +13,29 @@ security:
 tags:
   - name: requestor
     description: Requestor part
+  - name: provider
+    description: Provider part
 
 paths:
-  /net:
+  /net/status:
+    get:
+      tags:
+        - provider
+        - requestor
+      operationId: getStatus
+      summary: GetStatus - Fetches connection status.
+      responses:
+        200:
+          $ref: '#/components/responses/Status'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+
+  /vpn/net:
     get:
       tags:
         - requestor
@@ -48,7 +68,7 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /net/{networkId}:
+  /vpn/net/{networkId}:
     parameters:
       - $ref: '#/components/parameters/networkId'
 
@@ -86,7 +106,7 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /net/{networkId}/addresses:
+  /vpn/net/{networkId}/addresses:
     parameters:
       - $ref: '#/components/parameters/networkId'
 
@@ -126,7 +146,7 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /net/{networkId}/nodes:
+  /vpn/net/{networkId}/nodes:
     parameters:
       - $ref: '#/components/parameters/networkId'
 
@@ -166,7 +186,7 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /net/{networkId}/nodes/{nodeId}:
+  /vpn/net/{networkId}/nodes/{nodeId}:
     parameters:
       - $ref: '#/components/parameters/networkId'
       - $ref: '#/components/parameters/nodeId'
@@ -188,7 +208,7 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /net/{networkId}/tcp:
+  /vpn/net/{networkId}/tcp:
     parameters:
       - $ref: '#/components/parameters/networkId'
 
@@ -209,7 +229,7 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
-  /net/{networkId}/tcp/{ip}/{port}:
+  /vpn/net/{networkId}/tcp/{ip}/{port}:
     parameters:
       - $ref: '#/components/parameters/networkId'
       - $ref: '#/components/parameters/ip'
@@ -281,6 +301,12 @@ components:
 
   responses:
 
+    Status:
+      description: Connection status.
+      content:
+        application/json:
+          schema: '#/components/schemas/Status'
+
     AddressList:
       description: List of Requestor's Addresses in a Virtual Private Network.
       content:
@@ -325,6 +351,24 @@ components:
               $ref: '#/components/schemas/Connection'
 
   schemas:
+
+    Status:
+      type: object
+      required:
+        - nodeId
+        - sessions
+      properties:
+        nodeId:
+          type: string
+          description: 'Ethereum address (40 hexadecimal digits with "0x" prefix)'
+          maxLength: 42
+        listenIp:
+          type: string
+        publicIp:
+          type: string
+        sessions:
+          type: integer
+          minimum: 0
 
     Address:
       type: object
