@@ -649,6 +649,8 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
+        410:
+          $ref: 'common.yaml#/responses/Gone'
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
