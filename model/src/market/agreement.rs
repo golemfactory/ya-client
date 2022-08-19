@@ -8,6 +8,7 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use derive_more::Display;
 
 use crate::market::{Demand, Offer};
 use crate::NodeId;
@@ -75,6 +76,40 @@ impl Agreement {
 
     pub fn requestor_id(&self) -> &NodeId {
         &self.demand.requestor_id
+    }
+}
+
+/// The role of the owner of an agreement
+/// 
+/// The same agreement will be held by the provider and the requestor. This
+/// enum may be used for carrying the information whether an agreement is obtained
+/// from the requestor or the provider.
+#[derive(Clone, Copy, Debug, Display, PartialEq, Serialize, Deserialize)]
+pub enum Role {
+    Provider,
+    Requestor,
+}
+
+/// A short summary of an agreement returned when they're listed
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AgreementListEntry {
+    pub id: String,
+    pub timestamp: DateTime<Utc>,
+    pub offer_timestamp: DateTime<Utc>,
+    pub demand_timestamp: DateTime<Utc>,
+    pub role: Role,
+}
+
+impl AgreementListEntry {
+    pub fn new(agreement: Agreement, role: Role) -> Self {
+        AgreementListEntry {
+            id: agreement.agreement_id,
+            timestamp: agreement.timestamp,
+            offer_timestamp: agreement.offer.timestamp,
+            demand_timestamp: agreement.demand.timestamp,
+            role,
+        }
     }
 }
 
