@@ -498,6 +498,41 @@ paths:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements:
+    get:
+      parameters:
+        - $ref: 'common.yaml#/parameters/appSessionId'
+        - $ref: 'common.yaml#/parameters/state'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+          name: afterDate
+        - $ref: 'common.yaml#/parameters/beforeTimestamp'
+          name: beforeDate
+      tags:
+        - requestor
+        - provider
+      operationId: listAgreements
+      summary: ListAgreements - Lists agreements with optional filters
+      description: >
+        List agreements.
+
+        Supported filters:
+        * state
+        * creation datetime
+        * app session id
+
+        A well-formed call will result in a collection of objects with the following fields:
+        * id
+        * creationTs
+        * approveTs
+        * role
+      responses:
+        200:
+          $ref: '#/components/responses/AgreementList'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - requestor
@@ -1027,6 +1062,15 @@ components:
             items:
               $ref: '#/components/schemas/AgreementEvent'
 
+    AgreementList:
+      description: Result of listing agreements.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AgreementListEntry'
+
   schemas:
 
     AgreementValidTo:
@@ -1294,6 +1338,25 @@ components:
           properties:
             agreement:
               $ref: '#/components/schemas/Agreement'
+
+    AgreementListEntry:
+      type: object
+      required:
+        - id
+        - creationTs
+        - approveTs
+        - role
+      discriminator:
+        propertyName: eventType
+      properties:
+        id:
+          type: string
+        creationTs:
+          $ref: 'common.yaml#/components/schemas/Timestamp'
+        approveTs:
+          $ref: 'common.yaml#/components/schemas/Timestamp'
+        role:
+          type: string
 
     # note this should be specified as a sub-class of Event, BUT
     # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(

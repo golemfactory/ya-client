@@ -1,11 +1,11 @@
 //! Requestor part of the Market API
 use ya_client_model::market::{
-    Agreement, AgreementOperationEvent, AgreementProposal, Demand, NewDemand, NewProposal,
-    Proposal, Reason, RequestorEvent,
+    agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, AgreementProposal,
+    Demand, NewDemand, NewProposal, Proposal, Reason, RequestorEvent,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
-use chrono::{DateTime, TimeZone};
+use chrono::{Date, DateTime, TimeZone, Utc};
 use std::fmt::Display;
 
 /// Bindings for Requestor part of the Market API.
@@ -157,6 +157,33 @@ impl MarketRequestorApi {
             .send_json(&agreement)
             .json()
             .await
+    }
+
+    /// Lists agreements
+    ///
+    /// Supports filtering by:
+    /// * state
+    /// * creation date
+    /// * app session id
+    pub async fn list_agreements(
+        &self,
+        state: Option<State>,
+        before_date: Option<Date<Utc>>,
+        after_date: Option<Date<Utc>>,
+        app_session_id: Option<String>,
+    ) -> Result<Vec<AgreementListEntry>> {
+        let url = url_format!(
+            "agreements",
+            #[query]
+            state,
+            #[query]
+            before_date,
+            #[query]
+            after_date,
+            #[query]
+            app_session_id,
+        );
+        self.client.get(&url).send().json().await
     }
 
     /// Fetches agreement with given agreement id.
