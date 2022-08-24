@@ -9,6 +9,7 @@
 use chrono::{DateTime, Utc};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumString;
 
 use crate::market::{Demand, Offer};
 use crate::NodeId;
@@ -84,7 +85,7 @@ impl Agreement {
 /// The same agreement will be held by the provider and the requestor. This
 /// enum may be used for carrying the information whether an agreement is obtained
 /// from the requestor or the provider.
-#[derive(Clone, Copy, Debug, Display, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Display, PartialEq, Serialize, Deserialize, EnumString)]
 pub enum Role {
     Provider,
     Requestor,
@@ -108,7 +109,18 @@ pub struct AgreementListEntry {
 /// * `Expired` - not accepted, rejected nor cancelled within validity period
 /// * `Terminated` - finished after approval.
 #[derive(
-    Clone, Copy, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    Display,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    Serialize,
+    Deserialize,
+    EnumString,
 )]
 pub enum State {
     /// Newly created by a Requestor (draft based on Proposal)
