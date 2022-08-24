@@ -67,6 +67,34 @@ parameters:
       type: string
       format: date-time
 
+  afterDate:
+    name: afterTimestamp
+    description: Apply only to records created later than the specified timestamp
+    required: false
+    in: query
+    schema:
+      type: string
+      format: date-time
+
+  beforeDate:
+    name: beforeTimestamp
+    description: Apply only to records created before the specified timestamp
+    required: false
+    in: query
+    schema:
+      type: string
+      format: date-time
+
+  state:
+    name: state
+    description: State of an agreement
+    required: false
+    in: query
+    schema:
+      type: string
+      readOnly: true
+      enum: [Initial, Draft, Rejected, Accepted, Expired]
+
   appSessionId:
     name: appSessionId
     description: A correlation/session identifier used for querying events related to an action

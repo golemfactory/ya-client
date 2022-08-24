@@ -107,7 +107,9 @@ pub struct AgreementListEntry {
 /// * `Approved` by both sides
 /// * `Expired` - not accepted, rejected nor cancelled within validity period
 /// * `Terminated` - finished after approval.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[derive(
+    Clone, Copy, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
+)]
 pub enum State {
     /// Newly created by a Requestor (draft based on Proposal)
     #[serde(rename = "Proposal")]
