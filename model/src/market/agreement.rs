@@ -7,8 +7,8 @@
  */
 
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
 use derive_more::Display;
+use serde::{Deserialize, Serialize};
 
 use crate::market::{Demand, Offer};
 use crate::NodeId;
@@ -80,7 +80,7 @@ impl Agreement {
 }
 
 /// The role of the owner of an agreement
-/// 
+///
 /// The same agreement will be held by the provider and the requestor. This
 /// enum may be used for carrying the information whether an agreement is obtained
 /// from the requestor or the provider.
@@ -120,7 +120,9 @@ impl AgreementListEntry {
 /// * `Approved` by both sides
 /// * `Expired` - not accepted, rejected nor cancelled within validity period
 /// * `Terminated` - finished after approval.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[derive(
+    Clone, Copy, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
+)]
 pub enum State {
     /// Newly created by a Requestor (draft based on Proposal)
     #[serde(rename = "Proposal")]
