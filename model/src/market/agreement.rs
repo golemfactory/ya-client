@@ -7,7 +7,9 @@
  */
 
 use chrono::{DateTime, Utc};
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumString;
 
 use crate::market::{Demand, Offer};
 use crate::NodeId;
@@ -78,6 +80,27 @@ impl Agreement {
     }
 }
 
+/// The role of the owner of an agreement
+///
+/// The same agreement will be held by the provider and the requestor. This
+/// enum may be used for carrying the information whether an agreement is obtained
+/// from the requestor or the provider.
+#[derive(Clone, Copy, Debug, Display, PartialEq, Serialize, Deserialize, EnumString)]
+pub enum Role {
+    Provider,
+    Requestor,
+}
+
+/// A short summary of an agreement returned when they're listed
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AgreementListEntry {
+    pub id: String,
+    pub creation_ts: DateTime<Utc>,
+    pub approve_ts: Option<DateTime<Utc>>,
+    pub role: Role,
+}
+
 /// * `Proposal` - newly created by a Requestor (based on Proposal)
 /// * `Pending` - confirmed by a Requestor and send to Provider for approval
 /// * `Cancelled` by a Requestor
@@ -85,7 +108,20 @@ impl Agreement {
 /// * `Approved` by both sides
 /// * `Expired` - not accepted, rejected nor cancelled within validity period
 /// * `Terminated` - finished after approval.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Display,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    Serialize,
+    Deserialize,
+    EnumString,
+)]
 pub enum State {
     /// Newly created by a Requestor (draft based on Proposal)
     #[serde(rename = "Proposal")]
