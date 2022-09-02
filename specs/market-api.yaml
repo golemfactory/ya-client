@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 1.6.2
+  version: 1.7.0
   title: Yagna Market API
   description: '
     ## Yagna Market
@@ -501,7 +501,12 @@ paths:
     get:
       parameters:
         - $ref: 'common.yaml#/parameters/appSessionId'
-        - $ref: 'common.yaml#/parameters/state'
+        - name: state
+          description: State of an agreement
+          required: false
+          in: query
+          schema:
+            $ref: '#/components/schemas/AgreementState'
         - $ref: 'common.yaml#/parameters/afterTimestamp'
           name: afterDate
         - $ref: 'common.yaml#/parameters/beforeTimestamp'
@@ -1213,6 +1218,23 @@ components:
         validTo:
           $ref: '#/components/schemas/AgreementValidTo'
 
+    AgreementState:
+      type: string
+      enum: [Proposal, Pending, Cancelled, Rejected, Approved, Expired, Terminated]
+      description: >
+        * `Proposal` - newly created by a Requestor (draft based on Proposal)
+
+        * `Pending` - confirmed by a Requestor and send to Provider for approval
+
+        * `Cancelled` by a Requestor
+
+        * `Rejected` by a Provider
+
+        * `Approved` by both sides
+
+        * `Expired` - not approved, rejected nor cancelled within validity period
+
+        * `Terminated` - finished after approval.
 
     Agreement:
       type: object
@@ -1237,22 +1259,7 @@ components:
           format: date-time
           description: Agreement approval timestamp
         state:
-          type: string
-          enum: [Proposal, Pending, Cancelled, Rejected, Approved, Expired, Terminated]
-          description: >
-            * `Proposal` - newly created by a Requestor (draft based on Proposal)
-
-            * `Pending` - confirmed by a Requestor and send to Provider for approval
-
-            * `Cancelled` by a Requestor
-
-            * `Rejected` by a Provider
-
-            * `Approved` by both sides
-
-            * `Expired` - not approved, rejected nor cancelled within validity period
-
-            * `Terminated` - finished after approval.
+          $ref: '#/components/schemas/AgreementState'
         timestamp:
           $ref: 'common.yaml#/components/schemas/Timestamp'
         appSessionId:
@@ -1351,9 +1358,9 @@ components:
       properties:
         id:
           type: string
-        creationTs:
+        timestamp:
           $ref: 'common.yaml#/components/schemas/Timestamp'
-        approveTs:
+        approvedDate:
           $ref: 'common.yaml#/components/schemas/Timestamp'
         role:
           type: string

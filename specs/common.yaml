@@ -76,16 +76,6 @@ parameters:
       type: string
       format: date-time
 
-  state:
-    name: state
-    description: State of an agreement
-    required: false
-    in: query
-    schema:
-      type: string
-      readOnly: true
-      enum: [Proposal, Pending, Cancelled, Rejected, Approved, Expired, Terminated]
-
   appSessionId:
     name: appSessionId
     description: A correlation/session identifier used for querying events related to an action
