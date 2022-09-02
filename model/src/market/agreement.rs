@@ -96,8 +96,8 @@ pub enum Role {
 #[serde(rename_all = "camelCase")]
 pub struct AgreementListEntry {
     pub id: String,
-    pub creation_ts: DateTime<Utc>,
-    pub approve_ts: Option<DateTime<Utc>>,
+    pub timestamp: DateTime<Utc>,
+    pub approved_date: Option<DateTime<Utc>>,
     pub role: Role,
 }
 
