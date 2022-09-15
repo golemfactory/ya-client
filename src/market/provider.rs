@@ -1,11 +1,11 @@
 //! Provider part of the Market API
 use ya_client_model::market::{
-    Agreement, AgreementOperationEvent, NewOffer, NewProposal, Offer, Proposal, ProviderEvent,
-    Reason, MARKET_API_PATH,
+    agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, NewOffer,
+    NewProposal, Offer, Proposal, ProviderEvent, Reason, MARKET_API_PATH,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
-use chrono::{DateTime, TimeZone};
+use chrono::{Date, DateTime, TimeZone, Utc};
 use std::fmt::Display;
 
 /// Bindings for Provider part of the Market API.
@@ -209,6 +209,33 @@ impl MarketProviderApi {
     ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
         self.client.post(&url).send_json(&reason).json().await
+    }
+
+    /// Lists agreements
+    ///
+    /// Supports filtering by:
+    /// * state
+    /// * creation date
+    /// * app session id
+    pub async fn list_agreements(
+        &self,
+        state: Option<State>,
+        before_date: Option<Date<Utc>>,
+        after_date: Option<Date<Utc>>,
+        app_session_id: Option<String>,
+    ) -> Result<Vec<AgreementListEntry>> {
+        let url = url_format!(
+            "agreements",
+            #[query]
+            state,
+            #[query]
+            before_date,
+            #[query]
+            after_date,
+            #[query]
+            app_session_id,
+        );
+        self.client.get(&url).send().json().await
     }
 
     /// Fetches agreement with given agreement id.

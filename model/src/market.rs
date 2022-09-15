@@ -9,7 +9,7 @@ pub mod property_query;
 pub mod proposal;
 pub mod reason;
 
-pub use agreement::Agreement;
+pub use agreement::{Agreement, AgreementListEntry, Role};
 pub use agreement_event::{AgreementEventType, AgreementOperationEvent};
 pub use agreement_proposal::AgreementProposal;
 pub use demand::Demand;

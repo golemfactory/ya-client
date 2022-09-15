@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 1.6.2
+  version: 1.7.0
   title: Yagna Market API
   description: '
     ## Yagna Market
@@ -498,6 +498,46 @@ paths:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
   /agreements:
+    get:
+      parameters:
+        - $ref: 'common.yaml#/parameters/appSessionId'
+        - name: state
+          description: State of an agreement
+          required: false
+          in: query
+          schema:
+            $ref: '#/components/schemas/AgreementState'
+        - $ref: 'common.yaml#/parameters/afterTimestamp'
+          name: afterDate
+        - $ref: 'common.yaml#/parameters/beforeTimestamp'
+          name: beforeDate
+      tags:
+        - requestor
+        - provider
+      operationId: listAgreements
+      summary: ListAgreements - Lists agreements with optional filters
+      description: >
+        List agreements.
+
+        Supported filters:
+        * state
+        * creation datetime
+        * app session id
+
+        A well-formed call will result in a collection of objects with the following fields:
+        * id
+        * creationTs
+        * approveTs
+        * role
+      responses:
+        200:
+          $ref: '#/components/responses/AgreementList'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
     post:
       tags:
         - requestor
@@ -1027,6 +1067,15 @@ components:
             items:
               $ref: '#/components/schemas/AgreementEvent'
 
+    AgreementList:
+      description: Result of listing agreements.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AgreementListEntry'
+
   schemas:
 
     AgreementValidTo:
@@ -1169,6 +1218,23 @@ components:
         validTo:
           $ref: '#/components/schemas/AgreementValidTo'
 
+    AgreementState:
+      type: string
+      enum: [Proposal, Pending, Cancelled, Rejected, Approved, Expired, Terminated]
+      description: >
+        * `Proposal` - newly created by a Requestor (draft based on Proposal)
+
+        * `Pending` - confirmed by a Requestor and send to Provider for approval
+
+        * `Cancelled` by a Requestor
+
+        * `Rejected` by a Provider
+
+        * `Approved` by both sides
+
+        * `Expired` - not approved, rejected nor cancelled within validity period
+
+        * `Terminated` - finished after approval.
 
     Agreement:
       type: object
@@ -1193,22 +1259,7 @@ components:
           format: date-time
           description: Agreement approval timestamp
         state:
-          type: string
-          enum: [Proposal, Pending, Cancelled, Rejected, Approved, Expired, Terminated]
-          description: >
-            * `Proposal` - newly created by a Requestor (draft based on Proposal)
-
-            * `Pending` - confirmed by a Requestor and send to Provider for approval
-
-            * `Cancelled` by a Requestor
-
-            * `Rejected` by a Provider
-
-            * `Approved` by both sides
-
-            * `Expired` - not approved, rejected nor cancelled within validity period
-
-            * `Terminated` - finished after approval.
+          $ref: '#/components/schemas/AgreementState'
         timestamp:
           $ref: 'common.yaml#/components/schemas/Timestamp'
         appSessionId:
@@ -1294,6 +1345,25 @@ components:
           properties:
             agreement:
               $ref: '#/components/schemas/Agreement'
+
+    AgreementListEntry:
+      type: object
+      required:
+        - id
+        - creationTs
+        - approveTs
+        - role
+      discriminator:
+        propertyName: eventType
+      properties:
+        id:
+          type: string
+        timestamp:
+          $ref: 'common.yaml#/components/schemas/Timestamp'
+        approvedDate:
+          $ref: 'common.yaml#/components/schemas/Timestamp'
+        role:
+          type: string
 
     # note this should be specified as a sub-class of Event, BUT
     # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(
