@@ -203,6 +203,35 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
+  /activity/{activityId}/agreement:
+    get:
+      summary: Returns agreement_id corresponding to the activity
+      description: >
+        'This call shall return id of the agreement that lead to the creation of this activity'
+      operationId: getActivityAgreement
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Agreement.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Agreement Id
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        500:
+          $ref: 'common.yaml#/responses/ServerError'
+
   /activity/{activityId}:
 
     delete:

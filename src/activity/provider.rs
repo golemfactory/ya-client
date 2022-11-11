@@ -44,6 +44,12 @@ impl ActivityProviderApi {
         self.client.get(&uri).send().json().await
     }
 
+    /// Get agreement corresponding to the activity
+    pub async fn get_agreement_id(&self, activity_id: &str) -> Result<String> {
+        let uri = url_format!("activity/{activity_id}/agreement");
+        self.client.get(&uri).send().json().await
+    }
+
     /// Fetch Requestor command events.
     #[rustfmt::skip]
     pub async fn get_activity_events(
