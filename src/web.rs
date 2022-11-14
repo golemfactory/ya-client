@@ -549,11 +549,12 @@ mod tests {
         assert_eq!(url_format!("foo"), "foo");
     }
 
-    #[test]
-    fn single_placeholder_url() {
-        let bar = "qux";
-        assert_eq!(url_format!("foo/{}", bar), "foo/qux");
-    }
+    // TODO: https://github.com/golemfactory/ya-client/issues/133
+    // #[test]
+    // fn single_placeholder_url() {
+    //    let bar = "qux";
+    //    assert_eq!(url_format!("foo/{}", bar), "foo/qux");
+    // }
 
     #[test]
     fn single_var_url() {
