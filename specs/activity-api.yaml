@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Yagna Activity API
-  version: 1.6.2
+  version: 1.7.0
   description: '
       The Activity API can be perceived as controls which a Requestor-side application
       has to steer the execution of an Activity as specified in an Agreement which
