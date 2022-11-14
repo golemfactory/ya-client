@@ -1,3 +1,6 @@
+// TODO: https://github.com/golemfactory/ya-client/issues/132
+#![allow(deprecated)]
+
 //! Requestor part of the Market API
 use ya_client_model::market::{
     agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, AgreementProposal,

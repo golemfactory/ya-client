@@ -1,3 +1,6 @@
+// TODO: https://github.com/golemfactory/ya-client/issues/132
+#![allow(deprecated)]
+
 //! Provider part of the Market API
 use ya_client_model::market::{
     agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, NewOffer,
