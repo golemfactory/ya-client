@@ -23,19 +23,19 @@ impl WebInterface for ActivityRequestorStateApi {
 impl ActivityRequestorStateApi {
     /// Get running command for a specified Activity.
     pub async fn get_running_command(&self, activity_id: &str) -> Result<ExeScriptCommandState> {
-        let uri = url_format!("activity/{activity_id}/command", activity_id);
+        let uri = url_format!("activity/{activity_id}/command");
         self.client.get(&uri).send().json().await
     }
 
     /// Get state of specified Activity.
     pub async fn get_state(&self, activity_id: &str) -> Result<ActivityState> {
-        let uri = url_format!("activity/{activity_id}/state", activity_id);
+        let uri = url_format!("activity/{activity_id}/state");
         self.client.get(&uri).send().json().await
     }
 
     /// Get usage of specified Activity.
     pub async fn get_usage(&self, activity_id: &str) -> Result<ActivityUsage> {
-        let uri = url_format!("activity/{activity_id}/usage", activity_id);
+        let uri = url_format!("activity/{activity_id}/usage");
         self.client.get(&uri).send().json().await
     }
 }

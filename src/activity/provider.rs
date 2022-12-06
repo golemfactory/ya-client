@@ -28,19 +28,19 @@ impl ActivityProviderApi {
 
     /// Fetch activity state (which may include error details)
     pub async fn get_activity_state(&self, activity_id: &str) -> Result<ActivityState> {
-        let uri = url_format!("activity/{activity_id}/state", activity_id);
+        let uri = url_format!("activity/{activity_id}/state");
         self.client.get(&uri).send().json().await
     }
 
     /// Set state of specified Activity.
     pub async fn set_activity_state(&self, activity_id: &str, state: &ActivityState) -> Result<()> {
-        let uri = url_format!("activity/{activity_id}/state", activity_id);
+        let uri = url_format!("activity/{activity_id}/state");
         self.client.put(&uri).send_json(&state).json().await
     }
 
     /// Fetch current activity usage (which may include error details)
     pub async fn get_activity_usage(&self, activity_id: &str) -> Result<ActivityUsage> {
-        let uri = url_format!("activity/{activity_id}/usage", activity_id);
+        let uri = url_format!("activity/{activity_id}/usage");
         self.client.get(&uri).send().json().await
     }
 

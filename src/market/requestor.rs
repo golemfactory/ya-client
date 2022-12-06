@@ -43,7 +43,7 @@ impl MarketRequestorApi {
 
     /// Stop subscription by invalidating a previously published Demand.
     pub async fn unsubscribe(&self, subscription_id: &str) -> Result<()> {
-        let url = url_format!("demands/{subscription_id}", subscription_id);
+        let url = url_format!("demands/{subscription_id}");
         self.client.delete(&url).send().json().await
     }
 
@@ -82,7 +82,6 @@ impl MarketRequestorApi {
     ) -> Result<Vec<RequestorEvent>> {
         let url = url_format!(
             "demands/{subscription_id}/events",
-            subscription_id,
             #[query] timeout,
             #[query] max_events,
         );
@@ -96,11 +95,7 @@ impl MarketRequestorApi {
         subscription_id: &str,
         proposal_id: &str,
     ) -> Result<String> {
-        let url = url_format!(
-            "demands/{subscription_id}/proposals/{proposal_id}",
-            subscription_id,
-            proposal_id,
-        );
+        let url = url_format!("demands/{subscription_id}/proposals/{proposal_id}",);
         self.client
             .post(&url)
             .send_json(&demand_proposal)
@@ -110,11 +105,7 @@ impl MarketRequestorApi {
 
     /// Fetches Proposal (Offer) with given id.
     pub async fn get_proposal(&self, subscription_id: &str, proposal_id: &str) -> Result<Proposal> {
-        let url = url_format!(
-            "demands/{subscription_id}/proposals/{proposal_id}",
-            subscription_id,
-            proposal_id,
-        );
+        let url = url_format!("demands/{subscription_id}/proposals/{proposal_id}",);
         self.client.get(&url).send().json().await
     }
 
@@ -128,11 +119,7 @@ impl MarketRequestorApi {
         proposal_id: &str,
         reason: &Option<Reason>,
     ) -> Result<()> {
-        let url = url_format!(
-            "demands/{subscription_id}/proposals/{proposal_id}/reject",
-            subscription_id,
-            proposal_id,
-        );
+        let url = url_format!("demands/{subscription_id}/proposals/{proposal_id}/reject",);
         self.client.post(&url).send_json(&reason).json().await
     }
 
@@ -188,7 +175,7 @@ impl MarketRequestorApi {
 
     /// Fetches agreement with given agreement id.
     pub async fn get_agreement(&self, agreement_id: &str) -> Result<Agreement> {
-        let url = url_format!("agreements/{agreement_id}", agreement_id);
+        let url = url_format!("agreements/{agreement_id}");
         self.client.get(&url).send().json().await
     }
 
@@ -202,7 +189,6 @@ impl MarketRequestorApi {
     ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/confirm",
-            agreement_id,
             #[query] app_session_id,
         );
         self.client.post(&url).send().json().await
@@ -245,7 +231,6 @@ impl MarketRequestorApi {
     ) -> Result<()> {
         let url = url_format!(
             "agreements/{agreement_id}/wait",
-            agreement_id,
             #[query] timeout,
         );
         self.client.post(&url).send().json().await
@@ -263,7 +248,7 @@ impl MarketRequestorApi {
         agreement_id: &str,
         reason: &Option<Reason>,
     ) -> Result<()> {
-        let url = url_format!("agreements/{agreement_id}/cancel", agreement_id);
+        let url = url_format!("agreements/{agreement_id}/cancel");
         self.client.post(&url).send_json(&reason).json().await
     }
 
@@ -273,7 +258,7 @@ impl MarketRequestorApi {
         agreement_id: &str,
         reason: &Option<Reason>,
     ) -> Result<()> {
-        let url = url_format!("agreements/{agreement_id}/terminate", agreement_id);
+        let url = url_format!("agreements/{agreement_id}/terminate");
         self.client.post(&url).send_json(&reason).json().await
     }
 
