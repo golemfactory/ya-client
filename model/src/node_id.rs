@@ -1,7 +1,6 @@
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::borrow::Cow;
 use std::convert::TryFrom;
-use std::mem::MaybeUninit;
 use std::str::FromStr;
 use std::{fmt, str};
 
@@ -41,7 +40,7 @@ impl NodeId {
     where
         F: FnOnce(&str) -> R,
     {
-        let mut hex_str: [u8; 42] = unsafe { MaybeUninit::uninit().assume_init() };
+        let mut hex_str = [0u8; 42];
 
         hex_str[0] = '0' as u8;
         hex_str[1] = 'x' as u8;
@@ -215,7 +214,7 @@ impl<'de> de::Visitor<'de> for NodeIdVisit {
         E: de::Error,
     {
         if v.len() == NODE_ID_LENGTH {
-            let mut inner: [u8; NODE_ID_LENGTH] = unsafe { MaybeUninit::uninit().assume_init() };
+            let mut inner = [0u8; NODE_ID_LENGTH];
             inner.copy_from_slice(v);
             Ok(NodeId { inner })
         } else {
