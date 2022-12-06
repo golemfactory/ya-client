@@ -1,6 +1,3 @@
-// TODO: https://github.com/golemfactory/ya-client/issues/132
-#![allow(deprecated)]
-
 //! Provider part of the Market API
 use ya_client_model::market::{
     agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, NewOffer,
@@ -8,7 +5,7 @@ use ya_client_model::market::{
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
-use chrono::{Date, DateTime, TimeZone, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use std::fmt::Display;
 
 /// Bindings for Provider part of the Market API.
@@ -223,8 +220,8 @@ impl MarketProviderApi {
     pub async fn list_agreements(
         &self,
         state: Option<State>,
-        before_date: Option<Date<Utc>>,
-        after_date: Option<Date<Utc>>,
+        before_date: Option<DateTime<Utc>>,
+        after_date: Option<DateTime<Utc>>,
         app_session_id: Option<String>,
     ) -> Result<Vec<AgreementListEntry>> {
         let url = url_format!(
