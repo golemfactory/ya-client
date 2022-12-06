@@ -509,11 +509,20 @@ where
 }
 
 /// Macro to facilitate URL formatting for REST API async bindings
+///
+/// Supports query parameters, in addition to working similarly to format!(..).
+/// The only exception being the ident=value syntax, which is not supported.
+///
+/// url_format!("foo") => "foo"
+/// url_format!("foo/{bar}") => "foo" + bar
+/// url_format!("foo/{}", bar) => "foo" + bar
+/// url_format!("foo/{bar}", bar="expr") => not supported
+/// url_format!("foo", #[query] bar) => "foo?bar=" + bar
 macro_rules! url_format {
     {
         $path:expr $(,$var:ident)* $(,#[query] $varq:ident)* $(,)?
     } => {{
-        let mut url = format!( $path $(, $var=$var)* );
+        let mut url = format!( $path $(, $var)* );
         let query = crate::web::QueryParamsBuilder::new()
             $( .put( stringify!($varq), $varq ) )*
             .build();
@@ -549,17 +558,16 @@ mod tests {
         assert_eq!(url_format!("foo"), "foo");
     }
 
-    // TODO: https://github.com/golemfactory/ya-client/issues/133
-    // #[test]
-    // fn single_placeholder_url() {
-    //    let bar = "qux";
-    //    assert_eq!(url_format!("foo/{}", bar), "foo/qux");
-    // }
+    #[test]
+    fn single_placeholder_url() {
+        let bar = "qux";
+        assert_eq!(url_format!("foo/{}", bar), "foo/qux");
+    }
 
     #[test]
     fn single_var_url() {
         let bar = "qux";
-        assert_eq!(url_format!("foo/{bar}", bar), "foo/qux");
+        assert_eq!(url_format!("foo/{bar}"), "foo/qux");
     }
 
     // compilation error when wrong var name given
@@ -574,7 +582,7 @@ mod tests {
         let bar = "qux";
         let baz = "quz";
         assert_eq!(
-            url_format!("foo/{bar}/fuu/{baz}", bar, baz),
+            url_format!("foo/{}/fuu/{baz}", bar),
             "foo/qux/fuu/quz"
         );
     }
@@ -615,8 +623,6 @@ mod tests {
         assert_eq!(
             url_format!(
                 "foo/{bar}/fuu/{baz}",
-                bar,
-                baz,
                 #[query] qar,
                 #[query] qaz
             ),

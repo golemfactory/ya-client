@@ -68,14 +68,14 @@ impl ActivityRequestorControlApi {
 
     /// Destroys given Activity.
     pub async fn destroy_activity(&self, activity_id: &str) -> Result<()> {
-        let uri = url_format!("activity/{activity_id}", activity_id);
+        let uri = url_format!("activity/{activity_id}");
         self.client.delete(&uri).send().json().await?;
         Ok(())
     }
 
     /// Executes an ExeScript batch within a given Activity.
     pub async fn exec(&self, script: ExeScriptRequest, activity_id: &str) -> Result<String> {
-        let uri = url_format!("activity/{activity_id}/exec", activity_id);
+        let uri = url_format!("activity/{activity_id}/exec");
         self.client.post(&uri).send_json(&script).json().await
     }
 
@@ -90,8 +90,6 @@ impl ActivityRequestorControlApi {
     ) -> Result<Vec<ExeScriptCommandResult>> {
         let uri = url_format!(
             "activity/{activity_id}/exec/{batch_id}",
-            activity_id,
-            batch_id,
             #[query] timeout,
             #[query] command_index,
         );
@@ -104,11 +102,7 @@ impl ActivityRequestorControlApi {
         activity_id: &str,
         batch_id: &str,
     ) -> Result<impl Stream<Item = RuntimeEvent>> {
-        let uri = url_format!(
-            "activity/{activity_id}/exec/{batch_id}",
-            activity_id,
-            batch_id,
-        );
+        let uri = url_format!("activity/{activity_id}/exec/{batch_id}",);
         let stream = self
             .client
             .event_stream(&uri)
