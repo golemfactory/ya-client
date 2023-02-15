@@ -1,0 +1,130 @@
+openapi: 3.0.3
+info:
+  version: 0.1.0
+  title: Golem GSB API
+  description: "Yagna GSB API"
+servers:
+  - url: /gsb-api/v1
+
+security:
+  - app_key: []
+
+tags:
+  - name: requestor
+    description: Requestor part
+
+paths:
+  /services:
+    post:
+      tags:
+        - requestor
+      operationId: bindServices
+      summary: Binds new GSB services.
+      responses:
+        201:
+          $ref: "#/components/responses/ServicesResponse"
+          description: "
+            GSB services are binded.
+            GSB messages can be accessed through endpoint
+            with path specified in 'listen.links.messages' response field."
+        400:
+          $ref: "common.yaml#/responses/BadRequest"
+        401:
+          $ref: "common.yaml#/responses/Unauthorized"
+        default:
+          $ref: "common.yaml#/responses/UnexpectedError"
+  /services/{serviceId}:
+    parameters:
+      - $ref: "#/components/parameters/servicesId"
+    delete:
+      tags:
+        - requestor
+      operationId: unbindServices
+      summary: "Unbinds GSB services."
+      description: "Unbinds GSB services and breaks existing WS connections."
+      responses:
+        200:
+          description: GSB services are unbinded and WS connections disconnected.
+        401:
+          $ref: "common.yaml#/responses/Unauthorized"
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+    get:
+      tags:
+        - requestor
+      operationId: connectToServices
+      responses:
+        
+components:
+  securitySchemes:
+    app_key:
+      $ref: "common.yaml#/components/securitySchemes/app_key"
+
+  parameters:
+    servicesId:
+      name: servicesId
+      description: "Generated id for binded GSB services. Its content is a base64 encoded address prefix."
+      in: path
+      required: true
+      schema:
+        type: string
+
+  requestBodies:
+    ServicesRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ServicesRequest"
+
+  responses:
+    ServicesResponse:
+      description: GSB services binding response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ServicesResponse"
+
+  schemas:
+    ServicesRequest:
+      type: object
+      required:
+        - "listen"
+      properties:
+        listen:
+          $ref: "#/components/schemas/ServicesListen"
+
+    ServicesResponse:
+      type: object
+      properties:
+        listen:
+          $ref: "#/components/schemas/ServicesListenResponse"
+
+    ServicesListen:
+      type: object
+      properties:
+        on:
+          type: string
+        components:
+          type: array
+          items:
+            type: string
+
+    ServicesListenResponse:
+      allOf:
+        - $ref: "#/components/schemas/ServicesListen"
+        - type: object
+          required:
+            - "links"
+          properties:
+            links:
+              $ref: "#/components/schemas/ServicesLinks"
+
+    ServicesLinks:
+      type: object
+      required:
+        - "messages"
+      properties:
+        messages:
+          type: string
+          description: "Path to binded GSB services messages"
