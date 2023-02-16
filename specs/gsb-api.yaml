@@ -25,15 +25,14 @@ paths:
           $ref: "#/components/responses/ServicesResponse"
           description: "
             GSB services are binded.
-            GSB messages can be accessed through endpoint
-            with path specified in 'listen.links.messages' response field."
+            GSB messages can be accessed using endpoint under path specified in 'listen.links.messages' response field."
         400:
           $ref: "common.yaml#/responses/BadRequest"
         401:
           $ref: "common.yaml#/responses/Unauthorized"
         default:
           $ref: "common.yaml#/responses/UnexpectedError"
-  /services/{serviceId}:
+  /services/{servicesId}:
     parameters:
       - $ref: "#/components/parameters/servicesId"
     delete:
@@ -50,11 +49,16 @@ paths:
         404:
           $ref: 'common.yaml#/responses/NotFound'
     get:
-      tags:
-        - requestor
-      operationId: connectToServices
+      summary: "Upgrades to WebSocket"
+      description: "
+        Upgrades to WebSocket which lets to receive messages to binded GSB services.
+        Check 'gsb-api-messages.yaml' for WebSocket messages specs.
+        "
       responses:
-        
+        101:
+          description: "Switches to WebSocket on request with protocol upgade header and existing 'servicesId'."
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
 components:
   securitySchemes:
     app_key:
@@ -63,7 +67,7 @@ components:
   parameters:
     servicesId:
       name: servicesId
-      description: "Generated id for binded GSB services. Its content is a base64 encoded address prefix."
+      description: "Generated id for binded GSB services. It is a base64 encoded address prefix."
       in: path
       required: true
       schema:

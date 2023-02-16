@@ -1,0 +1,110 @@
+asyncapi: "2.6.0"
+
+info:
+  title: GSB services Websocket API
+  version: "0.1.0"
+
+servers:
+  public:
+    url: /gsb-api/v1
+    protocol: ws
+
+channels:
+  /services/{servicesId}:
+    parameters:
+      servicesId:
+        description: "
+          Generated id for binded GSB services.
+          Path with id is in response of POST /services (field 'listen.links.messages')
+          "
+        schema:
+          type: string
+    bindings:
+      ws:
+        method: GET
+    subscribe:
+      summary: GSB requests
+      description: GSB message requests to binded services
+      message:
+        $ref: "#/components/messages/gsbRequest"
+
+    publish:
+      summary: GSB responses
+      description: GSB message responses
+      message:
+        $ref: "#/components/messages/gsbResponse"
+
+components:
+  messages:
+    gsbRequest:
+      payload:
+        $ref: "#/components/schemas/gsbRequest"
+      contentType: application/octet-stream
+    gsbResponse:
+      payload:
+        $ref: "#/components/schemas/gsbResponse"
+      contentType: application/octet-stream
+
+  schemas:
+    gsbRequest:
+      summary: "GSB API services message request"
+      type: object
+      required:
+        - "id"
+        - "component"
+      properties:
+        id:
+          $ref: "#/components/schemas/id"
+        component:
+          type: string
+          description: "GSB message REQUEST type name"
+          examples:
+            - "GetChunk"
+        payload:
+          type: object
+          description: "
+            Serialized into object GSB message of 'component' REQUEST type (e.g. GetChunk type).
+            In case of request with no payload it can be empty (or missing).
+            "
+      contentMediaType: application/octet-stream
+      contentEncoding: flexbuffers
+
+    gsbResponse:
+      summary: "GSB API services message response"
+      type: object
+      oneOf:
+        - required:
+            - id
+            - payload
+          not:
+            required:
+              - error
+        - required:
+            - id
+            - error
+          not:
+            required:
+              - payload
+      properties:
+        id:
+          $ref: "#/components/schemas/id"
+        payload:
+          type: object
+          description: "
+            Serialized into object GSB message of 'component' RESPONSE type
+            (e.g. for GetChunk it will have GftpChunk type).
+            "
+        error:
+          type: object
+          description: "
+            Object mapping GSB message error variant name to error message value.
+            Example shows error ya_core_model::gftp::Error::InternalError('failure').
+            "
+          examples:
+            - { "InternalError": "failure" }
+      contentMediaType: application/octet-stream
+      contentEncoding: flexbuffers
+
+    id:
+      type: string
+      description: Id used to match request to response
