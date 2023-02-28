@@ -20,6 +20,8 @@ paths:
         - requestor
       operationId: bindServices
       summary: Binds new GSB services.
+      requestBody:
+        $ref: '#/components/requestBodies/ServicesRequest'
       responses:
         201:
           $ref: "#/components/responses/ServicesResponse"
