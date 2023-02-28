@@ -14,7 +14,7 @@ channels:
     parameters:
       servicesId:
         description: "
-          Generated id for binded GSB services.
+          Generated id for bound GSB services.
           Path with id is in response of POST /services (field 'listen.links.messages')
           "
         schema:
@@ -24,7 +24,7 @@ channels:
         method: GET
     subscribe:
       summary: GSB requests
-      description: GSB message requests to binded services
+      description: GSB message requests to bound services
       message:
         $ref: "#/components/messages/gsbRequest"
 
