@@ -1,5 +1,10 @@
 # GSB API
 
+GSB REST API allows to bind and unbind GSB services.
+
+Binding GSB service enables WebSocket endpoint which allows to listen on incoming GSB messages.
+Path to WebSocket endpoint is returned in bind service response.
+
 API documentation:
 
 - REST endpoints OpenAPI [schema](../specs/gsb-api.yaml).
@@ -40,7 +45,7 @@ sequenceDiagram
     Backend -->>- App: HTTP 200
 ```
 
-#### Early GSB request scenario
+### Early GSB request scenario (simplified)
 
 ```mermaid
 sequenceDiagram
@@ -65,7 +70,7 @@ sequenceDiagram
     Backend -->>- App: HTTP 200
 ```
 
-### Some other scenarios (simplified)
+#### GSB messages buffering and cancelling (simplified)
 
 ```mermaid
 sequenceDiagram
@@ -103,7 +108,7 @@ sequenceDiagram
     Backend -->>- App: HTTP 200
 ```
 
-Disconnect WS on new WS connection
+### Disconnect WS on new WS connection (simplified)
 
 ```mermaid
 sequenceDiagram

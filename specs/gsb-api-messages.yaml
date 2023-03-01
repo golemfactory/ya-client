@@ -2,6 +2,11 @@ asyncapi: "2.6.0"
 
 info:
   title: GSB services Websocket API
+  description: "
+    GSB services Websocket API allows to listen and respond to incoming GSB messages.
+    In order to access endpoint required is to bind GSB services using 'POST /services' REST API endpoint.
+    Request to 'DELETE /services/{servicesId}' closes WebSocket connection, cancels pending GSB requests, and disables WebSocket endpoint created for these services.
+    "
   version: "0.1.0"
 
 servers:
@@ -64,6 +69,7 @@ components:
           type: object
           description: "
             Serialized into object GSB message of 'component' REQUEST type (e.g. GetChunk type).
+            Some GSB messages can be found here https://github.com/golemfactory/yagna/tree/master/core/model/src
             In case of request with no payload it can be empty (or missing).
             "
       contentMediaType: application/octet-stream
@@ -93,15 +99,17 @@ components:
           description: "
             Serialized into object GSB message of 'component' RESPONSE type
             (e.g. for GetChunk it will have GftpChunk type).
+            Some GSB messages can be found here https://github.com/golemfactory/yagna/tree/master/core/model/src
             "
         error:
           type: object
           description: "
             Object mapping GSB message error variant name to error message value.
-            Example shows error ya_core_model::gftp::Error::InternalError('failure').
+            Example shows error ya_core_model::gftp::Error::InternalError.
+            Some GSB message errors types can be found here https://github.com/golemfactory/yagna/tree/master/core/model/src
             "
           examples:
-            - { "InternalError": "failure" }
+            - { "InternalError": "Failed to read file" }
       contentMediaType: application/octet-stream
       contentEncoding: flexbuffers
 

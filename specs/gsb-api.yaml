@@ -2,7 +2,11 @@ openapi: 3.0.3
 info:
   version: 0.1.0
   title: Golem GSB API
-  description: "Yagna GSB API"
+  description: "
+    GSB REST API allows to bind and unbind GSB services.
+    Binding GSB services enables WebSocket endpoint which allows to listen on incoming GSB messages.
+    Path to WebSocket endpoint is returned in bind services response.
+    "
 servers:
   - url: /gsb-api/v1
 
@@ -26,8 +30,10 @@ paths:
         201:
           $ref: "#/components/responses/ServicesResponse"
           description: "
-            GSB services are bound.
-            GSB messages can be accessed using endpoint under path specified in 'listen.links.messages' response field."
+            Binds new GSB services.
+            Response includes path to WebSocket endpoint ('listen.links.messages' response field).
+            It allows to listen on incoming GSB messages.
+            "
         400:
           $ref: "common.yaml#/responses/BadRequest"
         401:
@@ -42,7 +48,11 @@ paths:
         - requestor
       operationId: unbindServices
       summary: "Unbinds GSB services."
-      description: "Unbinds GSB services and breaks existing WS connections."
+      description: "
+        Unbinds GSB services and closes existing WS connection.
+        WebSocket endpoint created for these services cannot be accessed after unbinding them.
+        Pending GSB requests will be Cancelled.
+        "
       responses:
         200:
           description: GSB services are unbound and WS connections disconnected.
@@ -69,7 +79,7 @@ components:
   parameters:
     servicesId:
       name: servicesId
-      description: "Generated id for bound GSB services. It is a base64 encoded address prefix."
+      description: "Generated id for bound GSB services. It is a base64 encoded GSB address prefix."
       in: path
       required: true
       schema:
@@ -133,4 +143,7 @@ components:
       properties:
         messages:
           type: string
-          description: "Path to bound GSB services messages"
+          description: "
+            Path to bound GSB services messages WebSocket endpoint. 
+            For details check GSB messages WebSocket API documentation.
+            "

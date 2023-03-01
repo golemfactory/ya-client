@@ -5,4 +5,4 @@ Public Yagna REST APIs client binding with Data Model and specifications in
 
 ## GSB API
 
-Documentation [page](docs/gsb_api.md).
+GSB API documentation [page](docs/gsb_api.md).
