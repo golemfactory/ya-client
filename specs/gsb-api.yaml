@@ -144,6 +144,6 @@ components:
         messages:
           type: string
           description: "
-            Path to bound GSB services messages WebSocket endpoint. 
+            Path to bound GSB services messages WebSocket endpoint.
             For details check GSB messages WebSocket API documentation.
             "
