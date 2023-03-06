@@ -28,12 +28,17 @@ paths:
         $ref: '#/components/requestBodies/ServicesRequest'
       responses:
         201:
-          $ref: "#/components/responses/ServicesResponse"
           description: "
             Binds new GSB services.
-            Response includes path to WebSocket endpoint ('listen.links.messages' response field).
-            It allows to listen on incoming GSB messages.
+            Response includes 'servicesId' allowing to access WebSocket endpoint and to unbind GSB services using DELETE method (resource path '/services/{servicesId}').
+            WebSocket endpoint allows to listen on incoming GSB messages.
             "
+          $ref: "#/components/responses/ServicesResponse"
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Relative URI to bound GSB services resource.
         400:
           $ref: "common.yaml#/responses/BadRequest"
         401:
@@ -111,39 +116,31 @@ components:
           $ref: "#/components/schemas/ServicesListen"
 
     ServicesResponse:
-      type: object
-      properties:
-        listen:
-          $ref: "#/components/schemas/ServicesListenResponse"
+      allOf:
+        - type: object
+          properties:
+            listen:
+              $ref: "#/components/schemas/ServicesListen"
+        - type: object
+          properties:
+            servicesId:
+              type: string
+              description: "
+                Id of bound GSB services.
+                It allows to access WebSocket endpoint and to later unbind GSB services using DELETE method.
+                WebSocket endpoint allows to listen on incoming GSB messages.
+                "
 
     ServicesListen:
       type: object
       properties:
         on:
           type: string
+          description: "GSB services address prefix."
+          example: "/public/gftp/id_of_shared_data"
         components:
           type: array
           items:
             type: string
-
-    ServicesListenResponse:
-      allOf:
-        - $ref: "#/components/schemas/ServicesListen"
-        - type: object
-          required:
-            - "links"
-          properties:
-            links:
-              $ref: "#/components/schemas/ServicesLinks"
-
-    ServicesLinks:
-      type: object
-      required:
-        - "messages"
-      properties:
-        messages:
-          type: string
-          description: "
-            Path to bound GSB services messages WebSocket endpoint.
-            For details check GSB messages WebSocket API documentation.
-            "
+          description: "GSB services address prefix subpath."
+          example: ["GetMetadata", "GetChunk"]
