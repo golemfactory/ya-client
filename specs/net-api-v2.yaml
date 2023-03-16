@@ -318,7 +318,7 @@ components:
       description: Connection status.
       content:
         application/json:
-          schema: 
+          schema:
             $ref: '#/components/schemas/Status'
 
     AddressList:
