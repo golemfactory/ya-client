@@ -25,7 +25,11 @@ paths:
       operationId: bindServices
       summary: Binds new GSB services.
       requestBody:
-        $ref: '#/components/requestBodies/ServicesRequest'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicesRequest"
       responses:
         201:
           description: "
@@ -100,22 +104,6 @@ components:
       required: true
       schema:
         type: string
-
-  requestBodies:
-    ServicesRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ServicesRequest"
-
-  responses:
-    ServicesResponse:
-      description: GSB services binding response
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ServicesResponse"
 
   schemas:
     ServicesRequest:
