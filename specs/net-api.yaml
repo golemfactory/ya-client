@@ -217,6 +217,7 @@ paths:
     description: >
       WebSocket endpoint for establishing a TCP connection to `{ip}:{port}`.
     get:
+      operationId: connect_tcp
       security:
         - app_key: []
         - app_key_param: []

@@ -237,6 +237,7 @@ paths:
     description: >
       WebSocket endpoint for establishing a TCP connection to `{ip}:{port}`.
     get:
+      operationId: connect_tcp
       security:
         - app_key: []
         - app_key_param: []
@@ -317,7 +318,8 @@ components:
       description: Connection status.
       content:
         application/json:
-          schema: '#/components/schemas/Status'
+          schema: 
+            $ref: '#/components/schemas/Status'
 
     AddressList:
       description: List of Requestor's Addresses in a Virtual Private Network.
