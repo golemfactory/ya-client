@@ -234,15 +234,27 @@ paths:
       - $ref: '#/components/parameters/networkId'
       - $ref: '#/components/parameters/ip'
       - $ref: '#/components/parameters/port'
-
     description: >
       WebSocket endpoint for establishing a TCP connection to `{ip}:{port}`.
+    get:
+      security:
+        - app_key: []
+        - app_key_param: []
+      responses:
+        101:
+          description: 'Switches to WebSocket on request with protocol upgrade header.'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
 
 components:
 
   securitySchemes:
     app_key:
       $ref: 'common.yaml#/components/securitySchemes/app_key'
+    app_key_param:
+      $ref: 'common.yaml#/components/securitySchemes/app_key_param'
 
   parameters:
 

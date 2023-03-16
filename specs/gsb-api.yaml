@@ -66,6 +66,9 @@ paths:
         404:
           $ref: 'common.yaml#/responses/NotFound'
     get:
+      security:
+        - app_key: []
+        - app_key_param: []
       summary: "Upgrades to WebSocket"
       description: "
         Upgrades to WebSocket which allows to receive messages to bound GSB services.
@@ -74,12 +77,16 @@ paths:
       responses:
         101:
           description: "Switches to WebSocket on request with protocol upgrade header and existing 'servicesId'."
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
 components:
   securitySchemes:
     app_key:
       $ref: "common.yaml#/components/securitySchemes/app_key"
+    app_key_param:
+      $ref: "common.yaml#/components/securitySchemes/app_key_param"
 
   parameters:
     servicesId:
