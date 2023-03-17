@@ -25,7 +25,11 @@ paths:
       operationId: bindServices
       summary: Binds new GSB services.
       requestBody:
-        $ref: '#/components/requestBodies/ServicesRequest'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicesRequest"
       responses:
         201:
           description: "
@@ -33,7 +37,10 @@ paths:
             Response includes 'servicesId' allowing to access WebSocket endpoint and to unbind GSB services using DELETE method (resource path '/services/{servicesId}').
             WebSocket endpoint allows to listen on incoming GSB messages.
             "
-          $ref: "#/components/responses/ServicesResponse"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServicesResponse"
           headers:
             Location:
               schema:
@@ -66,6 +73,10 @@ paths:
         404:
           $ref: 'common.yaml#/responses/NotFound'
     get:
+      operationId: "getServiceMessages"
+      security:
+        - app_key: []
+        - app_key_param: []
       summary: "Upgrades to WebSocket"
       description: "
         Upgrades to WebSocket which allows to receive messages to bound GSB services.
@@ -74,12 +85,16 @@ paths:
       responses:
         101:
           description: "Switches to WebSocket on request with protocol upgrade header and existing 'servicesId'."
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
 components:
   securitySchemes:
     app_key:
       $ref: "common.yaml#/components/securitySchemes/app_key"
+    app_key_param:
+      $ref: "common.yaml#/components/securitySchemes/app_key_param"
 
   parameters:
     servicesId:
@@ -89,22 +104,6 @@ components:
       required: true
       schema:
         type: string
-
-  requestBodies:
-    ServicesRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ServicesRequest"
-
-  responses:
-    ServicesResponse:
-      description: GSB services binding response
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ServicesResponse"
 
   schemas:
     ServicesRequest:
