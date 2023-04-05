@@ -42,8 +42,8 @@ impl NodeId {
     {
         let mut hex_str = [0u8; 42];
 
-        hex_str[0] = '0' as u8;
-        hex_str[1] = 'x' as u8;
+        hex_str[0] = b'0';
+        hex_str[1] = b'x';
 
         let mut ptr = 2;
         for it in &self.inner {

@@ -11,7 +11,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  rust_stable: 1.64.0
+  rust_stable: 1.68.2
 
 jobs:
   build:

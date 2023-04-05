@@ -12,6 +12,7 @@ pub mod invoice_event;
 pub mod market_decoration;
 pub mod network;
 pub mod params;
+#[allow(clippy::module_inception)]
 pub mod payment;
 pub mod rejection;
 pub mod rejection_reason;

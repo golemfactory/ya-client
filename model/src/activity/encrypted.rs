@@ -93,7 +93,7 @@ impl EncryptionCtx {
             self.aeskey.as_ref(),
             Some(iv.as_ref()),
             &[],
-            buf.as_ref(),
+            buf,
             tag.as_mut(),
         )
         .map_err(EncryptionError::encrypt_err_msg)?;
