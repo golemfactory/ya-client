@@ -57,7 +57,7 @@ mod test {
                 \"eventType\":\"DebitNoteRejectedEvent\",\
                 \"rejection\":{\
                     \"rejectionReason\":\"UNSOLICITED_SERVICE\",\
-                    \"totalAmountAccepted\":\"13.140000\"\
+                    \"totalAmountAccepted\":\"13.14000\"\
                 }\
              }",
             serde_json::to_string(&ie).unwrap()
