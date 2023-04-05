@@ -23,7 +23,7 @@ impl WebInterface for ActivityProviderApi {
 impl ActivityProviderApi {
     /// Fetch list of activity_ids
     pub async fn get_activity_ids(&self) -> Result<Vec<String>> {
-        self.client.get(&"activity").send().json().await
+        self.client.get("activity").send().json().await
     }
 
     /// Fetch activity state (which may include error details)
