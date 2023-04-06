@@ -85,10 +85,10 @@ pub enum CaptureMode {
 #[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CaptureFormat {
+    #[default]
     #[serde(alias = "string")]
     Str,
     #[serde(alias = "binary")]
-    #[default]
     Bin,
 }
 
