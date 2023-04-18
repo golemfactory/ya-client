@@ -31,7 +31,7 @@ impl ActivityState {
 impl From<&StatePair> for ActivityState {
     fn from(pending: &StatePair) -> Self {
         ActivityState {
-            state: pending.clone(),
+            state: *pending,
             reason: None,
             error_message: None,
         }
@@ -48,20 +48,21 @@ impl From<StatePair> for ActivityState {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[derive(
+    Clone, Copy, Default, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
+)]
 pub struct StatePair(pub State, pub Option<State>);
 
 impl StatePair {
     pub fn alive(&self) -> bool {
-        match (&self.0, &self.1) {
-            (State::Terminated, _) => false,
-            (_, Some(State::Terminated)) => false,
-            _ => true,
-        }
+        !matches!(
+            (&self.0, &self.1),
+            (State::Terminated, _) | (_, Some(State::Terminated))
+        )
     }
 
     pub fn to_pending(&self, state: State) -> Self {
-        StatePair(self.0.clone(), Some(state))
+        StatePair(self.0, Some(state))
     }
 }
 
@@ -71,24 +72,15 @@ impl From<State> for StatePair {
     }
 }
 
-impl Default for StatePair {
-    fn default() -> Self {
-        StatePair(State::default(), None)
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[derive(
+    Clone, Default, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
+)]
 pub enum State {
+    #[default]
     New,
     Initialized,
     Deployed,
     Ready,
     Terminated,
     Unresponsive,
-}
-
-impl Default for State {
-    fn default() -> Self {
-        State::New
-    }
 }

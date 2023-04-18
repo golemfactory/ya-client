@@ -123,7 +123,7 @@ impl NetVpnApi {
 
         let status = res.status();
         if status.is_success().not() && status.is_informational().not() {
-            let body = res.body().limit(16384 as usize).await?;
+            let body = res.body().limit(16384).await?;
             return Err(Error::HttpError {
                 code: status,
                 msg: String::from_utf8(body.to_vec())?,

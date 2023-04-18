@@ -52,7 +52,7 @@ impl ActivityRequestorControlApi {
         let s = secp256k1::Secp256k1::new();
         let (secret, pub_key) = s.generate_keypair(&mut rand::thread_rng());
         let result = self
-            .create_secure_activity_raw(agreement_id, pub_key.clone())
+            .create_secure_activity_raw(agreement_id, pub_key)
             .await?;
         let api = sgx::SecureActivityRequestorApi::from_response(
             self.client.clone(),
@@ -209,7 +209,7 @@ pub mod sgx {
                 None => return Err(SgxError::MissingKeys),
                 Some(_) => return Err(SgxError::InvalidKeys),
             };
-            let enclave_key = sgx.enclave_pub_key.clone();
+            let enclave_key = sgx.enclave_pub_key;
             let ctx = EncryptionCtx::new(&enclave_key, &requestor_key);
             let nonce = &activity_id.to_owned();
             let session = Arc::new(Session {
@@ -294,7 +294,7 @@ pub mod sgx {
                 enc::Response::Error(e) => Err(e),
                 _ => return Err(AppError::InternalError("invalid response".to_string())),
             };
-            Ok(resp.map_err(|e| AppError::InternalError(e.to_string()))?)
+            resp.map_err(|e| AppError::InternalError(e.to_string()))
         }
 
         pub async fn get_exec_batch_results(
@@ -314,7 +314,7 @@ pub mod sgx {
                 enc::Response::Error(e) => Err(e),
                 _ => return Err(AppError::InternalError("invalid response".to_string())),
             };
-            Ok(resp.map_err(|e| AppError::InternalError(e.to_string()))?)
+            resp.map_err(|e| AppError::InternalError(e.to_string()))
         }
 
         pub async fn get_running_command(
@@ -332,7 +332,7 @@ pub mod sgx {
                 enc::Response::Error(e) => Err(e),
                 _ => return Err(AppError::InternalError("invalid response".to_string())),
             };
-            Ok(resp.map_err(|e| AppError::InternalError(e.to_string()))?)
+            resp.map_err(|e| AppError::InternalError(e.to_string()))
         }
 
         async fn send(&self, request: enc::Request) -> Result<enc::Response> {
