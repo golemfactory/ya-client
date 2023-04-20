@@ -64,7 +64,7 @@ mod binenc {
     where
         S: Serializer,
     {
-        let s = hex::encode(&bytes);
+        let s = hex::encode(bytes);
         serializer.serialize_str(&s)
     }
 
@@ -73,7 +73,7 @@ mod binenc {
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        let bytes = hex::decode(&s).map_err(D::Error::custom)?;
+        let bytes = hex::decode(s).map_err(D::Error::custom)?;
         Ok(bytes)
     }
 }

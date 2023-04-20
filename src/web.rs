@@ -31,7 +31,7 @@ pub fn rest_api_url() -> Url {
     let api_url = env::var(YAGNA_API_URL_ENV_VAR).unwrap_or(DEFAULT_YAGNA_API_URL.into());
     api_url
         .parse()
-        .expect(&format!("invalid API URL: {}", api_url))
+        .unwrap_or_else(|_| panic!("invalid API URL: {}", api_url))
 }
 
 #[derive(Clone, Debug)]
@@ -52,7 +52,7 @@ pub trait WebInterface {
     const API_SUFFIX: &'static str;
 
     fn rebase_service_url(base_url: Rc<Url>) -> Result<Rc<Url>> {
-        if let Some(url) = std::env::var(Self::API_URL_ENV_VAR).ok() {
+        if let Ok(url) = std::env::var(Self::API_URL_ENV_VAR) {
             return Ok(Url::from_str(&url)?.into());
         }
         let with_trailing = format!("{}/", Self::API_SUFFIX);
@@ -225,7 +225,7 @@ impl WebRequest<SendClientRequest> {
                     .unwrap_or_else(|e| format!("error parsing error msg: {}", e))
             } else {
                 match response.body().limit(MAX_BODY_SIZE).await {
-                    Ok(ref bytes) => String::from_utf8_lossy(&bytes).to_string(),
+                    Ok(ref bytes) => String::from_utf8_lossy(bytes).to_string(),
                     Err(e) => e.to_string(),
                 }
             };
@@ -325,7 +325,7 @@ impl WebClientBuilder {
         }
 
         WebClient {
-            base_url: Rc::new(self.api_url.unwrap_or_else(|| rest_api_url())),
+            base_url: Rc::new(self.api_url.unwrap_or_else(rest_api_url)),
             awc: builder.finish(),
         }
     }
@@ -347,12 +347,14 @@ pub struct QueryParamsBuilder<'a> {
     serializer: form_urlencoded::Serializer<'a, String>,
 }
 
-impl<'a> QueryParamsBuilder<'a> {
-    pub fn new() -> Self {
+impl<'a> Default for QueryParamsBuilder<'a> {
+    fn default() -> Self {
         let serializer = form_urlencoded::Serializer::new("".into());
         QueryParamsBuilder { serializer }
     }
+}
 
+impl<'a> QueryParamsBuilder<'a> {
     pub fn put<N: ToString, V: ToString>(mut self, name: N, value: Option<V>) -> Self {
         if let Some(v) = value {
             self.serializer
@@ -382,7 +384,7 @@ impl TryFrom<String> for Event {
         let mut data = Vec::<String>::new();
 
         for line in string.split('\n') {
-            let split = line.splitn(2, ":").collect::<Vec<_>>();
+            let split = line.splitn(2, ':').collect::<Vec<_>>();
             if split.len() < 2 {
                 continue;
             }
@@ -495,7 +497,7 @@ where
                 if let Some(result) = this.next_event(idx) {
                     Poll::Ready(Some(result))
                 } else {
-                    if let Poll::Ready(_) = Pin::new(&mut this.inner).poll_peek(cx) {
+                    if Pin::new(&mut this.inner).poll_peek(cx).is_ready() {
                         cx.waker().wake_by_ref();
                     }
                     Poll::Pending
@@ -509,12 +511,21 @@ where
 }
 
 /// Macro to facilitate URL formatting for REST API async bindings
+///
+/// Supports query parameters, in addition to working similarly to format!(..).
+/// The only exception being the ident=value syntax, which is not supported.
+///
+/// url_format!("foo") => "foo"
+/// url_format!("foo/{bar}") => "foo" + bar
+/// url_format!("foo/{}", bar) => "foo" + bar
+/// url_format!("foo/{bar}", bar="expr") => not supported
+/// url_format!("foo", #[query] bar) => "foo?bar=" + bar
 macro_rules! url_format {
     {
         $path:expr $(,$var:ident)* $(,#[query] $varq:ident)* $(,)?
     } => {{
-        let mut url = format!( $path $(, $var=$var)* );
-        let query = crate::web::QueryParamsBuilder::new()
+        let mut url = format!( $path $(, $var)* );
+        let query = crate::web::QueryParamsBuilder::default()
             $( .put( stringify!($varq), $varq ) )*
             .build();
         if query.len() > 1 {
@@ -529,7 +540,7 @@ where
     T: Serialize,
 {
     let qs = serde_qs::to_string(params).unwrap_or("".to_string());
-    if qs.len() > 0 {
+    if !qs.is_empty() {
         format!("{}?{}", base, qs)
     } else {
         base.to_string()
@@ -558,7 +569,7 @@ mod tests {
     #[test]
     fn single_var_url() {
         let bar = "qux";
-        assert_eq!(url_format!("foo/{bar}", bar), "foo/qux");
+        assert_eq!(url_format!("foo/{bar}"), "foo/qux");
     }
 
     // compilation error when wrong var name given
@@ -573,7 +584,7 @@ mod tests {
         let bar = "qux";
         let baz = "quz";
         assert_eq!(
-            url_format!("foo/{bar}/fuu/{baz}", bar, baz),
+            url_format!("foo/{}/fuu/{baz}", bar),
             "foo/qux/fuu/quz"
         );
     }
@@ -614,8 +625,6 @@ mod tests {
         assert_eq!(
             url_format!(
                 "foo/{bar}/fuu/{baz}",
-                bar,
-                baz,
                 #[query] qar,
                 #[query] qaz
             ),

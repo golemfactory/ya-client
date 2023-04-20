@@ -87,5 +87,5 @@ where
     D: Deserializer<'de>,
 {
     let s: &str = Deserialize::deserialize(deserializer)?;
-    Ok(s.split(",").map(str::to_string).collect())
+    Ok(s.split(',').map(str::to_string).collect())
 }

@@ -1,4 +1,3 @@
-use serde_json;
 use std::{env, thread, time::Duration};
 use structopt::StructOpt;
 use url::Url;
@@ -197,7 +196,7 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
         while requestor_events.is_empty() {
             demand_id = round_robin_demands();
             println!("REQUESTOR=>  | waiting for events: {}", demand_id);
-            requestor_events = client.collect(&demand_id, Some(1.0), Some(2)).await?;
+            requestor_events = client.collect(demand_id, Some(1.0), Some(2)).await?;
         }
         println!("REQUESTOR=>  | Yay! Got event(s): {:#?}", requestor_events);
 
@@ -208,7 +207,7 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
                     let proposal_id = &proposal.proposal_id;
 
                     // this is not needed in regular flow; just to illustrate possibility
-                    let offer_proposal = client.get_proposal(&demand_id, proposal_id).await?;
+                    let offer_proposal = client.get_proposal(demand_id, proposal_id).await?;
                     cmp_proposals(&offer_proposal, &proposal);
 
                     match proposal.state {
@@ -219,7 +218,7 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
                             println!("REQUESTOR=>  | Negotiating proposal...");
                             let bespoke_proposal = demand.clone();
                             let new_proposal_id = client
-                                .counter_proposal(&bespoke_proposal, &demand_id, proposal_id)
+                                .counter_proposal(&bespoke_proposal, demand_id, proposal_id)
                                 .await?;
                             println!(
                                 "REQUESTOR=>  | Responded with counter proposal(id: {})",
