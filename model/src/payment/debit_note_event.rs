@@ -38,10 +38,6 @@ mod test {
     #[test]
     fn test_serialize_rejected_event_has_flat_rejection() {
         let ie = DebitNoteEvent {
-            node_id: NodeId::default(),
-            agreement_id: "538115101743e2e79e9d34b554079f070d286a98f6542c50e7ad61c19538ee16"
-                .to_string(),
-            activity_id: "12345".to_string(),
             debit_note_id: "ajdik".to_string(),
             event_date: Utc
                 .datetime_from_str("2020-12-21T15:51:21.126645Z", "%+")
