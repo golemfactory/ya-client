@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use strum_macros::{EnumString, ToString};
+use strum_macros::{Display, EnumString};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -11,7 +11,7 @@ pub struct DebitNoteEvent {
     pub event_type: DebitNoteEventType,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, EnumString, ToString)]
+#[derive(Clone, Debug, Display, Serialize, Deserialize, EnumString)]
 #[serde(tag = "eventType")]
 pub enum DebitNoteEventType {
     #[strum(to_string = "RECEIVED")]
@@ -49,7 +49,7 @@ mod test {
             event_type: DebitNoteEventType::DebitNoteRejectedEvent {
                 rejection: Rejection {
                     rejection_reason: RejectionReason::UnsolicitedService,
-                    total_amount_accepted: BigDecimal::from_f32(3.14).unwrap(),
+                    total_amount_accepted: BigDecimal::from_f32(13.14).unwrap(),
                     message: None,
                 },
             },
@@ -61,7 +61,7 @@ mod test {
                 \"eventType\":\"DebitNoteRejectedEvent\",\
                 \"rejection\":{\
                     \"rejectionReason\":\"UNSOLICITED_SERVICE\",\
-                    \"totalAmountAccepted\":\"3.140000\"\
+                    \"totalAmountAccepted\":\"13.14000\"\
                 }\
              }",
             serde_json::to_string(&ie).unwrap()

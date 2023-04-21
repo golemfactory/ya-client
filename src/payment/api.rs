@@ -101,18 +101,18 @@ impl PaymentApi {
     }
 
     pub async fn get_allocation(&self, allocation_id: &str) -> Result<Allocation> {
-        let url = url_format!("allocations/{allocation_id}", allocation_id);
+        let url = url_format!("allocations/{allocation_id}");
         self.client.get(&url).send().json().await
     }
 
     pub async fn amend_allocation(&self, allocation: &Allocation) -> Result<Allocation> {
         let allocation_id = &allocation.allocation_id;
-        let url = url_format!("allocations/{allocation_id}", allocation_id);
+        let url = url_format!("allocations/{allocation_id}");
         self.client.put(&url).send_json(allocation).json().await
     }
 
     pub async fn release_allocation(&self, allocation_id: &str) -> Result<()> {
-        let url = url_format!("allocations/{allocation_id}", allocation_id);
+        let url = url_format!("allocations/{allocation_id}");
         self.client.delete(&url).send().json().await
     }
 
@@ -151,7 +151,7 @@ impl PaymentApi {
     }
 
     pub async fn get_debit_note(&self, debit_note_id: &str) -> Result<DebitNote> {
-        let url = url_format!("debitNotes/{debit_note_id}", debit_note_id);
+        let url = url_format!("debitNotes/{debit_note_id}");
         self.client.get(&url).send().json().await
     }
 
@@ -321,7 +321,7 @@ impl PaymentApi {
     }
 
     pub async fn get_invoice(&self, invoice_id: &str) -> Result<Invoice> {
-        let url = url_format!("invoices/{invoice_id}", invoice_id);
+        let url = url_format!("invoices/{invoice_id}");
         self.client.get(&url).send().json().await
     }
 
@@ -447,7 +447,7 @@ impl PaymentApi {
     }
 
     pub async fn get_payment(&self, payment_id: &str) -> Result<Payment> {
-        let url = url_format!("payments/{payment_id}", payment_id);
+        let url = url_format!("payments/{payment_id}");
         self.client.get(&url).send().json().await
     }
 }

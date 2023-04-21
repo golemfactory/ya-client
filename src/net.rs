@@ -65,49 +65,49 @@ impl NetVpnApi {
 
     /// Retrieves a requestor's virtual private network.
     pub async fn get_network(&self, network_id: &str) -> Result<Network> {
-        let url = url_format!("net/{network_id}", network_id);
+        let url = url_format!("net/{network_id}");
         self.client.get(&url).send().json().await
     }
 
     /// Unregisters an existing virtual private network overlay on the network.
     pub async fn remove_network(&self, network_id: &str) -> Result<()> {
-        let url = url_format!("net/{network_id}", network_id);
+        let url = url_format!("net/{network_id}");
         self.client.delete(&url).send().json().await
     }
 
     /// Retrieves requestor's addresses in a virtual private network.
     pub async fn get_addresses(&self, network_id: &str) -> Result<Vec<Address>> {
-        let url = url_format!("net/{network_id}/addresses", network_id);
+        let url = url_format!("net/{network_id}/addresses");
         self.client.get(&url).send().json().await
     }
 
     /// Assigns a new address of the requestor in an existing private network.
     pub async fn add_address(&self, network_id: &str, address: &Address) -> Result<()> {
-        let url = url_format!("net/{network_id}/addresses", network_id);
+        let url = url_format!("net/{network_id}/addresses");
         self.client.post(&url).send_json(&address).json().await
     }
 
     /// Retrieves nodes within a virtual private network.
     pub async fn get_nodes(&self, network_id: &str) -> Result<Vec<Node>> {
-        let url = url_format!("net/{network_id}/nodes", network_id);
+        let url = url_format!("net/{network_id}/nodes");
         self.client.get(&url).send().json().await
     }
 
     /// Registers a node in a virtual private network.
     pub async fn add_node(&self, network_id: &str, node: &Node) -> Result<()> {
-        let url = url_format!("net/{network_id}/nodes", network_id);
+        let url = url_format!("net/{network_id}/nodes");
         self.client.post(&url).send_json(&node).json().await
     }
 
     /// Unregisters an existing node in a virtual private network.
     pub async fn remove_node(&self, network_id: &str, node_id: &str) -> Result<()> {
-        let url = url_format!("net/{network_id}/nodes/{node_id}", network_id, node_id);
+        let url = url_format!("net/{network_id}/nodes/{node_id}");
         self.client.post(&url).send().json().await
     }
 
     /// Lists TCP connections
     pub async fn list_tcp(&self, network_id: &str) -> Result<Vec<Connection>> {
-        let url = url_format!("net/{network_id}/tcp", network_id);
+        let url = url_format!("net/{network_id}/tcp");
         self.client.get(&url).send().json().await
     }
 
@@ -118,12 +118,12 @@ impl NetVpnApi {
         ip: &str,
         port: u16,
     ) -> Result<Framed<BoxedSocket, Codec>> {
-        let url = url_format!("net/{network_id}/tcp/{ip}/{port}", network_id, ip, port);
+        let url = url_format!("net/{network_id}/tcp/{ip}/{port}");
         let (mut res, conn) = self.client.ws(&url).await?;
 
         let status = res.status();
         if status.is_success().not() && status.is_informational().not() {
-            let body = res.body().limit(16384 as usize).await?;
+            let body = res.body().limit(16384).await?;
             return Err(Error::HttpError {
                 code: status,
                 msg: String::from_utf8(body.to_vec())?,

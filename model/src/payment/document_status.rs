@@ -15,7 +15,7 @@ pub enum DocumentStatus {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("invalid {} EventType option: \"{0}\"")]
+#[error("invalid EventType option: \"{0}\"")]
 pub struct InvalidOption(String);
 
 impl TryFrom<String> for DocumentStatus {

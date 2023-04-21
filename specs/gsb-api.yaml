@@ -1,0 +1,145 @@
+openapi: 3.0.3
+info:
+  version: 0.1.0
+  title: Golem GSB API
+  description: "
+    GSB REST API allows to bind and unbind GSB services.
+    Binding GSB services enables WebSocket endpoint which allows to listen on incoming GSB messages.
+    Path to WebSocket endpoint is returned in bind services response.
+    "
+servers:
+  - url: /gsb-api/v1
+
+security:
+  - app_key: []
+
+tags:
+  - name: requestor
+    description: Requestor part
+
+paths:
+  /services:
+    post:
+      tags:
+        - requestor
+      operationId: bindServices
+      summary: Binds new GSB services.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicesRequest"
+      responses:
+        201:
+          description: "
+            Binds new GSB services.
+            Response includes 'servicesId' allowing to access WebSocket endpoint and to unbind GSB services using DELETE method (resource path '/services/{servicesId}').
+            WebSocket endpoint allows to listen on incoming GSB messages.
+            "
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServicesResponse"
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Relative URI to bound GSB services resource.
+        400:
+          $ref: "common.yaml#/responses/BadRequest"
+        401:
+          $ref: "common.yaml#/responses/Unauthorized"
+        default:
+          $ref: "common.yaml#/responses/UnexpectedError"
+  /services/{servicesId}:
+    parameters:
+      - $ref: "#/components/parameters/servicesId"
+    delete:
+      tags:
+        - requestor
+      operationId: unbindServices
+      summary: "Unbinds GSB services."
+      description: "
+        Unbinds GSB services and closes existing WS connection.
+        WebSocket endpoint created for these services cannot be accessed after unbinding them.
+        Pending GSB requests will be Cancelled.
+        "
+      responses:
+        200:
+          description: GSB services are unbound and WS connections disconnected.
+        401:
+          $ref: "common.yaml#/responses/Unauthorized"
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+    get:
+      operationId: "getServiceMessages"
+      security:
+        - app_key: []
+        - app_key_param: []
+      summary: "Upgrades to WebSocket"
+      description: "
+        Upgrades to WebSocket which allows to receive messages to bound GSB services.
+        Check 'gsb-api-messages.yaml' for WebSocket messages specs.
+        "
+      responses:
+        101:
+          description: "Switches to WebSocket on request with protocol upgrade header and existing 'servicesId'."
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+components:
+  securitySchemes:
+    app_key:
+      $ref: "common.yaml#/components/securitySchemes/app_key"
+    app_key_param:
+      $ref: "common.yaml#/components/securitySchemes/app_key_param"
+
+  parameters:
+    servicesId:
+      name: servicesId
+      description: "Generated id for bound GSB services. It is a base64 encoded GSB address prefix."
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    ServicesRequest:
+      type: object
+      required:
+        - "listen"
+      properties:
+        listen:
+          $ref: "#/components/schemas/ServicesListen"
+
+    ServicesResponse:
+      allOf:
+        - type: object
+          properties:
+            listen:
+              $ref: "#/components/schemas/ServicesListen"
+        - type: object
+          properties:
+            servicesId:
+              type: string
+              description: "
+                Id of bound GSB services.
+                It allows to access WebSocket endpoint and to later unbind GSB services using DELETE method.
+                WebSocket endpoint allows to listen on incoming GSB messages.
+                "
+
+    ServicesListen:
+      type: object
+      properties:
+        on:
+          type: string
+          description: "GSB services address prefix."
+          example: "/public/gftp/id_of_shared_data"
+        components:
+          type: array
+          items:
+            type: string
+          description: "GSB services address prefix subpath."
+          example: ["GetMetadata", "GetChunk"]

@@ -45,7 +45,7 @@ async fn requestor_start(
 
 async fn requestor_stop(client: &ActivityRequestorControlApi, activity_id: &str) -> Result<()> {
     println!("[-] Activity {}", activity_id);
-    client.destroy_activity(&activity_id).await?;
+    client.destroy_activity(activity_id).await?;
     println!("[<] Destroyed");
     Ok(())
 }
@@ -53,12 +53,12 @@ async fn requestor_stop(client: &ActivityRequestorControlApi, activity_id: &str)
 async fn requestor_exec(client: &ActivityRequestorControlApi, activity_id: &str) -> Result<()> {
     let exe_request = ExeScriptRequest::new("STOP".to_string());
     println!("[+] Batch exe script:{:?}", exe_request);
-    let batch_id = client.exec(exe_request, &activity_id).await?;
+    let batch_id = client.exec(exe_request, activity_id).await?;
     println!("[<] Batch id: {}", batch_id);
 
     println!("[?] Batch results for activity {}", activity_id);
     let results = client
-        .get_exec_batch_results(&activity_id, &batch_id, Some(10.), None)
+        .get_exec_batch_results(activity_id, &batch_id, Some(10.), None)
         .await?;
     println!("[<] Batch results: {:?}", results);
     Ok(())

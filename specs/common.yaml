@@ -178,6 +178,11 @@ components:
     app_key:
       type: http
       scheme: bearer
+    app_key_param:
+      type: apiKey
+      in: query
+      name: authToken
+      description: API key to pass Yagna application key
 
   schemas:
     Timestamp:

@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use strum_macros::{EnumString, ToString};
+use strum_macros::{Display, EnumString};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -11,7 +11,7 @@ pub struct InvoiceEvent {
     pub event_type: InvoiceEventType,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, EnumString, ToString)]
+#[derive(Clone, Debug, Display, Serialize, Deserialize, PartialEq, EnumString)]
 #[serde(tag = "eventType")]
 pub enum InvoiceEventType {
     #[strum(to_string = "RECEIVED")]
@@ -45,7 +45,7 @@ mod test {
             event_type: InvoiceEventType::InvoiceRejectedEvent {
                 rejection: Rejection {
                     rejection_reason: RejectionReason::UnsolicitedService,
-                    total_amount_accepted: BigDecimal::from_f32(3.14).unwrap(),
+                    total_amount_accepted: BigDecimal::from_f32(13.14).unwrap(),
                     message: None,
                 },
             },
@@ -57,7 +57,7 @@ mod test {
                 \"eventType\":\"InvoiceRejectedEvent\",\
                 \"rejection\":{\
                     \"rejectionReason\":\"UNSOLICITED_SERVICE\",\
-                    \"totalAmountAccepted\":\"3.140000\"\
+                    \"totalAmountAccepted\":\"13.14000\"\
                 }\
              }",
             serde_json::to_string(&ie).unwrap()
