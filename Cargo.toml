@@ -11,16 +11,21 @@ edition = "2021"
 [features]
 default = []
 cli = ['structopt']
-sgx = ['graphene-sgx', 'lazy_static', 'secp256k1', 'openssl', 'secp256k1/serde', 'secp256k1/rand', 'ya-client-model/sgx']
+sgx = [
+    'graphene-sgx', 'lazy_static', 'secp256k1',
+    'openssl', 'secp256k1/serde', 'secp256k1/rand',
+    'ya-client-model/sgx', 'rand']
 
 [workspace]
 members = [
     "model",
 ]
 
+[workspace.dependencies]
+secp256k1 = ">=0.23,<0.28"
+
 [dependencies]
 ya-client-model = { version = "^0.5", path = "model" }
-
 awc = { version = "3", default-features = false }
 actix-codec = "0.5"
 bytes = "1"
@@ -30,17 +35,17 @@ futures = "0.3"
 hex = "0.4"
 heck = "0.4.1"
 log = "0.4"
-rand = "0.8.5"
-mime = "0.3"
+mime = "0.3.17"
 serde = "1"
 serde_json = "1.0"
 serde_qs = "0.12"
-thiserror = "1"
+thiserror = "1.0.40"
 url = "2"
 
 graphene-sgx = { version = "0.3.3", optional = true }
 lazy_static = { version = "1.4", optional = true }
-secp256k1 = { version = "0.27", optional = true }
+secp256k1 = { workspace=true, optional = true }
+rand = { version = "0.8.5", optional = true }
 structopt = { version = "0.3", optional = true }
 openssl = { version = "0.10", optional = true }
 
