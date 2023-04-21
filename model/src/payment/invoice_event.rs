@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use strum_macros::{EnumString, ToString};
+use strum_macros::{Display, EnumString};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -11,7 +11,7 @@ pub struct InvoiceEvent {
     pub event_type: InvoiceEventType,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, EnumString, ToString)]
+#[derive(Clone, Debug, Display, Serialize, Deserialize, PartialEq, EnumString)]
 #[serde(tag = "eventType")]
 pub enum InvoiceEventType {
     #[strum(to_string = "RECEIVED")]
