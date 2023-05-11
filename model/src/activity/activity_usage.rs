@@ -10,11 +10,13 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Struct for reporting current usage vector.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ActivityUsage {
     /// Current usage vector
     #[serde(rename = "currentUsage", skip_serializing_if = "Option::is_none")]
     pub current_usage: Option<Vec<f64>>,
+    /// Report timestamp in number of non-leap seconds since January 1, 1970 0:00:00 UTC (aka “UNIX timestamp”).
     #[serde(rename = "timestamp")]
     pub timestamp: i64,
 }

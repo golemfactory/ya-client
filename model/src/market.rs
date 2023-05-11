@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 pub mod agreement;
 pub mod agreement_event;
 pub mod agreement_proposal;

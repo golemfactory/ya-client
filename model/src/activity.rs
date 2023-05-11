@@ -1,14 +1,17 @@
-pub mod activity_state;
-pub mod activity_usage;
+//! The Activity API.
+
+mod activity_state;
+mod activity_usage;
 mod create_activity;
+
 #[cfg(feature = "sgx")]
-pub mod encrypted;
-pub mod exe_script_command;
-pub mod exe_script_command_result;
-pub mod exe_script_command_state;
-pub mod exe_script_request;
-pub mod provider_event;
-pub mod runtime_event;
+mod encrypted;
+mod exe_script_command;
+mod exe_script_command_result;
+mod exe_script_command_state;
+mod exe_script_request;
+mod provider_event;
+mod runtime_event;
 #[cfg(feature = "sgx")]
 mod sgx_credentials;
 
@@ -25,4 +28,5 @@ pub use self::runtime_event::{RuntimeEvent, RuntimeEventKind};
 #[cfg(feature = "sgx")]
 pub use self::sgx_credentials::SgxCredentials;
 
+#[doc(hidden)]
 pub const ACTIVITY_API_PATH: &str = "/activity-api/v1";

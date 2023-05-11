@@ -10,13 +10,16 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Represents a request for executing a script.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExeScriptRequest {
     #[serde(rename = "text")]
+    /// The script text to execute.
     pub text: String,
 }
 
 impl ExeScriptRequest {
+    /// Creates a new `ExeScriptRequest` with the specified script text.
     pub fn new(text: String) -> ExeScriptRequest {
         ExeScriptRequest { text }
     }
