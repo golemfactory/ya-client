@@ -55,6 +55,8 @@ pub enum Error {
     EventStreamError(String),
 }
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 impl From<PayloadError> for Error {
     fn from(e: PayloadError) -> Self {
         Error::PayloadError(e)

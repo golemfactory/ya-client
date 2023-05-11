@@ -39,14 +39,14 @@ impl ApiClient for Requestor {
     type Market = market::MarketRequestorApi;
     type Activity = activity::ActivityRequestorApi;
     type Payment = payment::PaymentApi;
-    type Net = net::NetApi;
+    type Net = net::NetVpnApi;
 }
 
 impl ApiClient for Provider {
     type Market = market::MarketProviderApi;
     type Activity = activity::ActivityProviderApi;
     type Payment = payment::PaymentApi;
-    type Net = net::NetApi;
+    type Net = crate::p2p::NetApi;
 }
 
 #[derive(StructOpt, Clone)]
