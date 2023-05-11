@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 0.1.0
+  version: 0.1.2
   title: Yagna Net API
   description: 'Yagna Net API'
 
@@ -8,7 +8,7 @@ servers:
   - url: /net-api/v1
 
 security:
-  - app_key: []
+  - app_key: [ ]
 
 tags:
   - name: requestor
@@ -24,8 +24,6 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/NetworkList'
-        400:
-          $ref: 'common.yaml#/responses/BadRequest'
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         default:
@@ -217,10 +215,10 @@ paths:
     description: >
       WebSocket endpoint for establishing a TCP connection to `{ip}:{port}`.
     get:
-      operationId: connect_tcp
+      operationId: connectTcpTo
       security:
-        - app_key: []
-        - app_key_param: []
+        - app_key: [ ]
+        - app_key_param: [ ]
       responses:
         101:
           description: 'Switches to WebSocket on request with protocol upgrade header.'
@@ -228,6 +226,46 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
+
+  /net/{networkId}/listen-tcp/{port}:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+      - $ref: '#/components/parameters/port'
+    description: >
+      WebSocket endpoint for listening on `{port}`.
+    get:
+      tags:
+        - requestor
+      operationId: listenTcpOn
+      security:
+        - app_key: [ ]
+        - app_key_param: [ ]
+      responses:
+        101:
+          description: 'Switches to WebSocket on request with protocol upgrade header.'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+
+
+  /net/{networkId}/proxy:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+    get:
+      tags:
+        - requestor
+      operationId: listNetworkProxy
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: ''
+
+
 
 components:
 
@@ -393,6 +431,56 @@ components:
         - ip
       properties:
         id:
+          description: Provider's node identifier
           type: string
         ip:
+          description: ipv4 adddress
           type: string
+          format: ipv4
+        activityId:
+          description: >
+            for the scenario when more than one container operates on
+            one provider within the VPN, the container ID is needed to
+            unambiguously direct traffic.
+          type: string
+
+    Protocol:
+      type: string
+      enum:
+        - tcp4
+        - udp4
+        - http
+        - socks5
+
+    Direction:
+      type: string
+      enum:
+        - forward
+        - reverse
+
+    Proxy:
+      type: object
+      required:
+        - proto
+        - localIp
+        - localPort
+      properties:
+        proto:
+          $ref: '#/components/schemas/Protocol'
+        dir:
+          $ref: '#/components/schemas/Direction'
+        localIp:
+          type: string
+          format: ipv4
+        localPort:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 65535
+      example: >
+        {
+          "proto": "tcp4",
+          "localIp": "127.0.0.1",
+          "localPort": 6000,
+          "dir": "forward",
+        }

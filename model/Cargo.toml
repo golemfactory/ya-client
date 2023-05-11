@@ -9,9 +9,10 @@ license = "LGPL-3.0"
 edition = "2018"
 
 [features]
-default = []
+default = ['node-id-compat']
 with-diesel = ['diesel']
 sgx = ['secp256k1', 'openssl', 'hex', 'secp256k1/serde']
+node-id-compat = []
 
 [dependencies]
 bigdecimal = { version = "0.2", features = ["serde"]}
@@ -28,6 +29,9 @@ diesel = { version = "1.4", optional = true }
 hex = { version = "0.4", optional = true}
 secp256k1 = { workspace = true, optional = true }
 openssl = { version = "0.10", optional = true }
+
+[dev-dependencies]
+flexbuffers="2.0.0"
 
 [package.metadata.release]
 dev-version = false
