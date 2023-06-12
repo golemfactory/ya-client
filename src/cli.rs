@@ -1,7 +1,7 @@
 use structopt::StructOpt;
 use url::Url;
 
-use crate::{activity, market, net, payment, web::WebClient, web::WebInterface};
+use crate::{web::WebClient, web::WebInterface};
 use std::convert::TryFrom;
 
 use crate::activity::ACTIVITY_URL_ENV_VAR;
@@ -12,11 +12,25 @@ use crate::web::{DEFAULT_YAGNA_API_URL, YAGNA_API_URL_ENV_VAR};
 
 const YAGNA_APPKEY_ENV_VAR: &str = "YAGNA_APPKEY";
 
+#[cfg(feature = "provider")]
+mod provider;
+#[cfg(feature = "provider")]
+pub use provider::*;
+
+#[cfg(feature = "requestor")]
+mod requestor;
+#[cfg(feature = "requestor")]
+pub use requestor::*;
+
+pub trait WebInterfaceFactory {
+    fn try_from_client(client: WebClient) -> anyhow::Result<Self>;
+}
+
 pub trait ApiClient: Clone {
-    type Market: WebInterface;
-    type Activity: WebInterface;
-    type Payment: WebInterface;
-    type Net: WebInterface;
+    type Market: WebInterfaceFactory;
+    type Activity: WebInterfaceFactory;
+    type Payment: WebInterfaceFactory;
+    type Net: WebInterfaceFactory;
 }
 
 #[derive(Clone)]
@@ -25,28 +39,6 @@ pub struct Api<T: ApiClient> {
     pub activity: T::Activity,
     pub payment: T::Payment,
     pub net: T::Net,
-}
-
-pub type RequestorApi = Api<Requestor>;
-pub type ProviderApi = Api<Provider>;
-
-#[derive(Clone)]
-pub struct Requestor;
-#[derive(Clone)]
-pub struct Provider;
-
-impl ApiClient for Requestor {
-    type Market = market::MarketRequestorApi;
-    type Activity = activity::ActivityRequestorApi;
-    type Payment = payment::PaymentApi;
-    type Net = net::NetVpnApi;
-}
-
-impl ApiClient for Provider {
-    type Market = market::MarketProviderApi;
-    type Activity = activity::ActivityProviderApi;
-    type Payment = payment::PaymentApi;
-    type Net = crate::p2p::NetApi;
 }
 
 #[derive(StructOpt, Clone)]

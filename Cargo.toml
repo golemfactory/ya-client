@@ -9,12 +9,16 @@ license = "LGPL-3.0"
 edition = "2021"
 
 [features]
-default = []
+default = ['provider', 'requestor']
 cli = ['structopt']
+
 sgx = [
     'graphene-sgx', 'lazy_static', 'secp256k1',
     'openssl', 'secp256k1/serde', 'secp256k1/rand',
-    'ya-client-model/sgx', 'rand']
+    'ya-client-model/sgx', 'rand', 'hex']
+
+provider= []
+requestor = []
 
 [workspace]
 members = [
@@ -23,31 +27,38 @@ members = [
 
 [workspace.dependencies]
 secp256k1 = ">=0.23,<0.28"
+serde = { version = "1.0.146" }
+serde_json = "1.0.96"
+thiserror = "1.0.40"
+rand = "0.8.5"
+chrono = { version = "0.4", default-features = false }
+openssl = "0.10"
+hex = "0.4"
 
 [dependencies]
-ya-client-model = { version = "^0.5", path = "model" }
+ya-client-model = { version = "^0.5", path = "model", features=["debug"] }
 awc = { version = "3", default-features = false }
 actix-codec = "0.5"
 bytes = "1"
-chrono = { version = "0.4", default-features = false }
+hex = { workspace=true, optional = true}
+chrono = { workspace=true, default-features = false }
 envy = "0.4"
 futures = "0.3"
-hex = "0.4"
 heck = "0.4.1"
 log = "0.4"
 mime = "0.3.17"
-serde = "1"
-serde_json = "1.0"
+serde = { workspace=true }
+serde_json = { workspace=true }
 serde_qs = "0.12"
-thiserror = "1.0.40"
+thiserror = { workspace=true }
 url = "2"
 
 graphene-sgx = { version = "0.3.3", optional = true }
 lazy_static = { version = "1.4", optional = true }
 secp256k1 = { workspace=true, optional = true }
-rand = { version = "0.8.5", optional = true }
+rand = { workspace=true, optional = true }
 structopt = { version = "0.3", optional = true }
-openssl = { version = "0.10", optional = true }
+openssl = { workspace=true, optional = true }
 
 [dev-dependencies]
 actix-rt = "2.7.0"

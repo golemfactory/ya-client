@@ -7,12 +7,16 @@ use serde::{Deserialize, Serialize};
 use std::net::{IpAddr, Ipv4Addr, SocketAddrV4};
 
 use crate::NodeId;
+#[cfg(feature = "json-schema")]
+use schemars::JsonSchema;
 
 #[doc(hidden)]
 pub const NET_API_PATH: &str = "/net-api/v1";
 
 /// Represents a new network configuration.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "json-schema", derive(JsonSchema))]
+#[cfg_attr(feature = "debug", derive(Debug))]
 #[serde(rename_all = "camelCase")]
 pub struct NewNetwork {
     /// The IP address for the network.
@@ -28,7 +32,9 @@ pub struct NewNetwork {
 }
 
 /// Represents a network configuration.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "json-schema", derive(JsonSchema))]
+#[cfg_attr(feature = "debug", derive(Debug))]
 #[serde(rename_all = "camelCase")]
 pub struct Network {
     /// The ID of the network.
@@ -47,7 +53,9 @@ pub struct Network {
 }
 
 /// Represents single VPN node.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "json-schema", derive(JsonSchema))]
+#[cfg_attr(feature = "debug", derive(Debug))]
 #[serde(rename_all = "camelCase")]
 pub struct Node {
     /// Provider node id assigned to given ip.
@@ -60,7 +68,9 @@ pub struct Node {
 }
 
 /// Requestor's address in a virtual private network.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "json-schema", derive(JsonSchema))]
+#[cfg_attr(feature = "debug", derive(Debug))]
 #[serde(rename_all = "camelCase")]
 pub struct Address {
     /// The IP address of the requestor in the virtual private network.
@@ -68,7 +78,9 @@ pub struct Address {
 }
 
 /// Represents a network connection.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "json-schema", derive(JsonSchema))]
+#[cfg_attr(feature = "debug", derive(Debug))]
 #[serde(rename_all = "camelCase")]
 pub struct Connection {
     /// The protocol of the connection.
@@ -88,11 +100,83 @@ pub struct Connection {
 }
 
 /// Represents proxy binding.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "json-schema",
+    derive(JsonSchema),
+    schemars(example = "example_proxy")
+)]
+#[cfg_attr(feature = "debug", derive(Debug))]
 #[serde(rename_all = "camelCase")]
-pub struct Proxy {
-    /// Local address to listen-on.
-    pub bind_address: SocketAddrV4,
+pub enum Proxy {
+    /// Forwards TCP or UDP connections to remote address inside vpn.
+    #[serde(rename_all = "camelCase")]
+    Forward {
+        /// Rule type tcp4/udp4
+        protocol: Protocol,
+        /// Address to listen on. It is host address for forward rules or virtual adddress
+        /// for reverse proxy.
+        from_local: SocketAddrV4,
+        /// Ip address inside vpn where to forward connections.
+        to_remote: SocketAddrV4,
+    },
+    /// Forwards TCP or UDP connections from an address inside VPN to an address on the local host.
+    #[serde(rename_all = "camelCase")]
+    Reverse {
+        /// Rule type tcp4/udp4
+        protocol: Protocol,
+        /// Address to listen on. It is host address for forward rules or virtual adddress
+        /// for reverse proxy.
+        from_remote: SocketAddrV4,
+        /// Ip address in local network to forwards connection.
+        to_local: SocketAddrV4,
+    },
+}
+
+#[cfg(feature = "json-schema")]
+fn example_proxy() -> Proxy {
+    Proxy::Reverse {
+        protocol: Protocol::Tcp4,
+        from_remote: SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 9000),
+        to_local: SocketAddrV4::new(Ipv4Addr::LOCALHOST, 9000),
+    }
+}
+
+/// Proxy rule
+#[derive(Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "json-schema", derive(JsonSchema))]
+#[cfg_attr(feature = "debug", derive(Debug))]
+#[serde(rename_all = "camelCase")]
+pub enum ProxyRule {
+    /// Forwards TCP or UDP connections to remote address inside vpn.
+    #[serde(rename_all = "camelCase")]
+    Forward {
+        /// Rule type tcp4/udp4
+        protocol: Protocol,
+        /// Ip address inside vpn where to forward connections.
+        to_remote: SocketAddrV4,
+    },
+    /// Forwards TCP or UDP connections from an address inside VPN to an address on the local host.
+    #[serde(rename_all = "camelCase")]
+    Reverse {
+        /// Rule type tcp4/udp4
+        protocol: Protocol,
+
+        /// Ip address in local network to forwards connection.
+        to_local: SocketAddrV4,
+    },
+}
+
+/// Forwarding protocol
+#[derive(Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "json-schema", derive(JsonSchema))]
+#[cfg_attr(feature = "debug", derive(Debug))]
+#[serde(rename_all = "camelCase")]
+pub enum Protocol {
+    /// Tcp on ipv4
+    Tcp4,
+    /// Udp on ipv4
+    Udp4,
 }
 
 #[cfg(test)]
@@ -118,11 +202,22 @@ mod test {
 
     #[test]
     fn test_serialize_proxy() {
-        let json = serde_json::to_string(&Proxy {
-            bind_address: SocketAddrV4::new("127.0.0.1".parse().unwrap(), 9000),
+        let _json = serde_json::to_string(&Proxy::Reverse {
+            protocol: Protocol::Tcp4,
+            from_remote: SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 9000),
+            to_local: SocketAddrV4::new(Ipv4Addr::LOCALHOST, 9000),
         })
         .unwrap();
 
-        let _: Proxy = serde_json::from_str(r#"{"bindAddress": "127.0.0.1:9000"}"#).unwrap();
+        let _: Proxy = serde_json::from_str(
+            r#"{
+            "reverse": {
+                "protocol": "tcp4",
+                "fromRemote": "0.0.0.0:9000",
+                "toLocal": "127.0.0.1:9000"
+            }
+        }"#,
+        )
+        .unwrap();
     }
 }

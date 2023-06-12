@@ -3,8 +3,10 @@
 #[macro_use]
 pub mod web;
 
+#[cfg(any(feature = "requestor", feature = "provider", feature = "cli"))]
 pub mod activity;
 pub mod market;
+#[cfg(feature = "requestor")]
 pub mod net;
 pub mod p2p;
 pub mod payment;

@@ -8,30 +8,41 @@ repository = "https://github.com/golemfactory/ya-client"
 license = "LGPL-3.0"
 edition = "2018"
 
+[[example]]
+name = "gen-json-schema"
+required-features = ["json-schema"]
+
 [features]
 default = ['node-id-compat']
-with-diesel = ['diesel']
-sgx = ['secp256k1', 'openssl', 'hex', 'secp256k1/serde']
 node-id-compat = []
+json-schema = ["schemars", "schemars/chrono", "serde_json/preserve_order"]
+server = []
+debug = []
+sgx = ['secp256k1', 'openssl', 'hex', 'secp256k1/serde', 'rand']
+with-diesel = ['diesel']
 
 [dependencies]
 bigdecimal = { version = "0.2", features = ["serde"]}
-chrono = { version = "0.4", features = ["serde"]}
+chrono = { workspace=true, features = ["serde", "clock"]}
 derive_more = "0.99"
-rand = "0.8"
-serde = { version = "1.0.146", features = ["derive"] }
-serde_json = "1.0.96"
+rand = { workspace=true, optional = true }
+serde = { workspace=true, features = ["derive"] }
+serde_json = { workspace=true }
 strum = "0.24.1"
 strum_macros = "0.24.3"
-thiserror = "1.0"
+thiserror = { workspace=true }
 
 diesel = { version = "1.4", optional = true }
 hex = { version = "0.4", optional = true}
 secp256k1 = { workspace = true, optional = true }
-openssl = { version = "0.10", optional = true }
+openssl = { workspace=true, optional = true }
+
+schemars = { version = "0.8", optional = true }
 
 [dev-dependencies]
 flexbuffers="2.0.0"
+serde_yaml = "0.9.21"
+json-schema-diff = "0.1.6"
 
 [package.metadata.release]
 dev-version = false

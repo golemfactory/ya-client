@@ -39,6 +39,39 @@ pub struct NodeId {
     inner: [u8; NODE_ID_LENGTH],
 }
 
+#[cfg(feature = "json-schema")]
+use schemars::{
+    gen::SchemaGenerator,
+    schema::{InstanceType, Schema, SchemaObject, StringValidation},
+    JsonSchema,
+};
+
+#[cfg(feature = "json-schema")]
+impl JsonSchema for NodeId {
+    fn is_referenceable() -> bool {
+        false
+    }
+
+    fn schema_name() -> String {
+        "String".to_owned()
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        SchemaObject {
+            instance_type: Some(InstanceType::String.into()),
+            string: Some(
+                StringValidation {
+                    pattern: Some("0x[0-9a-fA-F]{40}".into()),
+                    ..Default::default()
+                }
+                .into(),
+            ),
+            ..Default::default()
+        }
+        .into()
+    }
+}
+
 impl NodeId {
     #[inline(always)]
     fn with_hex<F, R>(&self, f: F) -> R
@@ -135,7 +168,7 @@ fn hex_to_dec(hex: u8, s: &[u8]) -> Result<u8, ParseError> {
         b'a'..=b'f' => Ok(hex - b'a' + 10),
         b'0'..=b'9' => Ok(hex - b'0'),
         _ => Err(ParseError::new(
-            String::from_utf8_lossy(s).to_owned(),
+            String::from_utf8_lossy(s).into_owned(),
             format!("expected hex chars, but got: `{}`", char::from(hex)),
         )),
     }
