@@ -11,22 +11,34 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+/// Represents an event related to a provider.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProviderEvent {
+    /// The activity ID associated with the event.
     pub activity_id: String,
+
+    /// The agreement ID associated with the event.
     pub agreement_id: String,
+
+    /// The type of the provider event.
     pub event_type: ProviderEventType,
+
+    /// The date and time of the event.
     pub event_date: DateTime<Utc>,
 }
 
+/// Represents the type of a provider event.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ProviderEventType {
     #[serde(rename = "CreateActivity")]
+    /// Indicates the creation of an activity.
     CreateActivity {
         #[serde(rename = "requestorPubKey", skip_serializing_if = "Option::is_none")]
+        /// The public key of the requestor associated with the activity creation.
         requestor_pub_key: Option<String>,
     },
     #[serde(rename = "DestroyActivity")]
+    /// Indicates the destruction of an activity.
     DestroyActivity {},
 }

@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  version: 0.1.0
+  version: 0.1.2
   title: Yagna Net API
   description: 'Yagna Net API'
 
@@ -8,7 +8,7 @@ servers:
   - url: /net-api/v1
 
 security:
-  - app_key: []
+  - app_key: [ ]
 
 tags:
   - name: requestor
@@ -24,8 +24,6 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/NetworkList'
-        400:
-          $ref: 'common.yaml#/responses/BadRequest'
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         default:
@@ -217,10 +215,10 @@ paths:
     description: >
       WebSocket endpoint for establishing a TCP connection to `{ip}:{port}`.
     get:
-      operationId: connect_tcp
+      operationId: connectTcpTo
       security:
-        - app_key: []
-        - app_key_param: []
+        - app_key: [ ]
+        - app_key_param: [ ]
       responses:
         101:
           description: 'Switches to WebSocket on request with protocol upgrade header.'
@@ -228,6 +226,52 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
+
+  /net/{networkId}/listen-tcp/{port}:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+      - $ref: '#/components/parameters/port'
+    description: >
+      WebSocket endpoint for listening on `{port}`.
+    get:
+      tags:
+        - requestor
+      operationId: listenTcpOn
+      security:
+        - app_key: [ ]
+        - app_key_param: [ ]
+      responses:
+        101:
+          description: 'Switches to WebSocket on request with protocol upgrade header.'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+
+
+  /net/{networkId}/proxy:
+    parameters:
+      - $ref: '#/components/parameters/networkId'
+    get:
+      tags:
+        - requestor
+      operationId: listNetworkProxy
+      responses:
+        '200':
+          $ref: '#/components/responses/ProxyList'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+    post:
+      tags:
+        - requestor
+      operationId: createNetworkProxy
+      requestBody:
+        $ref: '#/components/requestBodies/NewProxy'
+      responses:
+        201:
+          description: 'Proxy Created'
 
 components:
 
@@ -292,6 +336,13 @@ components:
           schema:
             $ref: '#/components/schemas/Node'
 
+    NewProxy:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Proxy'
+
   responses:
 
     AddressList:
@@ -337,6 +388,15 @@ components:
             items:
               $ref: '#/components/schemas/Connection'
 
+    ProxyList:
+      description: List of Proxys created by the Requestor.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Proxy'
+
   schemas:
 
     Address:
@@ -358,24 +418,32 @@ components:
       properties:
         protocol:
           type: integer
+          minimum: 0
+          format: uint16
           readOnly: true
         localIp:
           type: string
           readOnly: true
         localPort:
           type: integer
+          minimum: 0
+          format: uint16
           readOnly: true
         remoteIp:
           type: string
           readOnly: true
         remotePort:
           type: integer
+          minimum: 0
+          format: uint16
           readOnly: true
 
     Network:
       type: object
       required:
+        - id
         - ip
+        - mask
       properties:
         id:
           type: string
@@ -393,6 +461,77 @@ components:
         - ip
       properties:
         id:
+          description: Provider's node identifier
           type: string
         ip:
+          description: ipv4 adddress
           type: string
+          format: ipv4
+        activityId:
+          description: >
+            for the scenario when more than one container operates on
+            one provider within the VPN, the container ID is needed to
+            unambiguously direct traffic.
+          type: string
+
+    Protocol:
+      type: string
+      enum:
+        - tcp4
+        - udp4
+
+    Proxy:
+      example:
+        reverse:
+          protocol: tcp4
+          fromRemote: 0.0.0.0:9000
+          toLocal: 127.0.0.1:9000
+      oneOf:
+        - description: Forwards TCP or UDP connections to remote address inside vpn.
+          type: object
+          required:
+            - forward
+          properties:
+            forward:
+              type: object
+              required:
+                - fromLocal
+                - protocol
+                - toRemote
+              properties:
+                fromLocal:
+                  description: Address to listen on. It is host address for forward rules or virtual adddress for reverse proxy.
+                  type: string
+                protocol:
+                  description: Rule type tcp4/udp4
+                  allOf:
+                    - $ref: '#/components/schemas/Protocol'
+                toRemote:
+                  description: Ip address inside vpn where to forward connections.
+                  type: string
+          additionalProperties: false
+        - description: Forwards TCP or UDP connections from an address inside VPN to an address on the local host.
+          type: object
+          required:
+            - reverse
+          properties:
+            reverse:
+              type: object
+              required:
+                - fromRemote
+                - protocol
+                - toLocal
+              properties:
+                fromRemote:
+                  description: Address to listen on. It is host address for forward rules or virtual adddress for reverse proxy.
+                  type: string
+                protocol:
+                  description: Rule type tcp4/udp4
+                  allOf:
+                    - $ref: '#/components/schemas/Protocol'
+                toLocal:
+                  description: Ip address in local network to forwards connection.
+                  type: string
+          additionalProperties: false
+
+

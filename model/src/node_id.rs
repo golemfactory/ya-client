@@ -6,10 +6,15 @@ use std::{fmt, str};
 
 const NODE_ID_LENGTH: usize = 20;
 
+const NODE_ID_STR_LENGTH: usize = NODE_ID_LENGTH * 2 + 2;
+
+/// Represents an error that occurs during parsing of a NodeId.
 #[derive(Clone, Debug, thiserror::Error, PartialEq, Serialize, Deserialize)]
 #[error("NodeId `{original_str}` parsing error: {msg}")]
 pub struct ParseError {
+    /// The original string that failed to parse as a NodeId.
     original_str: String,
+    /// The error message describing the parsing failure.
     msg: String,
 }
 
@@ -32,6 +37,39 @@ pub struct InvalidLengthError {
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct NodeId {
     inner: [u8; NODE_ID_LENGTH],
+}
+
+#[cfg(feature = "json-schema")]
+use schemars::{
+    gen::SchemaGenerator,
+    schema::{InstanceType, Schema, SchemaObject, StringValidation},
+    JsonSchema,
+};
+
+#[cfg(feature = "json-schema")]
+impl JsonSchema for NodeId {
+    fn is_referenceable() -> bool {
+        false
+    }
+
+    fn schema_name() -> String {
+        "String".to_owned()
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        SchemaObject {
+            instance_type: Some(InstanceType::String.into()),
+            string: Some(
+                StringValidation {
+                    pattern: Some("0x[0-9a-fA-F]{40}".into()),
+                    ..Default::default()
+                }
+                .into(),
+            ),
+            ..Default::default()
+        }
+        .into()
+    }
 }
 
 impl NodeId {
@@ -59,6 +97,7 @@ impl NodeId {
         f(hex_str)
     }
 
+    /// Converts node id into 20 bytes.
     #[inline]
     pub fn into_array(self) -> [u8; NODE_ID_LENGTH] {
         self.inner
@@ -123,44 +162,52 @@ impl<'a> From<Cow<'a, [u8]>> for NodeId {
 }
 
 #[inline]
-fn hex_to_dec(hex: u8, s: &str) -> Result<u8, ParseError> {
+fn hex_to_dec(hex: u8, s: &[u8]) -> Result<u8, ParseError> {
     match hex {
         b'A'..=b'F' => Ok(hex - b'A' + 10),
         b'a'..=b'f' => Ok(hex - b'a' + 10),
         b'0'..=b'9' => Ok(hex - b'0'),
         _ => Err(ParseError::new(
-            s,
+            String::from_utf8_lossy(s).into_owned(),
             format!("expected hex chars, but got: `{}`", char::from(hex)),
         )),
     }
 }
 
-impl str::FromStr for NodeId {
+fn from_str_bytes(bytes: &[u8]) -> Result<NodeId, ParseError> {
+    // String representation is 2x the byte length + 2 extra for prefix
+    if bytes.len() != NODE_ID_STR_LENGTH {
+        return Err(ParseError::new(
+            String::from_utf8_lossy(bytes),
+            "expected length is 42 chars",
+        ));
+    }
+
+    if bytes[0] != b'0' || bytes[1] != b'x' {
+        return Err(ParseError::new(
+            String::from_utf8_lossy(bytes),
+            "expected 0x prefix",
+        ));
+    }
+
+    let mut inner = [0u8; NODE_ID_LENGTH];
+    let mut p = 0;
+
+    for b in bytes[2..].chunks(2) {
+        let (hi, lo) = (hex_to_dec(b[0], bytes)?, hex_to_dec(b[1], bytes)?);
+        inner[p] = (hi << 4) | lo;
+        p += 1;
+    }
+    assert_eq!(p, NODE_ID_LENGTH);
+
+    Ok(NodeId { inner })
+}
+
+impl FromStr for NodeId {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, ParseError> {
-        let bytes = s.as_bytes();
-
-        // String representation is 2x the byte length + 2 extra for prefix
-        if bytes.len() != 2 + NODE_ID_LENGTH * 2 {
-            return Err(ParseError::new(s, "expected length is 42 chars"));
-        }
-
-        if bytes[0] != b'0' || bytes[1] != b'x' {
-            return Err(ParseError::new(s, "expected 0x prefix"));
-        }
-
-        let mut inner = [0u8; NODE_ID_LENGTH];
-        let mut p = 0;
-
-        for b in bytes[2..].chunks(2) {
-            let (hi, lo) = (hex_to_dec(b[0], s)?, hex_to_dec(b[1], s)?);
-            inner[p] = (hi << 4) | lo;
-            p += 1;
-        }
-        assert_eq!(p, NODE_ID_LENGTH);
-
-        Ok(NodeId { inner })
+        from_str_bytes(s.as_bytes())
     }
 }
 
@@ -174,7 +221,11 @@ impl Serialize for NodeId {
     where
         S: Serializer,
     {
-        self.with_hex(|hex_str| serializer.serialize_str(hex_str))
+        if serializer.is_human_readable() || cfg!(feature = "node-id-compat") {
+            self.with_hex(|hex_str| serializer.serialize_str(hex_str))
+        } else {
+            serializer.serialize_bytes(&self.inner)
+        }
     }
 }
 
@@ -213,7 +264,9 @@ impl<'de> de::Visitor<'de> for NodeIdVisit {
     where
         E: de::Error,
     {
-        if v.len() == NODE_ID_LENGTH {
+        if v.len() == NODE_ID_LENGTH * 2 + 2 {
+            Ok(from_str_bytes(v).map_err(|_| de::Error::custom("invalid format"))?)
+        } else if v.len() == NODE_ID_LENGTH {
             let mut inner = [0u8; NODE_ID_LENGTH];
             inner.copy_from_slice(v);
             Ok(NodeId { inner })
@@ -228,7 +281,7 @@ impl<'de> Deserialize<'de> for NodeId {
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_str(NodeIdVisit)
+        deserializer.deserialize_bytes(NodeIdVisit)
     }
 }
 
@@ -368,5 +421,17 @@ mod tests {
                 NODE_ID_LENGTH
             )
         );
+    }
+
+    #[test]
+    fn test_serialize() {
+        let n1 = NodeId::from_str("0xbabe000000000000000000000000000000000707").unwrap();
+        let v = flexbuffers::to_vec(&n1).unwrap();
+        let vj = serde_json::to_string(&n1).unwrap();
+        eprintln!("size={}/{}", v.len(), vj.len());
+        eprintln!("v={:?}", v);
+        eprintln!("vj={}", vj);
+        assert_eq!(flexbuffers::from_slice::<NodeId>(&v).unwrap(), n1);
+        assert_eq!(serde_json::from_str::<NodeId>(&vj).unwrap(), n1);
     }
 }

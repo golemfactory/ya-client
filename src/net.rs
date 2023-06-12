@@ -11,28 +11,6 @@ pub const NET_URL_ENV_VAR: &str = "YAGNA_NET_URL";
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// Bindings for Requestor part of the Net API.
-#[derive(Clone)]
-pub struct NetApi {
-    client: WebClient,
-}
-
-impl WebInterface for NetApi {
-    const API_URL_ENV_VAR: &'static str = "YAGNA_NET_URL";
-    const API_SUFFIX: &'static str = ya_client_model::net::NET_API_V2_NET_PATH;
-
-    fn from_client(client: WebClient) -> Self {
-        NetApi { client }
-    }
-}
-
-impl NetApi {
-    /// Retrieves connection status.
-    pub async fn get_status(&self) -> Result<Status> {
-        self.client.get("status").send().json().await
-    }
-}
-
 /// Bindings for Requestor part of the Net VPN API.
 #[deprecated(since = "0.7.0", note = "Please use `NetVpnApi` instead")]
 pub type NetRequestorApi = NetVpnApi;
@@ -45,7 +23,7 @@ pub struct NetVpnApi {
 
 impl WebInterface for NetVpnApi {
     const API_URL_ENV_VAR: &'static str = "YAGNA_NET_URL";
-    const API_SUFFIX: &'static str = ya_client_model::net::NET_API_V2_VPN_PATH;
+    const API_SUFFIX: &'static str = ya_client_model::net::NET_API_PATH;
 
     fn from_client(client: WebClient) -> Self {
         NetVpnApi { client }

@@ -1,13 +1,16 @@
 //! Activity part of the Yagna API
+
+#[cfg(feature = "provider")]
 mod provider;
-mod requestor;
-
+#[cfg(feature = "provider")]
 pub use provider::ActivityProviderApi;
-pub use requestor::control::ActivityRequestorControlApi;
-pub use requestor::state::ActivityRequestorStateApi;
-pub use requestor::ActivityRequestorApi;
 
-#[cfg(feature = "sgx")]
+#[cfg(feature = "requestor")]
+mod requestor;
+#[cfg(feature = "requestor")]
+pub use requestor::{ActivityRequestorApi, ActivityRequestorControlApi, ActivityRequestorStateApi};
+
+#[cfg(all(feature = "sgx", feature = "requestor"))]
 pub use requestor::control::sgx::SecureActivityRequestorApi;
 
 pub(crate) const ACTIVITY_URL_ENV_VAR: &str = "YAGNA_ACTIVITY_URL";

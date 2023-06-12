@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 pub mod acceptance;
 pub mod account;
 pub mod activity_payment;

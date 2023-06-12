@@ -41,3 +41,6 @@ impl ActivityRequestorApi {
         self.client.get(&uri).send().json().await
     }
 }
+
+pub use control::ActivityRequestorControlApi;
+pub use state::ActivityRequestorStateApi;
