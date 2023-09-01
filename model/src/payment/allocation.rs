@@ -27,3 +27,12 @@ pub struct NewAllocation {
     pub timeout: Option<DateTime<Utc>>,
     pub make_deposit: bool,
 }
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AllocationUpdate {
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub total_amount: Option<BigDecimal>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub timeout: Option<DateTime<Utc>>,
+}
