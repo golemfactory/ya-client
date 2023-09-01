@@ -12,7 +12,7 @@ use crate::{
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use ya_client_model::payment::*;
+use ya_client_model::payment::{allocation::AllocationUpdate, *};
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
@@ -105,8 +105,11 @@ impl PaymentApi {
         self.client.get(&url).send().json().await
     }
 
-    pub async fn amend_allocation(&self, allocation: &Allocation) -> Result<Allocation> {
-        let allocation_id = &allocation.allocation_id;
+    pub async fn amend_allocation(
+        &self,
+        allocation_id: &str,
+        allocation: &AllocationUpdate,
+    ) -> Result<Allocation> {
         let url = url_format!("allocations/{allocation_id}");
         self.client.put(&url).send_json(allocation).json().await
     }

@@ -603,13 +603,11 @@ paths:
       tags:
         - requestor
       summary: Amend Allocation.
-      description: >
-        **WARNING:** Operation not implemented.
       operationId: amendAllocation
       parameters:
         - $ref: '#/components/parameters/allocationId'
       requestBody:
-        $ref: '#/components/requestBodies/Allocation'
+        $ref: '#/components/requestBodies/AllocationUpdate'
       responses:
         200:
           $ref: '#/components/responses/Allocation'
@@ -1175,6 +1173,18 @@ components:
         - remainingAmount
         - timestamp
         - makeDeposit
+
+    AllocationUpdate:
+      type: object
+      description: >
+        AllocationUpdate represents the changes that can be made to an existing
+        allocation.
+      properties:
+        totalAmount:
+          type: string
+        timeout:
+          type: string
+          format: date-time
 
     Payment:
       type: object
