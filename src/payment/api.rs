@@ -108,7 +108,7 @@ impl PaymentApi {
     pub async fn amend_allocation(
         &self,
         allocation_id: &str,
-        allocation: &NewAllocation,
+        allocation: &AllocationUpdate,
     ) -> Result<Allocation> {
         let url = url_format!("allocations/{allocation_id}");
         self.client.put(&url).send_json(allocation).json().await

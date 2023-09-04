@@ -9,7 +9,7 @@ use ya_client::{
     web::{WebClient, WebInterface},
     Result,
 };
-use ya_client_model::payment::{Allocation, NewAllocation};
+use ya_client_model::payment::{Allocation, AllocationUpdate, NewAllocation};
 
 #[derive(Clone, StructOpt)]
 #[structopt(name = "Market", about = "Market service properties")]
@@ -78,11 +78,8 @@ async fn main() -> Result<()> {
             println!("{:#?}", allocation);
         }
         Command::Amend { id, budget } => {
-            let new_allocation = NewAllocation {
-                total_amount: BigDecimal::from_str(&budget).unwrap(),
-                make_deposit: true,
-                address: None,
-                payment_platform: None,
+            let new_allocation = AllocationUpdate {
+                total_amount: Some(BigDecimal::from_str(&budget).unwrap()),
                 timeout: None,
             };
 

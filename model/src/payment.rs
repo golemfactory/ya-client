@@ -22,6 +22,7 @@ pub use self::account::Account;
 pub use self::activity_payment::ActivityPayment;
 pub use self::agreement_payment::AgreementPayment;
 pub use self::allocation::Allocation;
+pub use self::allocation::AllocationUpdate;
 pub use self::allocation::NewAllocation;
 pub use self::debit_note::DebitNote;
 pub use self::debit_note::NewDebitNote;
