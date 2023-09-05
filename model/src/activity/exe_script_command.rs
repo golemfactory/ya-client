@@ -9,6 +9,7 @@
  */
 
 use crate::activity::ExeScriptCommandState;
+use duration_string::DurationString;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -21,6 +22,8 @@ pub enum ExeScriptCommand {
         net: Vec<Network>,
         #[serde(default)]
         hosts: HashMap<String, String>, // hostname -> IP
+        #[serde(default)]
+        progress_update_interval: Option<DurationString>,
     },
     Start {
         #[serde(default)]

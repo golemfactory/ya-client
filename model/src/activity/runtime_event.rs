@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::activity::{CommandOutput, ExeScriptCommand};
 use chrono::{NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -47,6 +49,10 @@ impl RuntimeEvent {
     pub fn stderr(batch_id: String, idx: usize, out: CommandOutput) -> Self {
         Self::new(batch_id, idx, RuntimeEventKind::StdErr(out))
     }
+
+    pub fn deploy_progress(batch_id: String, idx: usize, progress: DeployProgress) -> Self {
+        Self::new(batch_id, idx, RuntimeEventKind::DeployProgressUpdate(progress))
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -61,4 +67,16 @@ pub enum RuntimeEventKind {
     },
     StdOut(CommandOutput),
     StdErr(CommandOutput),
+    DeployProgressUpdate(DeployProgress),
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum DeployProgress {
+    DeployFromCache,
+    DownloadingImage,
+    DownloadProgress(u64, Option<u64>),
+    DownloadError(String),
+    DownloadRetry(String, Duration),
+    DownloadFinished,
 }
