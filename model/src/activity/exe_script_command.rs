@@ -22,8 +22,18 @@ pub enum ExeScriptCommand {
         net: Vec<Network>,
         #[serde(default)]
         hosts: HashMap<String, String>, // hostname -> IP
+
         #[serde(default)]
-        progress_update_interval: Option<DurationString>,
+        hostname : Option<String>,
+
+        #[serde(default)]
+        volumes : Vec<String>,
+
+        #[serde(default)]
+        env : HashMap<String, String>,
+
+        #[serde(default)]
+        progress: Option<ProgressArgs>,
     },
     Start {
         #[serde(default)]
@@ -108,6 +118,12 @@ pub struct TransferArgs {
     pub format: Option<String>,
     pub depth: Option<usize>,
     pub fileset: Option<FileSet>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ProgressArgs {
+    pub update_interval : Option<DurationString>
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
