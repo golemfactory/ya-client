@@ -33,15 +33,14 @@ mod test {
     use super::*;
     use crate::payment::{Rejection, RejectionReason};
     use bigdecimal::{BigDecimal, FromPrimitive};
-    use chrono::TimeZone;
 
     #[test]
     fn test_serialize_rejected_event_has_flat_rejection() {
         let ie = InvoiceEvent {
             invoice_id: "ajdik".to_string(),
-            event_date: Utc
-                .datetime_from_str("2020-12-21T15:51:21.126645Z", "%+")
-                .unwrap(),
+            event_date: DateTime::parse_from_str("2020-12-21T15:51:21.126645Z", "%+")
+                .unwrap()
+                .into(),
             event_type: InvoiceEventType::InvoiceRejectedEvent {
                 rejection: Rejection {
                     rejection_reason: RejectionReason::UnsolicitedService,
@@ -78,9 +77,9 @@ mod test {
         assert_eq!(
             InvoiceEvent {
                 invoice_id: "ajdik".to_string(),
-                event_date: Utc
-                    .datetime_from_str("2020-12-21T15:51:21.126645Z", "%+")
-                    .unwrap(),
+                event_date: DateTime::parse_from_str("2020-12-21T15:51:21.126645Z", "%+")
+                    .unwrap()
+                    .into(),
                 event_type: InvoiceEventType::InvoiceAcceptedEvent,
             },
             ie
