@@ -360,25 +360,6 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
-  /payments/{paymentId}:
-    get:
-      tags:
-        - requestor
-        - provider
-      summary: Get Payment.
-      operationId: getPayment
-      parameters:
-        - $ref: '#/components/parameters/paymentId'
-      responses:
-        200:
-          $ref: '#/components/responses/Payment'
-        401:
-          $ref: 'common.yaml#/responses/Unauthorized'
-        404:
-          $ref: 'common.yaml#/responses/NotFound'
-        500:
-          $ref: 'common.yaml#/responses/ServerError'
-
   /providerAccounts:
     get:
       tags:
@@ -683,6 +664,51 @@ paths:
         500:
           $ref: 'common.yaml#/responses/ServerError'
 
+  /payments/{paymentId}:
+    get:
+      tags:
+        - requestor
+        - provider
+      summary: Get Payment.
+      operationId: getPayment
+      parameters:
+        - $ref: '#/components/parameters/paymentId'
+      responses:
+        200:
+          $ref: '#/components/responses/Payment'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        500:
+          $ref: 'common.yaml#/responses/ServerError'
+
+  /payments/status:
+    get:
+      tags:
+        - requestor
+        - provider
+      summary: Get status of the payment driver
+      description: >
+        This only relates to the erc20 driver, not erc20legacy. The returned
+        list contains individual status properties, which can be used to identify
+        problems like missing funds or misconfigured max fee per gas on a per-chain
+        (network) basis.
+      parameters:
+        - $ref: 'common.yaml#/parameters/network'
+        - $ref: 'common.yaml#/parameters/driver'
+      responses:
+        200:
+          $ref: '#/components/responses/DriverStatus'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        500:
+          $ref: 'common.yaml#/responses/ServerError'
+
   /requestorAccounts:
     get:
       tags:
@@ -892,6 +918,15 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Payment'
+
+    DriverStatus:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#components/schemas/DriverStatusProperty'
 
     DebitNoteEventList:
       description: OK
@@ -1242,6 +1277,72 @@ components:
         - agreementPayments
         - activityPayments
         - details
+
+    DriverStatusProperty:
+      type: object
+      description: Individual actionable property of the payment driver status
+      readOnly: true
+      properties:
+        kind:
+          description: >
+            Determines what property this is.
+            - InsufficientGas -- Driver cannot proceed due to missing gas.
+            - InsufficientToken -- Driver cannot proceed due to missing tokens.
+            - InvalidChainId -- A transaction can't be processed because its chain-id
+              isn't present in the configuration. This hints at a network being removed
+              from driver configuration after a transaction on this network has been
+              scheduled.
+            - CantSign -- Driver cannot sign transactions (locked wallet?).
+            - RpcError -- All configured RPC endpoints are failing.
+            - TxStuck -- Transaction was sent to blockchain successfully but cannot
+              proceed any further. Likely indicative of too low setting of max fee
+              per gas.
+          type: string
+          enum:
+          - InsufficientGas
+          - InsufficientToken
+          - InvalidChainId
+          - CantSign
+          - TxStuck
+          - RpcError
+        driver:
+          description: Payment driver to which this status property is applicable
+          type: string
+        network:
+          description: >
+            Indicates which chain the problem occurs on. No statuses other than
+            CantSign necessarily imply issues on other chains than the one the status
+            property originates from.
+
+            Present for all status properties other than InvalidChainId.
+          type: string
+        neededGasEst:
+          description: >
+            Estimate total required gas to complete all outstanding transactions.
+
+            Only present for InsufficientGas
+          type: string
+        neededTokenEst:
+          description: >
+            Estimate total required token to complete all outstanding transactions.
+
+            Only present for InsufficientToken
+          type: string
+        address:
+          description: >
+            Relates the status event to a specific blockchain address.
+
+            Only present for CantSign.
+          type: string
+        chainId:
+          description: >
+            Chain-id that the error relates to.
+
+            Only present for InvalidChainId.
+          type: integer
+      required:
+        - kind
+        - driver
 
     AgreementPayment:
       description: >
