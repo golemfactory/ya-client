@@ -1441,6 +1441,24 @@ components:
             debitNoteId:
               type: string
 
+    DebitNotePaymentStatusEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
+          properties:
+            debitNoteId:
+              type: string
+            property:
+              $ref: '#components/schemas/DriverStatusProperty'
+
+    DebitNotePaymentOkEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
+          properties:
+            debitNoteId:
+              type: string
+
     InvoiceEvent:
       type: object
       required:

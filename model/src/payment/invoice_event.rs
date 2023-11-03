@@ -1,6 +1,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use strum_macros::{Display, EnumString};
+use strum_macros::Display;
+
+use super::DriverStatusProperty;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -11,21 +13,69 @@ pub struct InvoiceEvent {
     pub event_type: InvoiceEventType,
 }
 
-#[derive(Clone, Debug, Display, Serialize, Deserialize, PartialEq, EnumString)]
+#[derive(Clone, Debug, Display, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "eventType")]
 pub enum InvoiceEventType {
-    #[strum(to_string = "RECEIVED")]
     InvoiceReceivedEvent,
-    #[strum(to_string = "ACCEPTED")]
     InvoiceAcceptedEvent,
-    #[strum(to_string = "REJECTED")]
     InvoiceRejectedEvent {
         rejection: crate::payment::Rejection,
     },
-    #[strum(to_string = "CANCELLED")]
     InvoiceCancelledEvent,
-    #[strum(to_string = "SETTLED")]
     InvoiceSettledEvent,
+    InvoicePaymentStatusEvent {
+        property: DriverStatusProperty,
+    },
+    InvoicePaymentOkEvent,
+}
+
+impl InvoiceEventType {
+    pub fn discriminant(&self) -> &'static str {
+        use InvoiceEventType::*;
+        match self {
+            InvoiceReceivedEvent => "RECEIVED",
+            InvoiceAcceptedEvent => "ACCEPTED",
+            InvoiceRejectedEvent { .. } => "REJECTED",
+            InvoiceCancelledEvent => "CANCELLED",
+            InvoiceSettledEvent => "SETTLED",
+            InvoicePaymentStatusEvent { .. } => "PAYMENT_EVENT",
+            InvoicePaymentOkEvent => "PAYMENT_OK",
+        }
+    }
+
+    pub fn details(&self) -> Option<serde_json::Value> {
+        use serde_json::to_value;
+        use InvoiceEventType::*;
+
+        match self {
+            InvoiceRejectedEvent { rejection } => to_value(rejection).ok(),
+            InvoicePaymentStatusEvent { property } => to_value(property).ok(),
+            _ => None,
+        }
+    }
+
+    pub fn from_discriminant_and_details(
+        discriminant: &str,
+        details: Option<serde_json::Value>,
+    ) -> Option<Self> {
+        use serde_json::from_value;
+        use InvoiceEventType::*;
+
+        Some(match (discriminant, details) {
+            ("RECEIVED", _) => InvoiceReceivedEvent,
+            ("ACCEPTED", _) => InvoiceAcceptedEvent,
+            ("REJECTED", Some(details)) => InvoiceRejectedEvent {
+                rejection: from_value(details).ok()?,
+            },
+            ("CANCELLED", _) => InvoiceCancelledEvent,
+            ("SETTLED", _) => InvoiceSettledEvent,
+            ("PAYMENT_EVENT", Some(details)) => InvoicePaymentStatusEvent {
+                property: from_value(details).ok()?,
+            },
+            ("PAYMENT_OK", _) => InvoicePaymentOkEvent,
+            _ => None?,
+        })
+    }
 }
 
 #[cfg(test)]
@@ -104,7 +154,14 @@ mod test {
 
     #[test]
     fn test_deserialize_event_type_from_str() {
-        let iet: InvoiceEventType = "REJECTED".parse().unwrap();
+        let iet = InvoiceEventType::from_discriminant_and_details(
+            "REJECTED",
+            InvoiceEventType::InvoiceRejectedEvent {
+                rejection: Default::default(),
+            }
+            .details(),
+        )
+        .unwrap();
         assert_eq!(
             InvoiceEventType::InvoiceRejectedEvent {
                 rejection: Default::default()
@@ -115,6 +172,9 @@ mod test {
 
     #[test]
     fn test_deserialize_event_type_to_string() {
-        assert_eq!(InvoiceEventType::InvoiceSettledEvent.to_string(), "SETTLED");
+        assert_eq!(
+            InvoiceEventType::InvoiceSettledEvent.discriminant(),
+            "SETTLED"
+        );
     }
 }

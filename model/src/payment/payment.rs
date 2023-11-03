@@ -55,6 +55,45 @@ pub enum DriverStatusProperty {
     },
 }
 
+impl DriverStatusProperty {
+    pub fn driver(&self) -> &str {
+        use DriverStatusProperty::*;
+        match self {
+            InsufficientGas { driver, .. } => driver,
+            InsufficientToken { driver, .. } => driver,
+            InvalidChainId { driver, .. } => driver,
+            CantSign { driver, .. } => driver,
+            TxStuck { driver, .. } => driver,
+            RpcError { driver, .. } => driver,
+        }
+    }
+
+    pub fn network(&self) -> Option<&str> {
+        use DriverStatusProperty::*;
+        Some(match self {
+            InsufficientGas { network, .. } => network,
+            InsufficientToken { network, .. } => network,
+            InvalidChainId { .. } => None?,
+            CantSign { network, .. } => network,
+            TxStuck { network, .. } => network,
+            RpcError { network, .. } => network,
+        })
+    }
+
+    /// Checks if this status means no further payments can proceed on this netowrk
+    pub fn is_blocking(&self) -> bool {
+        use DriverStatusProperty::*;
+        match self {
+            InsufficientGas { .. }
+            | InsufficientToken { .. }
+            | InvalidChainId { .. }
+            | CantSign { .. }
+            | TxStuck { .. }
+            | RpcError { .. } => true,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
