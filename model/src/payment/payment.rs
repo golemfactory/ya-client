@@ -26,12 +26,14 @@ pub enum DriverStatusProperty {
     InsufficientGas {
         driver: String,
         network: String,
+        address: String,
         #[serde(rename = "neededGasEst")]
         needed_gas_est: String,
     },
     InsufficientToken {
         driver: String,
         network: String,
+        address: String,
         #[serde(rename = "neededTokenEst")]
         needed_token_est: String,
     },
@@ -103,6 +105,7 @@ mod tests {
     fn status_prop_serialization() {
         assert_eq!(
             json!({
+                "address": "0xf00ba4e03254c41AFd00f530A4fDFF63E7564FE8",
                 "driver": "erc20",
                 "kind": "InsufficientGas",
                 "network": "foo",
@@ -111,6 +114,7 @@ mod tests {
             to_value(&DriverStatusProperty::InsufficientGas {
                 driver: "erc20".into(),
                 network: "foo".into(),
+                address: "0xf00ba4e03254c41AFd00f530A4fDFF63E7564FE8".into(),
                 needed_gas_est: "bar".into()
             })
             .unwrap()
