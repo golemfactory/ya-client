@@ -926,7 +926,7 @@ components:
           schema:
             type: array
             items:
-              $ref: '#components/schemas/DriverStatusProperty'
+              $ref: '#/components/schemas/DriverStatusProperty'
 
     DebitNoteEventList:
       description: OK
@@ -1449,7 +1449,7 @@ components:
             debitNoteId:
               type: string
             property:
-              $ref: '#components/schemas/DriverStatusProperty'
+              $ref: '#/components/schemas/DriverStatusProperty'
 
     DebitNotePaymentOkEvent:
       allOf:
