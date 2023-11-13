@@ -1,6 +1,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use strum_macros::{Display, EnumString};
+use strum_macros::Display;
+
+use super::DriverStatusProperty;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -11,21 +13,69 @@ pub struct DebitNoteEvent {
     pub event_type: DebitNoteEventType,
 }
 
-#[derive(Clone, Debug, Display, Serialize, Deserialize, EnumString)]
+#[derive(Clone, Debug, Display, Serialize, Deserialize)]
 #[serde(tag = "eventType")]
 pub enum DebitNoteEventType {
-    #[strum(to_string = "RECEIVED")]
     DebitNoteReceivedEvent,
-    #[strum(to_string = "ACCEPTED")]
     DebitNoteAcceptedEvent,
-    #[strum(to_string = "REJECTED")]
     DebitNoteRejectedEvent {
         rejection: crate::payment::Rejection,
     },
-    #[strum(to_string = "CANCELLED")]
     DebitNoteCancelledEvent,
-    #[strum(to_string = "SETTLED")]
     DebitNoteSettledEvent,
+    DebitNotePaymentStatusEvent {
+        property: DriverStatusProperty,
+    },
+    DebitNotePaymentOkEvent,
+}
+
+impl DebitNoteEventType {
+    pub fn discriminant(&self) -> &'static str {
+        use DebitNoteEventType::*;
+        match self {
+            DebitNoteReceivedEvent => "RECEIVED",
+            DebitNoteAcceptedEvent => "ACCEPTED",
+            DebitNoteRejectedEvent { .. } => "REJECTED",
+            DebitNoteCancelledEvent => "CANCELLED",
+            DebitNoteSettledEvent => "SETTLED",
+            DebitNotePaymentStatusEvent { .. } => "PAYMENT_EVENT",
+            DebitNotePaymentOkEvent => "PAYMENT_OK",
+        }
+    }
+
+    pub fn details(&self) -> Option<serde_json::Value> {
+        use serde_json::to_value;
+        use DebitNoteEventType::*;
+
+        match self {
+            DebitNoteRejectedEvent { rejection } => to_value(rejection).ok(),
+            DebitNotePaymentStatusEvent { property } => to_value(property).ok(),
+            _ => None,
+        }
+    }
+
+    pub fn from_discriminant_and_details(
+        discriminant: &str,
+        details: Option<serde_json::Value>,
+    ) -> Option<Self> {
+        use serde_json::from_value;
+        use DebitNoteEventType::*;
+
+        Some(match (discriminant, details) {
+            ("RECEIVED", _) => DebitNoteReceivedEvent,
+            ("ACCEPTED", _) => DebitNoteAcceptedEvent,
+            ("REJECTED", Some(details)) => DebitNoteRejectedEvent {
+                rejection: from_value(details).ok()?,
+            },
+            ("CANCELLED", _) => DebitNoteCancelledEvent,
+            ("SETTLED", _) => DebitNoteSettledEvent,
+            ("PAYMENT_EVENT", Some(details)) => DebitNotePaymentStatusEvent {
+                property: from_value(details).ok()?,
+            },
+            ("PAYMENT_OK", _) => DebitNotePaymentOkEvent,
+            _ => None?,
+        })
+    }
 }
 
 #[cfg(test)]

@@ -1332,7 +1332,7 @@ components:
           description: >
             Relates the status event to a specific blockchain address.
 
-            Only present for CantSign.
+            Only present for CantSign, InsufficientGas and InsufficientToken.
           type: string
         chainId:
           description: >
@@ -1434,6 +1434,24 @@ components:
               type: string
 
     DebitNoteCancelledEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
+          properties:
+            debitNoteId:
+              type: string
+
+    DebitNotePaymentStatusEvent:
+      allOf:
+        - $ref: '#/components/schemas/DebitNoteEvent'
+        - type: object
+          properties:
+            debitNoteId:
+              type: string
+            property:
+              $ref: '#components/schemas/DriverStatusProperty'
+
+    DebitNotePaymentOkEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
         - type: object

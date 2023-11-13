@@ -26,12 +26,14 @@ pub enum DriverStatusProperty {
     InsufficientGas {
         driver: String,
         network: String,
+        address: String,
         #[serde(rename = "neededGasEst")]
         needed_gas_est: String,
     },
     InsufficientToken {
         driver: String,
         network: String,
+        address: String,
         #[serde(rename = "neededTokenEst")]
         needed_token_est: String,
     },
@@ -55,6 +57,45 @@ pub enum DriverStatusProperty {
     },
 }
 
+impl DriverStatusProperty {
+    pub fn driver(&self) -> &str {
+        use DriverStatusProperty::*;
+        match self {
+            InsufficientGas { driver, .. } => driver,
+            InsufficientToken { driver, .. } => driver,
+            InvalidChainId { driver, .. } => driver,
+            CantSign { driver, .. } => driver,
+            TxStuck { driver, .. } => driver,
+            RpcError { driver, .. } => driver,
+        }
+    }
+
+    pub fn network(&self) -> Option<&str> {
+        use DriverStatusProperty::*;
+        Some(match self {
+            InsufficientGas { network, .. } => network,
+            InsufficientToken { network, .. } => network,
+            InvalidChainId { .. } => None?,
+            CantSign { network, .. } => network,
+            TxStuck { network, .. } => network,
+            RpcError { network, .. } => network,
+        })
+    }
+
+    /// Checks if this status means no further payments can proceed on this netowrk
+    pub fn is_blocking(&self) -> bool {
+        use DriverStatusProperty::*;
+        match self {
+            InsufficientGas { .. }
+            | InsufficientToken { .. }
+            | InvalidChainId { .. }
+            | CantSign { .. }
+            | TxStuck { .. }
+            | RpcError { .. } => true,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -64,6 +105,7 @@ mod tests {
     fn status_prop_serialization() {
         assert_eq!(
             json!({
+                "address": "0xf00ba4e03254c41AFd00f530A4fDFF63E7564FE8",
                 "driver": "erc20",
                 "kind": "InsufficientGas",
                 "network": "foo",
@@ -72,6 +114,7 @@ mod tests {
             to_value(&DriverStatusProperty::InsufficientGas {
                 driver: "erc20".into(),
                 network: "foo".into(),
+                address: "0xf00ba4e03254c41AFd00f530A4fDFF63E7564FE8".into(),
                 needed_gas_est: "bar".into()
             })
             .unwrap()
