@@ -1523,6 +1523,24 @@ components:
             invoiceId:
               type: string
 
+    InvoicePaymentStatusEvent:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceEvent'
+        - type: object
+          properties:
+            invoiceId:
+              type: string
+            property:
+              $ref: '#/components/schemas/DriverStatusProperty'
+
+    InvoicePaymentOkEvent:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceEvent'
+        - type: object
+          properties:
+            invoiceId:
+              type: string
+
     PaymentReceivedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
