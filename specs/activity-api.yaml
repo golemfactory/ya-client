@@ -205,6 +205,9 @@ paths:
 
   /activity/{activityId}/agreement:
     get:
+      tags:
+        - provider
+        - requestor_state
       summary: Returns agreement_id corresponding to the activity
       description: >
         'This call shall return id of the agreement that lead to the creation of this activity'
