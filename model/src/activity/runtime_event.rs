@@ -49,6 +49,12 @@ impl RuntimeEvent {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
+pub struct CommandProgress {
+    pub progress: u64,
+    pub size: Option<u64>,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum RuntimeEventKind {
@@ -61,4 +67,5 @@ pub enum RuntimeEventKind {
     },
     StdOut(CommandOutput),
     StdErr(CommandOutput),
+    Progress(CommandProgress),
 }
