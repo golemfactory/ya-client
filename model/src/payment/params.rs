@@ -74,6 +74,14 @@ pub struct DriverNetworkParams {
 }
 
 #[derive(Deserialize, Serialize)]
+pub struct DriverStatusParams {
+    #[serde(default)]
+    pub network: Option<String>,
+    #[serde(default)]
+    pub driver: Option<String>,
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct AllocationIds {
     #[serde(
         rename = "allocationIds",

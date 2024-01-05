@@ -453,6 +453,17 @@ impl PaymentApi {
         let url = url_format!("payments/{payment_id}");
         self.client.get(&url).send().json().await
     }
+
+    pub async fn driver_status(
+        &self,
+        driver: Option<String>,
+        network: Option<String>,
+    ) -> Result<Vec<DriverStatusProperty>> {
+        let params = params::DriverStatusParams { driver, network };
+        let url = url_format_obj("payments/status", &params);
+
+        self.client.get(&url).send().json().await
+    }
 }
 
 pub trait PaymentEvent: DeserializeOwned {
