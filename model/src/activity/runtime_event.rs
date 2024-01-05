@@ -50,8 +50,8 @@ impl RuntimeEvent {
         Self::new(batch_id, idx, RuntimeEventKind::StdErr(out))
     }
 
-    pub fn deploy_progress(batch_id: String, idx: usize, progress: DeployProgress) -> Self {
-        Self::new(batch_id, idx, RuntimeEventKind::DeployProgressUpdate(progress))
+    pub fn progress(batch_id: String, idx: usize, progress: CommandProgress) -> Self {
+        Self::new(batch_id, idx, RuntimeEventKind::Progress(progress))
     }
 }
 
@@ -67,16 +67,30 @@ pub enum RuntimeEventKind {
     },
     StdOut(CommandOutput),
     StdErr(CommandOutput),
-    DeployProgressUpdate(DeployProgress),
+    Progress(CommandProgress),
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum DeployProgress {
-    DeployFromCache,
-    DownloadingImage,
-    DownloadProgress(u64, Option<u64>),
-    DownloadError(String),
-    DownloadRetry(String, Duration),
-    DownloadFinished,
+pub enum CommandProgress {
+    FetchingFromCache,
+    TransferStarted,
+    TransferProgress(u64, Option<u64>),
+    Retry(String, Duration),
+    TransferFinished,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_runtime_event_serialization() {
+        let event = RuntimeEvent::progress(
+            "326754653".to_string(),
+            1,
+            CommandProgress::TransferProgress(30, Some(100)),
+        );
+        println!("{}", serde_json::to_string(&event).unwrap());
+    }
 }
