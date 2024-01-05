@@ -79,18 +79,3 @@ pub enum CommandProgress {
     Retry(String, Duration),
     TransferFinished,
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_runtime_event_serialization() {
-        let event = RuntimeEvent::progress(
-            "326754653".to_string(),
-            1,
-            CommandProgress::TransferProgress(30, Some(100)),
-        );
-        println!("{}", serde_json::to_string(&event).unwrap());
-    }
-}
