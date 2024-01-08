@@ -73,12 +73,12 @@ pub enum RuntimeEventKind {
 pub struct CommandProgress {
     /// Steps are counted starting from 0. That means that first step from 4-steps tasks
     /// will report 0/4. Task is finished when counter reaches 4/4.
-    step: (usize, usize),
+    pub step: (usize, usize),
     /// May contain additional arbitrary information about, what is happening with the task
     /// like retrying transfer or that image was deployed from cache.
-    message: Option<String>,
+    pub message: Option<String>,
     /// Granular progress of currently executed step. The first element describes current
     /// progress, the second the size of the whole task, which can be unknown.
-    progress: (u64, Option<u64>),
-    unit: Option<String>,
+    pub progress: (u64, Option<u64>),
+    pub unit: Option<String>,
 }
