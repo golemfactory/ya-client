@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use crate::activity::{CommandOutput, ExeScriptCommand};
 use chrono::{NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -72,10 +70,15 @@ pub enum RuntimeEventKind {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum CommandProgress {
-    FetchingFromCache,
-    TransferStarted,
-    TransferProgress(u64, Option<u64>),
-    Retry(String, Duration),
-    TransferFinished,
+pub struct CommandProgress {
+    /// Steps are counted starting from 0. That means that first step from 4-steps tasks
+    /// will report 0/4. Task is finished when counter reaches 4/4.
+    step: (usize, usize),
+    /// May contain additional arbitrary information about, what is happening with the task
+    /// like retrying transfer or that image was deployed from cache.
+    message: Option<String>,
+    /// Granular progress of currently executed step. The first element describes current
+    /// progress, the second the size of the whole task, which can be unknown.
+    progress: (u64, Option<u64>),
+    unit: Option<String>,
 }
