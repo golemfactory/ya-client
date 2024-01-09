@@ -127,7 +127,7 @@ pub struct TransferArgs {
 pub struct ProgressArgs {
     pub update_interval: Option<DurationString>,
     /// Number of bytes after which next progress event will be sent.
-    pub step: Option<usize>,
+    pub update_step: Option<usize>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
