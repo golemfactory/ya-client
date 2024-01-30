@@ -9,8 +9,8 @@ use ya_client::{
     web::{WebClient, WebInterface},
     Result,
 };
-use ya_client_model::payment::{Allocation, AllocationUpdate, NewAllocation};
 use ya_client_model::payment::allocation::PaymentPlatformEnum;
+use ya_client_model::payment::{Allocation, AllocationUpdate, NewAllocation};
 
 #[derive(Clone, StructOpt)]
 #[structopt(name = "Market", about = "Market service properties")]
