@@ -9,6 +9,7 @@ use ya_client::{
     web::{WebClient, WebInterface},
     Result,
 };
+use ya_client_model::payment::allocation::PaymentPlatformEnum;
 use ya_client_model::payment::{Allocation, AllocationUpdate, NewAllocation};
 
 #[derive(Clone, StructOpt)]
@@ -92,7 +93,7 @@ async fn main() -> Result<()> {
                     total_amount: BigDecimal::from_str(&budget).unwrap(),
                     make_deposit: true,
                     address: None,
-                    payment_platform: Some(platform),
+                    payment_platform: Some(PaymentPlatformEnum::PaymentPlatformName(platform)),
                     timeout: None,
                 })
                 .await?;
