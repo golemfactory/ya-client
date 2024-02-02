@@ -19,9 +19,24 @@ pub struct Allocation {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct PaymentPlatform {
+    pub driver: Option<String>,
+    pub network: Option<String>,
+    pub token: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", untagged)]
+pub enum PaymentPlatformEnum {
+    PaymentPlatformName(String),
+    PaymentPlatform(PaymentPlatform),
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NewAllocation {
     pub address: Option<String>,
-    pub payment_platform: Option<String>,
+    pub payment_platform: Option<PaymentPlatformEnum>,
     pub total_amount: BigDecimal,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub timeout: Option<DateTime<Utc>>,
