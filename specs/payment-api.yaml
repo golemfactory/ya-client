@@ -1171,6 +1171,17 @@ components:
         - BAD_SERVICE
         - INCORRECT_AMOUNT
 
+    PaymentPlatform:
+      description: >
+        PaymentPlatform is a object that is helping to chose which driver and network to use
+      properties:
+        driver:
+          type: string
+        network:
+          type: string
+        token:
+          type: string
+
     Allocation:
       type: object
       description: >
@@ -1191,7 +1202,9 @@ components:
         address:
           type: string
         paymentPlatform:
-          type: string
+          oneOf:
+            - $ref: '#/components/schemas/PaymentPlatform'
+            - type: string
         totalAmount:
           type: string
         spentAmount:
