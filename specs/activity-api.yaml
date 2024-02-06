@@ -844,36 +844,40 @@ components:
               $ref: '#/components/schemas/CommandOutput'
 
     RuntimeEventKindFinishedBody:
-      type: object
-      required:
-        - returnCode
-      properties:
-        returnCode:
-          type: integer
-          format: int32
-        message:
-          type: string
+      allOf:
+        - $ref: '#/components/schemas/RuntimeEventKind'
+        - type: object
+          required:
+            - returnCode
+          properties:
+            returnCode:
+              type: integer
+              format: int32
+            message:
+              type: string
 
     RuntimeEventKindProgress:
-      description: Reports progress of currently executed command. This event will be sent only, 
-        if `progress` field was set in `deploy` or `transfer` command.
-      type: object
-      required:
-        - step
-      properties:
-        step:
-          $ref: '#/components/schemas/ProgressStep'
-        message:
-          type: string
-          description: May contain additional arbitrary information, what is happening with the task,
-            for example "retrying transfer" or "image deployed from cache".
-            Content of this field is ExeUnit specific.
-        progress:
-          $ref: '#/components/schemas/ProgressDetails'
-        unit:
-          type: string
-          description: Units in which `progress` field is expressed. This should be human readable
-            string for displaying in UI. List of possible values is ExeUnit specific.
+      allOf:
+        - $ref: '#/components/schemas/RuntimeEventKind'
+        - type: object
+          description: Reports progress of currently executed command. This event will be sent only, 
+            if `progress` field was set in `deploy` or `transfer` command.
+          required:
+            - step
+          properties:
+            step:
+              $ref: '#/components/schemas/ProgressStep'
+            message:
+              type: string
+              description: May contain additional arbitrary information, what is happening with the task,
+                for example "retrying transfer" or "image deployed from cache".
+                Content of this field is ExeUnit specific.
+            progress:
+              $ref: '#/components/schemas/ProgressDetails'
+            unit:
+              type: string
+              description: Units in which `progress` field is expressed. This should be human readable
+                string for displaying in UI. List of possible values is ExeUnit specific.
 
     ProgressStep:
       description: Can be used if single ExeUnit command is executing multiple steps. Number of steps is
