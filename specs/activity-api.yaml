@@ -486,7 +486,8 @@ components:
             "deploy": {
               "net": [{ "id": "id", "ip": "10.0.0.2", "mask": "255.255.0.0" }],
               "hosts": {"master": "10.0.0.1"},
-              "nodes": {"10.0.0.1": "0xdeadbeef"}
+              "nodes": {"10.0.0.1": "0xdeadbeef"},
+              "progress" : {"updateInterval": "300ms", "updateStep": null}
             }
         },
         {
@@ -500,7 +501,8 @@ components:
                 "to": "container:/input/file_in",
                 "format": "zip",
                 "depth": 2,
-                "fileset": [{"desc":"all images", "includes": ["*.jpg"], "excludes": ["db*.*"] }]
+                "fileset": [{"desc":"all images", "includes": ["*.jpg"], "excludes": ["db*.*"] }],
+                "progress" : {"updateInterval": null, "updateStep": 1048576}
             }
         },
         {
@@ -851,6 +853,52 @@ components:
           format: int32
         message:
           type: string
+
+    RuntimeEventKindProgress:
+      description: Reports progress of currently executed command. This event will be sent only, 
+        if `progress` field was set in `deploy` or `transfer` command.
+      type: object
+      required:
+        - step
+      properties:
+        step:
+          $ref: '#/components/schemas/ProgressStep'
+        message:
+          type: string
+          description: May contain additional arbitrary information, what is happening with the task,
+            for example "retrying transfer" or "image deployed from cache".
+            Content of this field is ExeUnit specific.
+        progress:
+          $ref: '#/components/schemas/ProgressDetails'
+        unit:
+          type: string
+          description: Units in which `progress` field is expressed. This should be human readable
+            string for displaying in UI. List of possible values is ExeUnit specific.
+
+    ProgressStep:
+      description: Can be used if single ExeUnit command is executing multiple steps. Number of steps is
+        Exeunit specific.
+        
+        Steps are counted starting from 0. That means that first step from 4-steps task
+        will report 0/4. Task is finished when counter reaches 4/4.
+      type: array
+      items:
+        type: integer
+        format: int64
+      minItems: 2
+      maxItems: 2
+      minimum: 0
+
+    ProgressDetails:
+      description: Granular progress of currently executed step. The first element describes current
+        progress, the second the size of the whole task, which can be unknown.
+      type: array
+      items:
+        type: integer
+        format: int64
+      minItems: 1
+      maxItems: 2
+      minimum: 0
 
     CommandOutput:
       type: object
