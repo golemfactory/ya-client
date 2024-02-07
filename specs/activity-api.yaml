@@ -906,7 +906,7 @@ components:
     ProgressStep:
       description: Can be used if single ExeUnit command is executing multiple steps. Number of steps is
         Exeunit specific.
-        
+
         Steps are counted starting from 0. That means that first step from 4-steps task
         will report 0/4. Task is finished when counter reaches 4/4.
       type: array
