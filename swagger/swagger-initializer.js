@@ -6,27 +6,27 @@ window.onload = function() {
     urls: [
       {
         name: "Market API",
-        url: "../specs/market-api.yaml",
+        url: "specs/market-api.yaml",
       },
       {
         name: "Activity API",
-        url: "../specs/activity-api.yaml",
+        url: "specs/activity-api.yaml",
       },
       {
         name: "Payment API",
-        url: "../specs/payment-api.yaml",
+        url: "specs/payment-api.yaml",
       },
       {
         name: "NET API",
-        url: "../specs/net-api.yaml",
+        url: "specs/net-api.yaml",
       },
       {
         name: "NET API v2",
-        url: "../specs/net-api-v2.yaml",
+        url: "specs/net-api-v2.yaml",
       },
       {
         name: "GSB API",
-        url: "../specs/gsb-api.yaml",
+        url: "specs/gsb-api.yaml",
       },
     ],
     dom_id: '#swagger-ui',
