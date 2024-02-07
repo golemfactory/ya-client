@@ -22,7 +22,7 @@ servers:
   - url: /activity-api/v1
 
 security:
-  - app_key: []
+  - app_key: [ ]
 
 tags:
   - name: requestor_control
@@ -254,7 +254,7 @@ paths:
       responses:
         200:
           description: Success
-          content: {}
+          content: { }
         403:
           $ref: 'common.yaml#/responses/Forbidden'
         404:
@@ -328,7 +328,7 @@ paths:
       responses:
         200:
           description: Success
-          content: {}
+          content: { }
         404:
           $ref: 'common.yaml#/responses/NotFound'
         500:
@@ -559,6 +559,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        progress:
+          $ref: '#/components/schemas/ProgressArgs'
 
     DeployNetwork:
       type: object
@@ -573,6 +575,26 @@ components:
           type: string
         mask:
           type: string
+
+    ProgressArgs:
+      type: object
+      description: Configuration of progress reporting.
+        Presence of this field in ExeUnitCommand indicates, that ExeUnit should send
+        '#/components/schemas/RuntimeEventKindProgress' events. If non of properties is set
+        ExeUnit will use default values.
+        Behavior when both properties are defined is ExeUnit specific.
+      properties:
+        update-interval:
+          type: string
+          description: Interval between progress reporting events expressed as
+            described in specification https://docs.rs/human-duration/latest/human_duration/
+            TODO Consider https://docs.rs/humantime/latest/humantime/fn.parse_duration.html
+        update-step:
+          type: number
+          format: int64
+          minimum: 1
+          description: Number of units (for example Bytes in case of transfer) after which next
+            progress event will be sent.
 
     StartCommand:
       allOf:
@@ -860,7 +882,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/RuntimeEventKind'
         - type: object
-          description: Reports progress of currently executed command. This event will be sent only, 
+          description: Reports progress of currently executed command. This event will be sent only,
             if `progress` field was set in `deploy` or `transfer` command.
           required:
             - step
