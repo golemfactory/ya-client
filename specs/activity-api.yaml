@@ -640,6 +640,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FileSet'
+        progress:
+          $ref: '#/components/schemas/ProgressArgs'
 
     FileSet:
       properties:
