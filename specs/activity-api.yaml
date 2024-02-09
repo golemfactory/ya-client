@@ -587,8 +587,7 @@ components:
         update-interval:
           type: string
           description: Interval between progress reporting events expressed as
-            described in specification https://docs.rs/human-duration/latest/human_duration/
-            TODO Consider https://docs.rs/humantime/latest/humantime/fn.parse_duration.html
+            described in specification https://docs.rs/humantime/latest/humantime/fn.parse_duration.html
         update-step:
           type: number
           format: int64
