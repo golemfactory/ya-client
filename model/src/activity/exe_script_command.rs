@@ -9,9 +9,9 @@
  */
 
 use crate::activity::ExeScriptCommandState;
-use duration_string::DurationString;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::time::Duration;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -125,7 +125,9 @@ pub struct TransferArgs {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ProgressArgs {
-    pub update_interval: Option<DurationString>,
+    #[serde(default)]
+    #[serde(with = "humantime_serde")]
+    pub update_interval: Option<Duration>,
     /// Number of bytes after which next progress event will be sent.
     pub update_step: Option<usize>,
 }
