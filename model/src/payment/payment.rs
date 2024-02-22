@@ -10,9 +10,9 @@ pub struct Signed<T> {
     #[serde(flatten)]
     pub payload: T,
     #[serde(with = "serde_bytes")]
-    pub signature: Vec<u8>,
+    pub signature: Option<Vec<u8>>,
     #[serde(with = "serde_bytes")]
-    pub signed_bytes: Vec<u8>
+    pub signed_bytes: Option<Vec<u8>>
 }
 
 
