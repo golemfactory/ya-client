@@ -12,9 +12,8 @@ pub struct Signed<T> {
     #[serde(with = "serde_bytes")]
     pub signature: Option<Vec<u8>>,
     #[serde(with = "serde_bytes")]
-    pub signed_bytes: Option<Vec<u8>>
+    pub signed_bytes: Option<Vec<u8>>,
 }
-
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -123,7 +122,7 @@ mod tests {
                 "network": "foo",
                 "neededGasEst": "bar",
             }),
-            to_value(&DriverStatusProperty::InsufficientGas {
+            to_value(DriverStatusProperty::InsufficientGas {
                 driver: "erc20".into(),
                 network: "foo".into(),
                 address: "0xf00ba4e03254c41AFd00f530A4fDFF63E7564FE8".into(),

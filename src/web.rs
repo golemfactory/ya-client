@@ -497,7 +497,7 @@ where
         match Pin::new(&mut this.inner).poll_next(cx) {
             Poll::Ready(Some(Ok(bytes))) => {
                 let idx = this.buffer.len();
-                this.buffer.extend(bytes.into_iter());
+                this.buffer.extend(bytes);
 
                 if let Some(result) = this.next_event(idx) {
                     Poll::Ready(Some(result))
