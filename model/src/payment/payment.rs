@@ -9,6 +9,13 @@ use serde::{Deserialize, Serialize};
 pub struct Signed<T> {
     #[serde(flatten)]
     pub payload: T,
+    #[serde(flatten)]
+    pub signature: Option<Signature>
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Signature {
     #[serde(with = "serde_bytes")]
     pub signature: Vec<u8>,
     #[serde(with = "serde_bytes")]
