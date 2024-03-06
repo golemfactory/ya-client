@@ -1,10 +1,9 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
-use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
-pub const DEFAULT_ACK_TIMEOUT: f64 = 500000.0; // seconds
-pub const DEFAULT_EVENT_TIMEOUT: f64 = 500000.0; // seconds
+pub const DEFAULT_ACK_TIMEOUT: f64 = 5.0; // seconds
+pub const DEFAULT_EVENT_TIMEOUT: f64 = 5.0; // seconds
 
 #[derive(Deserialize, Serialize)]
 pub struct DebitNoteId {
@@ -47,16 +46,6 @@ impl FromStr for Timeout {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         serde_json::from_str::<Timeout>(s)
-    }
-}
-
-impl Display for Timeout {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let str = serde_json::to_string(self)
-            .unwrap()
-            .trim_matches('"')
-            .to_owned();
-        write!(f, "{}", str)
     }
 }
 
