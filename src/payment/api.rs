@@ -12,9 +12,9 @@ use crate::{
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
+use ya_client_model::payment::params::Timeout;
 use ya_client_model::payment::payment::Signed;
 use ya_client_model::payment::*;
-use ya_client_model::payment::params::Timeout;
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
@@ -235,7 +235,7 @@ impl PaymentApi {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
             timeout: Timeout {
-                timeout: timeout.map(|d| d.as_secs_f64())
+                timeout: timeout.map(|d| d.as_secs_f64()),
             },
             max_events,
             app_session_id,
@@ -366,7 +366,7 @@ impl PaymentApi {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
             timeout: Timeout {
-                timeout: timeout.map( | d| d.as_secs_f64())
+                timeout: timeout.map(|d| d.as_secs_f64()),
             },
             max_events,
             app_session_id,
@@ -443,7 +443,7 @@ impl PaymentApi {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
             timeout: Timeout {
-                timeout:timeout.map(|d| d.as_secs_f64())
+                timeout: timeout.map(|d| d.as_secs_f64()),
             },
             max_events,
             app_session_id,
@@ -471,7 +471,7 @@ impl PaymentApi {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
             timeout: Timeout {
-                timeout: timeout.map(|d| d.as_secs_f64())
+                timeout: timeout.map(|d| d.as_secs_f64()),
             },
             max_events,
             app_session_id,
