@@ -1,7 +1,5 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
-use serde_with::serde_as;
-use serde_with::DisplayFromStr;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
@@ -62,11 +60,9 @@ impl Display for Timeout {
     }
 }
 
-#[serde_as]
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EventParams {
-    #[serde_as(as = "DisplayFromStr")]
     #[serde(default)]
     pub timeout: Timeout,
     #[serde(default)]
@@ -86,7 +82,6 @@ pub struct FilterParams {
     pub after_timestamp: Option<DateTime<Utc>>,
 }
 
-#[serde_as]
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DriverNetworkParams {
