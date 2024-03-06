@@ -55,7 +55,7 @@ pub trait WebInterface {
         if let Ok(url) = std::env::var(Self::API_URL_ENV_VAR) {
             return Ok(Url::from_str(&url)?.into());
         }
-        let suffix = if Self::API_SUFFIX.starts_with("/") {
+        let suffix = if Self::API_SUFFIX.starts_with('/') {
             Self::API_SUFFIX[1..].to_string()
         } else {
             Self::API_SUFFIX.to_string()

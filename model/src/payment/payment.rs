@@ -10,7 +10,7 @@ pub struct Signed<T> {
     #[serde(flatten)]
     pub payload: T,
     #[serde(flatten)]
-    pub signature: Option<Signature>
+    pub signature: Option<Signature>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
