@@ -1,8 +1,12 @@
+use std::fmt::{Display, Formatter};
+use std::str::FromStr;
+use serde_with::DisplayFromStr;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
+use serde_with::serde_as;
 
-pub const DEFAULT_ACK_TIMEOUT: f64 = 5.0; // seconds
-pub const DEFAULT_EVENT_TIMEOUT: f64 = 5.0; // seconds
+pub const DEFAULT_ACK_TIMEOUT: f64 = 500000.0; // seconds
+pub const DEFAULT_EVENT_TIMEOUT: f64 = 500000.0; // seconds
 
 #[derive(Deserialize, Serialize)]
 pub struct DebitNoteId {
@@ -34,17 +38,37 @@ pub struct PaymentId {
     pub payment_id: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct Timeout {
     #[serde(default)]
     pub timeout: Option<f64>,
 }
 
+impl FromStr for Timeout {
+    type Err = serde_json::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        serde_json::from_str::<Timeout>(s)
+    }
+}
+
+impl Display for Timeout {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let str = serde_json::to_string(self)
+            .unwrap()
+            .trim_matches('"')
+            .to_owned();
+        write!(f, "{}", str)
+    }
+}
+
+#[serde_as]
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EventParams {
+    #[serde_as(as = "DisplayFromStr")]
     #[serde(default)]
-    pub timeout: Option<f64>,
+    pub timeout: Timeout,
     #[serde(default)]
     pub after_timestamp: Option<DateTime<Utc>>,
     #[serde(default)]
@@ -62,6 +86,7 @@ pub struct FilterParams {
     pub after_timestamp: Option<DateTime<Utc>>,
 }
 
+#[serde_as]
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DriverNetworkParams {
