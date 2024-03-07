@@ -230,7 +230,7 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
                             let new_agreement_id = proposal_id.clone();
                             let agreement = AgreementProposal::new(
                                 new_agreement_id,
-                                chrono::Utc::now() + chrono::Duration::minutes(5),
+                                chrono::Utc::now() + chrono::Duration::try_minutes(5).unwrap(),
                             );
                             let agreement_id = client.create_agreement(&agreement).await?;
                             println!(

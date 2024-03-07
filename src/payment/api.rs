@@ -12,6 +12,8 @@ use crate::{
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
+use ya_client_model::payment::params::Timeout;
+use ya_client_model::payment::payment::Signed;
 use ya_client_model::payment::*;
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -232,7 +234,9 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            timeout: timeout.map(|d| d.as_secs_f64()),
+            timeout: Timeout {
+                timeout: timeout.map(|d| d.as_secs_f64()),
+            },
             max_events,
             app_session_id,
         };
@@ -361,7 +365,9 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            timeout: timeout.map(|d| d.as_secs_f64()),
+            timeout: Timeout {
+                timeout: timeout.map(|d| d.as_secs_f64()),
+            },
             max_events,
             app_session_id,
         };
@@ -436,7 +442,37 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            timeout: timeout.map(|d| d.as_secs_f64()),
+            timeout: Timeout {
+                timeout: timeout.map(|d| d.as_secs_f64()),
+            },
+            max_events,
+            app_session_id,
+        };
+        let url = url_format_obj("payments", &input);
+        self.client
+            .get(&url)
+            .send()
+            .json()
+            .await
+            .or_else(default_on_timeout)
+    }
+
+    pub async fn get_signed_payments<Tz>(
+        &self,
+        after_timestamp: Option<&DateTime<Tz>>,
+        timeout: Option<Duration>,
+        max_events: Option<u32>,
+        app_session_id: Option<String>,
+    ) -> Result<Vec<Signed<Payment>>>
+    where
+        Tz: TimeZone,
+        Tz::Offset: Display,
+    {
+        let input = params::EventParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            timeout: Timeout {
+                timeout: timeout.map(|d| d.as_secs_f64()),
+            },
             max_events,
             app_session_id,
         };
@@ -559,7 +595,9 @@ impl<'a, EvType: PaymentEvent> EventsBuilder<'a, EvType> {
     pub async fn get(self) -> Result<Vec<EvType>> {
         let input = params::EventParams {
             after_timestamp: self.after_timestamp,
-            timeout: self.timeout.map(|d| d.as_secs_f64()),
+            timeout: Timeout {
+                timeout: self.timeout.map(|d| d.as_secs_f64()),
+            },
             max_events: self.max_events,
             app_session_id: self.app_session_id,
         };

@@ -55,8 +55,14 @@ pub trait WebInterface {
         if let Ok(url) = std::env::var(Self::API_URL_ENV_VAR) {
             return Ok(Url::from_str(&url)?.into());
         }
-        let with_trailing = format!("{}/", Self::API_SUFFIX);
-        Ok(base_url.join(&with_trailing)?.into())
+        let suffix = if Self::API_SUFFIX.starts_with('/') {
+            Self::API_SUFFIX[1..].to_string()
+        } else {
+            Self::API_SUFFIX.to_string()
+        };
+        let with_trailing = format!("{}/", suffix);
+        let u = base_url.join(&with_trailing);
+        Ok(u?.into())
     }
 
     fn from_client(client: WebClient) -> Self;
@@ -497,7 +503,7 @@ where
         match Pin::new(&mut this.inner).poll_next(cx) {
             Poll::Ready(Some(Ok(bytes))) => {
                 let idx = this.buffer.len();
-                this.buffer.extend(bytes.into_iter());
+                this.buffer.extend(bytes);
 
                 if let Some(result) = this.next_event(idx) {
                     Poll::Ready(Some(result))
