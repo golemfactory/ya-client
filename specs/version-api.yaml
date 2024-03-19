@@ -31,10 +31,10 @@ components:
       properties:
         version:
           type: string
-          example: 0.13.2
+          example: 0.12.1
         name:
           type: string
-          example: v0.13.2
+          example: v0.12.1 Aware Thrill
         seen:
           type: boolean
         releaseTs:
@@ -49,17 +49,13 @@ components:
         - name
         - seen
         - releaseTs
-        - insertionTs
-        - updateTs
+
     YagnaVersionResponse:
       type: object
       properties:
         current:
           $ref: '#/components/schemas/YagnaVersionInfo'
         pending:
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/YagnaVersionInfo'
+          $ref: '#/components/schemas/YagnaVersionInfo'
       required:
         - current
-        - pending
