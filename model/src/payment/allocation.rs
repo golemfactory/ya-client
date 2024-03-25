@@ -3,6 +3,12 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Deposit {
+    pub id: String,
+    pub contract: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Allocation {
     pub allocation_id: String,
@@ -14,6 +20,8 @@ pub struct Allocation {
     pub timestamp: DateTime<Utc>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub timeout: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub deposit: Option<Deposit>,
     pub make_deposit: bool,
 }
 
@@ -40,6 +48,8 @@ pub struct NewAllocation {
     pub total_amount: BigDecimal,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub timeout: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub deposit: Option<Deposit>,
     pub make_deposit: bool,
 }
 
