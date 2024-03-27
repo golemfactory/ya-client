@@ -23,7 +23,7 @@ pub struct AgreementOperationEvent {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
-#[serde(tag = "eventtype")]
+#[serde(tag = "eventType")]
 pub enum AgreementEventType {
     #[serde(rename = "AgreementApprovedEvent")]
     AgreementApprovedEvent,
