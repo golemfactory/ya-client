@@ -1,0 +1,49 @@
+openapi: 3.0.2
+info:
+  version: 0.1.0
+  title: Yagna Identity API
+  description: Yagna Identity API
+security:
+  - app_key: []
+paths:
+  /me:
+    get:
+      operationId: getIdentity
+      summary: GetIdentity - Fetches the identity of the user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Identity'
+        '400':
+          $ref: 'common.yaml#/responses/BadRequest'
+        '401':
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+components:
+  securitySchemes:
+    app_key:
+      $ref: 'common.yaml#/components/securitySchemes/app_key'
+  responses:
+    Identity:
+      description: Identity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Identity'
+  schemas:
+    Identity:
+      type: object
+      properties:
+        identity:
+          type: string
+          description: Address
+        name:
+          type: string
+          description: Name
+        role:
+          type: string
+          description: Role
+      required:
+        - identity
+        - name
+        - role
