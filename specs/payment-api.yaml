@@ -1222,6 +1222,16 @@ components:
           format: date-time
         makeDeposit:
           type: boolean
+        deposit:
+          type: object
+          properties:
+            id:
+              type: string
+            contract:
+              type: string
+          required:
+            - id
+            - contract
       required:
         - allocationId
         - totalAmount
