@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 
-pub const DEFAULT_ACK_TIMEOUT: f64 = 5.0; // seconds
+pub const DEFAULT_ACK_TIMEOUT: f64 = 15.0; // seconds
 pub const DEFAULT_EVENT_TIMEOUT: f64 = 5.0; // seconds
 
 #[derive(Deserialize, Serialize)]
