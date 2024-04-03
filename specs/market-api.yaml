@@ -924,6 +924,43 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
+  /scan:
+    post:
+      tags:
+        - provider
+        - requestor
+      operationId: scanStart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Agreement'
+      responses:
+        201:
+          $ref: '#/components/parameters/iteratorId'
+
+
+      summary: Creates market scanning iterator
+  /scan/{iteratorId}:
+    parameters:
+      - $ref: '#/components/parameters/iteratorId'
+    get:
+      tags:
+        - provider
+        - requestor
+      operationId: scanCollect
+      parameters:
+        - name: peer
+          in: query
+          required: false
+          schema:
+            type: string
+        - $ref: 'common.yaml#/parameters/pollTimeout'
+
+
+
+
 components:
 
   securitySchemes:
@@ -960,6 +997,12 @@ components:
       schema:
         type: string
 
+    iteratorId:
+      name: iteratorId
+      in: path
+      required: true
+      schema:
+        type: string
 
   requestBodies:
 
