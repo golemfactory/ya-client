@@ -12,7 +12,6 @@ use crate::{
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use ya_client_model::payment::params::Timeout;
 use ya_client_model::payment::payment::Signed;
 use ya_client_model::payment::*;
 
@@ -234,9 +233,7 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            timeout: Timeout {
-                timeout: timeout.map(|d| d.as_secs_f64()),
-            },
+            timeout: timeout.map(|d| d.as_secs_f64()),
             max_events,
             app_session_id,
         };
@@ -365,9 +362,7 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            timeout: Timeout {
-                timeout: timeout.map(|d| d.as_secs_f64()),
-            },
+            timeout: timeout.map(|d| d.as_secs_f64()),
             max_events,
             app_session_id,
         };
@@ -442,9 +437,7 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            timeout: Timeout {
-                timeout: timeout.map(|d| d.as_secs_f64()),
-            },
+            timeout: timeout.map(|d| d.as_secs_f64()),
             max_events,
             app_session_id,
         };
@@ -470,9 +463,7 @@ impl PaymentApi {
     {
         let input = params::EventParams {
             after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
-            timeout: Timeout {
-                timeout: timeout.map(|d| d.as_secs_f64()),
-            },
+            timeout: timeout.map(|d| d.as_secs_f64()),
             max_events,
             app_session_id,
         };
@@ -595,9 +586,7 @@ impl<'a, EvType: PaymentEvent> EventsBuilder<'a, EvType> {
     pub async fn get(self) -> Result<Vec<EvType>> {
         let input = params::EventParams {
             after_timestamp: self.after_timestamp,
-            timeout: Timeout {
-                timeout: self.timeout.map(|d| d.as_secs_f64()),
-            },
+            timeout: self.timeout.map(|d| d.as_secs_f64()),
             max_events: self.max_events,
             app_session_id: self.app_session_id,
         };
