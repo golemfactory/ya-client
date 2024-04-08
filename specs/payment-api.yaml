@@ -1414,6 +1414,8 @@ components:
         eventDate:
           type: string
           format: date-time
+        debitNoteId:
+          type: string
 
     DebitNoteReceivedEvent:
       allOf:
@@ -1496,6 +1498,8 @@ components:
         eventDate:
           type: string
           format: date-time
+        invoiceId:
+          type: string
 
     InvoiceReceivedEvent:
       allOf:
