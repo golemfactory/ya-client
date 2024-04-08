@@ -1411,6 +1411,14 @@ components:
       properties:
         eventType:
           type: string
+          x-extensible-enum: 
+            - value: DebitNoteReceivedEvent
+            - value: DebitNoteAcceptedEvent
+            - value: DebitNoteRejectedEvent
+            - value: DebitNoteCancelledEvent
+            - value: DebitNoteSettledEvent
+            - value: DebitNotePaymentStatusEvent 
+            - value: DebitNotePaymentOkEvent
         eventDate:
           type: string
           format: date-time
@@ -1493,6 +1501,14 @@ components:
       properties:
         eventType:
           type: string
+          x-extensible-enum: 
+            - value: InvoiceReceivedEvent
+            - value: InvoiceAcceptedEvent
+            - value: InvoiceRejectedEvent
+            - value: InvoiceSettledEvent
+            - value: InvoiceCancelledEvent
+            - value: InvoicePaymentStatusEvent
+            - value: InvoicePaymentOkEvent
         eventDate:
           type: string
           format: date-time
