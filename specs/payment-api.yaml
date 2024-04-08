@@ -22,8 +22,7 @@ info:
     Payment platform.
 
 
-    **NOTE:** This specification is work-in-progress.
-'
+    **NOTE:** This specification is work-in-progress.'
 
 servers:
   - url: /payment-api/v1
@@ -753,7 +752,6 @@ components:
       $ref: 'common.yaml#/components/securitySchemes/app_key'
 
   parameters:
-
     debitNoteId:
       name: debitNoteId
       required: true
@@ -794,7 +792,6 @@ components:
           type: string
 
   requestBodies:
-
     DebitNote:
       required: true
       content:
@@ -838,7 +835,6 @@ components:
             $ref: '#/components/schemas/Rejection'
 
   responses:
-
     OK:
       description: OK
 
@@ -964,7 +960,6 @@ components:
             $ref: '#/components/schemas/MarketDecoration'
 
   schemas:
-
     DebitNote:
       description: >
         A Debit Note is an artifact issued by the Provider to the Requestor,
@@ -1323,12 +1318,12 @@ components:
               per gas.
           type: string
           enum:
-          - InsufficientGas
-          - InsufficientToken
-          - InvalidChainId
-          - CantSign
-          - TxStuck
-          - RpcError
+            - InsufficientGas
+            - InsufficientToken
+            - InvalidChainId
+            - CantSign
+            - TxStuck
+            - RpcError
         driver:
           description: Payment driver to which this status property is applicable
           type: string
@@ -1411,13 +1406,13 @@ components:
       properties:
         eventType:
           type: string
-          x-extensible-enum: 
+          x-extensible-enum:
             - value: DebitNoteReceivedEvent
             - value: DebitNoteAcceptedEvent
             - value: DebitNoteRejectedEvent
             - value: DebitNoteCancelledEvent
             - value: DebitNoteSettledEvent
-            - value: DebitNotePaymentStatusEvent 
+            - value: DebitNotePaymentStatusEvent
             - value: DebitNotePaymentOkEvent
         eventDate:
           type: string
@@ -1501,7 +1496,7 @@ components:
       properties:
         eventType:
           type: string
-          x-extensible-enum: 
+          x-extensible-enum:
             - value: InvoiceReceivedEvent
             - value: InvoiceAcceptedEvent
             - value: InvoiceRejectedEvent
