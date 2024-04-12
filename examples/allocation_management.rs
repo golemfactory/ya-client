@@ -92,6 +92,7 @@ async fn main() -> Result<()> {
                 .create_allocation(&NewAllocation {
                     total_amount: BigDecimal::from_str(&budget).unwrap(),
                     make_deposit: true,
+                    deposit: None,
                     address: None,
                     payment_platform: Some(PaymentPlatformEnum::PaymentPlatformName(platform)),
                     timeout: None,

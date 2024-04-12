@@ -35,7 +35,7 @@ pub use self::invoice_event::{InvoiceEvent, InvoiceEventType};
 pub use self::market_decoration::MarketDecoration;
 pub use self::market_decoration::MarketProperty;
 pub use self::network::Network;
-pub use self::payment::{DriverStatusProperty, Payment};
+pub use self::payment::{DriverStatusProperty, Payment, Signed};
 pub use self::rejection::Rejection;
 pub use self::rejection_reason::RejectionReason;
 

@@ -12,6 +12,7 @@ use crate::{
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
+use ya_client_model::payment::payment::Signed;
 use ya_client_model::payment::*;
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -430,6 +431,32 @@ impl PaymentApi {
         max_events: Option<u32>,
         app_session_id: Option<String>,
     ) -> Result<Vec<Payment>>
+    where
+        Tz: TimeZone,
+        Tz::Offset: Display,
+    {
+        let input = params::EventParams {
+            after_timestamp: after_timestamp.map(|dt| dt.with_timezone(&Utc)),
+            timeout: timeout.map(|d| d.as_secs_f64()),
+            max_events,
+            app_session_id,
+        };
+        let url = url_format_obj("payments", &input);
+        self.client
+            .get(&url)
+            .send()
+            .json()
+            .await
+            .or_else(default_on_timeout)
+    }
+
+    pub async fn get_signed_payments<Tz>(
+        &self,
+        after_timestamp: Option<&DateTime<Tz>>,
+        timeout: Option<Duration>,
+        max_events: Option<u32>,
+        app_session_id: Option<String>,
+    ) -> Result<Vec<Signed<Payment>>>
     where
         Tz: TimeZone,
         Tz::Offset: Display,

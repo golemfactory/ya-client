@@ -6,6 +6,24 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct Signed<T> {
+    #[serde(flatten)]
+    pub payload: T,
+    #[serde(flatten)]
+    pub signature: Option<Signature>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Signature {
+    #[serde(with = "serde_bytes")]
+    pub signature: Vec<u8>,
+    #[serde(with = "serde_bytes")]
+    pub signed_bytes: Vec<u8>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Payment {
     pub payment_id: String,
     pub payer_id: NodeId,
@@ -111,7 +129,7 @@ mod tests {
                 "network": "foo",
                 "neededGasEst": "bar",
             }),
-            to_value(&DriverStatusProperty::InsufficientGas {
+            to_value(DriverStatusProperty::InsufficientGas {
                 driver: "erc20".into(),
                 network: "foo".into(),
                 address: "0xf00ba4e03254c41AFd00f530A4fDFF63E7564FE8".into(),

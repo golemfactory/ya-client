@@ -1,0 +1,61 @@
+openapi: 3.0.2
+info:
+  version: 0.1.0
+  title: Yagna Version API
+  description: Yagna Version API
+paths:
+  /version/get:
+    get:
+      operationId: getVersion
+      summary: GetVersion - Fetches the version of Yagna
+      responses:
+        '200':
+          $ref: '#/components/responses/Version'
+        '400':
+          $ref: 'common.yaml#/responses/BadRequest'
+        '401':
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+components:
+  responses:
+    Version:
+      description: Yagna Version Response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/YagnaVersionResponse'
+  schemas:
+    YagnaVersionInfo:
+      type: object
+      properties:
+        version:
+          type: string
+          example: 0.12.1
+        name:
+          type: string
+          example: v0.12.1 Aware Thrill
+        seen:
+          type: boolean
+        releaseTs:
+          type: string
+          example: '2023-12-07T14:23:48'
+        insertionTs:
+          type: string
+        updateTs:
+          type: string
+      required:
+        - version
+        - name
+        - seen
+        - releaseTs
+
+    YagnaVersionResponse:
+      type: object
+      properties:
+        current:
+          $ref: '#/components/schemas/YagnaVersionInfo'
+        pending:
+          $ref: '#/components/schemas/YagnaVersionInfo'
+      required:
+        - current
