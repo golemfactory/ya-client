@@ -936,7 +936,17 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/DebitNoteEvent'
+              anyOf:
+                - $ref: '#/components/schemas/DebitNoteReceivedEvent'
+                - $ref: '#/components/schemas/DebitNoteAcceptedEvent'
+                - $ref: '#/components/schemas/DebitNoteRejectedEvent'
+                - $ref: '#/components/schemas/DebitNoteFailedEvent'
+                - $ref: '#/components/schemas/DebitNoteSettledEvent'
+                - $ref: '#/components/schemas/DebitNoteCancelledEvent'
+                - $ref: '#/components/schemas/DebitNotePaymentStatusEvent'
+                - $ref: '#/components/schemas/DebitNotePaymentOkEvent'
+              discriminator:
+                propertyName: eventType
 
     InvoiceEventList:
       description: OK
@@ -945,7 +955,17 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/InvoiceEvent'
+              anyOf:
+                - $ref: '#/components/schemas/InvoiceReceivedEvent'
+                - $ref: '#/components/schemas/InvoiceAcceptedEvent'
+                - $ref: '#/components/schemas/InvoiceRejectedEvent'
+                - $ref: '#/components/schemas/InvoiceFailedEvent'
+                - $ref: '#/components/schemas/InvoiceSettledEvent'
+                - $ref: '#/components/schemas/InvoiceCancelledEvent'
+                - $ref: '#/components/schemas/InvoicePaymentStatusEvent'
+                - $ref: '#/components/schemas/InvoicePaymentOkEvent'
+              discriminator:
+                propertyName: eventType
 
     AccountList:
       description: OK
