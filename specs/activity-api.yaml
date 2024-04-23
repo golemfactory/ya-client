@@ -22,7 +22,7 @@ servers:
   - url: /activity-api/v1
 
 security:
-  - app_key: []
+  - app_key: [ ]
 
 tags:
   - name: requestor_control
@@ -254,7 +254,7 @@ paths:
       responses:
         200:
           description: Success
-          content: {}
+          content: { }
         403:
           $ref: 'common.yaml#/responses/Forbidden'
         404:
@@ -328,7 +328,7 @@ paths:
       responses:
         200:
           description: Success
-          content: {}
+          content: { }
         404:
           $ref: 'common.yaml#/responses/NotFound'
         500:
@@ -486,7 +486,8 @@ components:
             "deploy": {
               "net": [{ "id": "id", "ip": "10.0.0.2", "mask": "255.255.0.0" }],
               "hosts": {"master": "10.0.0.1"},
-              "nodes": {"10.0.0.1": "0xdeadbeef"}
+              "nodes": {"10.0.0.1": "0xdeadbeef"},
+              "progress" : {"updateInterval": "300ms", "updateStep": null}
             }
         },
         {
@@ -500,7 +501,8 @@ components:
                 "to": "container:/input/file_in",
                 "format": "zip",
                 "depth": 2,
-                "fileset": [{"desc":"all images", "includes": ["*.jpg"], "excludes": ["db*.*"] }]
+                "fileset": [{"desc":"all images", "includes": ["*.jpg"], "excludes": ["db*.*"] }],
+                "progress" : {"updateInterval": null, "updateStep": 1048576}
             }
         },
         {
@@ -557,6 +559,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        progress:
+          $ref: '#/components/schemas/ProgressArgs'
 
     DeployNetwork:
       type: object
@@ -571,6 +575,25 @@ components:
           type: string
         mask:
           type: string
+
+    ProgressArgs:
+      type: object
+      description: Configuration of progress reporting.
+        Presence of this field in ExeUnitCommand indicates, that ExeUnit should send
+        '#/components/schemas/RuntimeEventKindProgress' events. If non of properties is set
+        ExeUnit will use default values.
+        Behavior when both properties are defined is ExeUnit specific.
+      properties:
+        update-interval:
+          type: string
+          description: Interval between progress reporting events expressed as
+            described in specification https://docs.rs/humantime/latest/humantime/fn.parse_duration.html
+        update-step:
+          type: number
+          format: int64
+          minimum: 1
+          description: Number of units (for example Bytes in case of transfer) after which next
+            progress event will be sent.
 
     StartCommand:
       allOf:
@@ -616,6 +639,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FileSet'
+        progress:
+          $ref: '#/components/schemas/ProgressArgs'
 
     FileSet:
       properties:
@@ -842,15 +867,65 @@ components:
               $ref: '#/components/schemas/CommandOutput'
 
     RuntimeEventKindFinishedBody:
-      type: object
-      required:
-        - returnCode
-      properties:
-        returnCode:
-          type: integer
-          format: int32
-        message:
-          type: string
+      allOf:
+        - $ref: '#/components/schemas/RuntimeEventKind'
+        - type: object
+          required:
+            - returnCode
+          properties:
+            returnCode:
+              type: integer
+              format: int32
+            message:
+              type: string
+
+    RuntimeEventKindProgress:
+      allOf:
+        - $ref: '#/components/schemas/RuntimeEventKind'
+        - type: object
+          description: Reports progress of currently executed command. This event will be sent only,
+            if `progress` field was set in `deploy` or `transfer` command.
+          required:
+            - step
+          properties:
+            step:
+              $ref: '#/components/schemas/ProgressStep'
+            message:
+              type: string
+              description: May contain additional arbitrary information, what is happening with the task,
+                for example "retrying transfer" or "image deployed from cache".
+                Content of this field is ExeUnit specific.
+            progress:
+              $ref: '#/components/schemas/ProgressDetails'
+            unit:
+              type: string
+              description: Units in which `progress` field is expressed. This should be human readable
+                string for displaying in UI. List of possible values is ExeUnit specific.
+
+    ProgressStep:
+      description: Can be used if single ExeUnit command is executing multiple steps. Number of steps is
+        Exeunit specific.
+
+        Steps are counted starting from 0. That means that first step from 4-steps task
+        will report 0/4. Task is finished when counter reaches 4/4.
+      type: array
+      items:
+        type: integer
+        format: int64
+      minItems: 2
+      maxItems: 2
+      minimum: 0
+
+    ProgressDetails:
+      description: Granular progress of currently executed step. The first element describes current
+        progress, the second the size of the whole task, which can be unknown.
+      type: array
+      items:
+        type: integer
+        format: int64
+      minItems: 1
+      maxItems: 2
+      minimum: 0
 
     CommandOutput:
       type: object
