@@ -936,17 +936,7 @@ components:
           schema:
             type: array
             items:
-              anyOf:
-                - $ref: '#/components/schemas/DebitNoteReceivedEvent'
-                - $ref: '#/components/schemas/DebitNoteAcceptedEvent'
-                - $ref: '#/components/schemas/DebitNoteRejectedEvent'
-                - $ref: '#/components/schemas/DebitNoteFailedEvent'
-                - $ref: '#/components/schemas/DebitNoteSettledEvent'
-                - $ref: '#/components/schemas/DebitNoteCancelledEvent'
-                - $ref: '#/components/schemas/DebitNotePaymentStatusEvent'
-                - $ref: '#/components/schemas/DebitNotePaymentOkEvent'
-              discriminator:
-                propertyName: eventType
+              $ref: '#/components/schemas/DebitNoteEvent'
 
     InvoiceEventList:
       description: OK
@@ -955,17 +945,7 @@ components:
           schema:
             type: array
             items:
-              anyOf:
-                - $ref: '#/components/schemas/InvoiceReceivedEvent'
-                - $ref: '#/components/schemas/InvoiceAcceptedEvent'
-                - $ref: '#/components/schemas/InvoiceRejectedEvent'
-                - $ref: '#/components/schemas/InvoiceFailedEvent'
-                - $ref: '#/components/schemas/InvoiceSettledEvent'
-                - $ref: '#/components/schemas/InvoiceCancelledEvent'
-                - $ref: '#/components/schemas/InvoicePaymentStatusEvent'
-                - $ref: '#/components/schemas/InvoicePaymentOkEvent'
-              discriminator:
-                propertyName: eventType
+              $ref: '#/components/schemas/InvoiceEvent'
 
     AccountList:
       description: OK
@@ -1426,6 +1406,7 @@ components:
       required:
         - eventType
         - eventDate
+        - debitNoteId
       discriminator:
         propertyName: eventType
       properties:
@@ -1434,80 +1415,56 @@ components:
         eventDate:
           type: string
           format: date-time
+        debitNoteId:
+          type: string
 
     DebitNoteReceivedEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
-        - type: object
-          properties:
-            debitNoteId:
-              type: string
+
 
     DebitNoteAcceptedEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
-        - type: object
-          properties:
-            debitNoteId:
-              type: string
 
     DebitNoteRejectedEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
         - type: object
           properties:
-            debitNoteId:
-              type: string
             rejection:
               $ref: '#/components/schemas/Rejection'
 
     DebitNoteFailedEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
-        - type: object
-          properties:
-            debitNoteId:
-              type: string
 
     DebitNoteSettledEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
-        - type: object
-          properties:
-            debitNoteId:
-              type: string
 
     DebitNoteCancelledEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
-        - type: object
-          properties:
-            debitNoteId:
-              type: string
 
     DebitNotePaymentStatusEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
         - type: object
           properties:
-            debitNoteId:
-              type: string
             property:
               $ref: '#/components/schemas/DriverStatusProperty'
 
     DebitNotePaymentOkEvent:
       allOf:
         - $ref: '#/components/schemas/DebitNoteEvent'
-        - type: object
-          properties:
-            debitNoteId:
-              type: string
 
     InvoiceEvent:
       type: object
       required:
         - eventType
         - eventDate
+        - invoiceId
       discriminator:
         propertyName: eventType
       properties:
@@ -1516,74 +1473,49 @@ components:
         eventDate:
           type: string
           format: date-time
+        invoiceId:
+          type: string
 
     InvoiceReceivedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
-        - type: object
-          properties:
-            invoiceId:
-              type: string
+
 
     InvoiceAcceptedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
-        - type: object
-          properties:
-            invoiceId:
-              type: string
 
     InvoiceRejectedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
         - type: object
           properties:
-            invoiceId:
-              type: string
             rejection:
               $ref: '#/components/schemas/Rejection'
 
     InvoiceFailedEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
-        - type: object
-          properties:
-            invoiceId:
-              type: string
 
     InvoiceSettledEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
-        - type: object
-          properties:
-            invoiceId:
-              type: string
 
     InvoiceCancelledEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
-        - type: object
-          properties:
-            invoiceId:
-              type: string
 
     InvoicePaymentStatusEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
         - type: object
           properties:
-            invoiceId:
-              type: string
             property:
               $ref: '#/components/schemas/DriverStatusProperty'
 
     InvoicePaymentOkEvent:
       allOf:
         - $ref: '#/components/schemas/InvoiceEvent'
-        - type: object
-          properties:
-            invoiceId:
-              type: string
 
     Account:
       description: Payment account (wallet)

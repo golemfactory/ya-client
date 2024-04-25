@@ -1065,13 +1065,7 @@ components:
           schema:
             type: array
             items:
-              anyOf:
-                - $ref: "#/components/schemas/AgreementApprovedEvent"
-                - $ref: "#/components/schemas/AgreementTerminatedEvent"
-                - $ref: "#/components/schemas/AgreementCancelledEvent"
-                - $ref: "#/components/schemas/AgreementRejectedEvent"
-              discriminator:
-                propertyName: eventType
+              $ref: '#/components/schemas/AgreementOperationEvent'
 
     AgreementList:
       description: Result of listing agreements.
@@ -1371,8 +1365,6 @@ components:
         role:
           type: string
 
-    # note this should be specified as a sub-class of Event, BUT
-    # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(
     AgreementOperationEvent:
       allOf:
         - $ref: '#/components/schemas/Event'
