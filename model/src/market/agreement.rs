@@ -99,6 +99,8 @@ pub struct AgreementListEntry {
     pub timestamp: DateTime<Utc>,
     pub approved_date: Option<DateTime<Utc>>,
     pub role: Role,
+    pub requestor_id: NodeId,
+    pub provider_id: NodeId,
 }
 
 /// * `Proposal` - newly created by a Requestor (based on Proposal)
