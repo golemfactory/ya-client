@@ -1401,6 +1401,7 @@ components:
       required:
         - eventType
         - eventDate
+        - debitNoteId
       discriminator:
         propertyName: eventType
       properties:
@@ -1457,6 +1458,7 @@ components:
       required:
         - eventType
         - eventDate
+        - invoiceId
       discriminator:
         propertyName: eventType
       properties:
