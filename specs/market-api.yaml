@@ -31,7 +31,7 @@ servers:
   - url: /market-api/v1
 
 security:
-  - app_key: []
+  - app_key: [ ]
 
 tags:
   - name: requestor
@@ -1065,7 +1065,7 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/AgreementEvent'
+              $ref: '#/components/schemas/AgreementOperationEvent'
 
     AgreementList:
       description: Result of listing agreements.
@@ -1186,7 +1186,7 @@ components:
             state:
               type: string
               readOnly: true
-              enum: [Initial, Draft, Rejected, Accepted, Expired]
+              enum: [ Initial, Draft, Rejected, Accepted, Expired ]
               description: >
                 * `Initial` - proposal arrived from the market as response
                 to subscription
@@ -1220,7 +1220,7 @@ components:
 
     AgreementState:
       type: string
-      enum: [Proposal, Pending, Cancelled, Rejected, Approved, Expired, Terminated]
+      enum: [ Proposal, Pending, Cancelled, Rejected, Approved, Expired, Terminated ]
       description: >
         * `Proposal` - newly created by a Requestor (draft based on Proposal)
 
@@ -1365,23 +1365,17 @@ components:
         role:
           type: string
 
-    # note this should be specified as a sub-class of Event, BUT
-    # a number of OpenAPI code generators fail on multistory inheritance hierarchies :(
     AgreementOperationEvent:
-      type: object
-      required:
-        - eventType
-        - eventDate
-        - agreementId
-      discriminator:
-        propertyName: eventType
-      properties:
-        eventType:
-          type: string
-        eventDate:
-          $ref: 'common.yaml#/components/schemas/Timestamp'
-        agreementId:
-          type: string
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          required:
+            - agreementId
+          discriminator:
+            propertyName: eventType
+          properties:
+            agreementId:
+              type: string
 
     AgreementApprovedEvent:
       allOf:
@@ -1413,7 +1407,7 @@ components:
           properties:
             terminator:
               type: string
-              enum: [Requestor, Provider]
+              enum: [ Requestor, Provider ]
             signature:
               type: string
             reason:
