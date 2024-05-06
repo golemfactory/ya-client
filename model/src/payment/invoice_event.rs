@@ -90,7 +90,7 @@ mod test {
             invoice_id: "ajdik".to_string(),
             event_date: DateTime::parse_from_str("2020-12-21T15:51:21.126645Z", "%+")
                 .unwrap()
-                .into(),
+                .with_timezone(&Utc),
             event_type: InvoiceEventType::InvoiceRejectedEvent {
                 rejection: Rejection {
                     rejection_reason: RejectionReason::UnsolicitedService,
@@ -129,7 +129,7 @@ mod test {
                 invoice_id: "ajdik".to_string(),
                 event_date: DateTime::parse_from_str("2020-12-21T15:51:21.126645Z", "%+")
                     .unwrap()
-                    .into(),
+                    .with_timezone(&Utc),
                 event_type: InvoiceEventType::InvoiceAcceptedEvent,
             },
             ie

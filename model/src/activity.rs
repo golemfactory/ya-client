@@ -21,7 +21,7 @@ pub use self::exe_script_command_result::{CommandOutput, CommandResult, ExeScrip
 pub use self::exe_script_command_state::ExeScriptCommandState;
 pub use self::exe_script_request::ExeScriptRequest;
 pub use self::provider_event::ProviderEvent;
-pub use self::runtime_event::{RuntimeEvent, RuntimeEventKind};
+pub use self::runtime_event::{CommandProgress, RuntimeEvent, RuntimeEventKind};
 #[cfg(feature = "sgx")]
 pub use self::sgx_credentials::SgxCredentials;
 

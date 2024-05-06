@@ -1,8 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
-use std::str::FromStr;
 
-pub const DEFAULT_ACK_TIMEOUT: f64 = 5.0; // seconds
+pub const DEFAULT_ACK_TIMEOUT: f64 = 15.0; // seconds
 pub const DEFAULT_EVENT_TIMEOUT: f64 = 5.0; // seconds
 
 #[derive(Deserialize, Serialize)]
@@ -35,25 +34,17 @@ pub struct PaymentId {
     pub payment_id: String,
 }
 
-#[derive(Deserialize, Serialize, Default)]
+#[derive(Deserialize, Serialize)]
 pub struct Timeout {
     #[serde(default)]
     pub timeout: Option<f64>,
-}
-
-impl FromStr for Timeout {
-    type Err = serde_json::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        serde_json::from_str::<Timeout>(s)
-    }
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EventParams {
     #[serde(default)]
-    pub timeout: Timeout,
+    pub timeout: Option<f64>,
     #[serde(default)]
     pub after_timestamp: Option<DateTime<Utc>>,
     #[serde(default)]
