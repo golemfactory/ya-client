@@ -6,7 +6,7 @@ authors = ["Golem Factory <contact@golem.network>"]
 homepage = "https://github.com/golemfactory/ya-client"
 repository = "https://github.com/golemfactory/ya-client"
 license = "LGPL-3.0"
-edition = "2018"
+edition = "2021"
 
 [features]
 default = []
