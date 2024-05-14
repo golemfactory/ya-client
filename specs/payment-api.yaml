@@ -396,7 +396,7 @@ paths:
         - $ref: '#/components/parameters/debitNoteId'
         - $ref: 'common.yaml#/parameters/ackTimeout'
       requestBody:
-        $ref: '#/components/requestBodies/Acceptance'
+        $ref: '#/components/requestBodies/DebitNoteAcceptance'
       responses:
         200:
           $ref: '#/components/responses/OK'
@@ -820,6 +820,14 @@ components:
           schema:
             $ref: '#/components/schemas/AllocationUpdate'
 
+    DebitNoteAcceptance:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DebitNoteAcceptance'
+
+
     Acceptance:
       required: true
       content:
@@ -1132,6 +1140,22 @@ components:
         - CANCELLED
       readOnly: true
 
+    DebitNoteAcceptance:
+      description: Message sent when Requestor accepts a Debit Note or Invoice.
+      type: object
+      properties:
+        totalAmountAccepted:
+          type: string
+        allocationId:
+          type: string
+        autoAcceptTo:
+          type: string
+          format: decimal
+      required:
+        - totalAmountAccepted
+        - allocationId
+
+
     Acceptance:
       description: Message sent when Requestor accepts a Debit Note or Invoice.
       type: object
@@ -1217,6 +1241,12 @@ components:
           format: date-time
         makeDeposit:
           type: boolean
+        extendTimeout:
+          description: >
+            in seconds, the time by which the allocation timeout is
+            extended after it is last used.
+          type: integer
+          format: int64
         deposit:
           type: object
           properties:
@@ -1233,7 +1263,6 @@ components:
         - spentAmount
         - remainingAmount
         - timestamp
-        - makeDeposit
 
     AllocationUpdate:
       type: object
