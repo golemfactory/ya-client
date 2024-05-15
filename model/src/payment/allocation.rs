@@ -5,7 +5,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-struct ValidateDepositCall {
+pub struct ValidateDepositCall {
     #[serde(flatten)]
     arguments: HashMap<String, String>,
 }
