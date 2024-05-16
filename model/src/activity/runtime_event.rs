@@ -47,10 +47,6 @@ impl RuntimeEvent {
     pub fn stderr(batch_id: String, idx: usize, out: CommandOutput) -> Self {
         Self::new(batch_id, idx, RuntimeEventKind::StdErr(out))
     }
-
-    pub fn progress(batch_id: String, idx: usize, progress: CommandProgress) -> Self {
-        Self::new(batch_id, idx, RuntimeEventKind::Progress(progress))
-    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -65,20 +61,4 @@ pub enum RuntimeEventKind {
     },
     StdOut(CommandOutput),
     StdErr(CommandOutput),
-    Progress(CommandProgress),
-}
-
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub struct CommandProgress {
-    /// Steps are counted starting from 0. That means that first step from 4-steps tasks
-    /// will report 0/4. Task is finished when counter reaches 4/4.
-    pub step: (usize, usize),
-    /// May contain additional arbitrary information about, what is happening with the task
-    /// like retrying transfer or that image was deployed from cache.
-    pub message: Option<String>,
-    /// Granular progress of currently executed step. The first element describes current
-    /// progress, the second the size of the whole task, which can be unknown.
-    pub progress: (u64, Option<u64>),
-    pub unit: Option<String>,
 }
