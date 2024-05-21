@@ -19,9 +19,9 @@ pub struct Deposit {
     pub validate: Option<ValidateDepositCall>,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde_as]
 #[skip_serializing_none]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Allocation {
     pub allocation_id: String,
@@ -35,7 +35,7 @@ pub struct Allocation {
     pub deposit: Option<Deposit>,
     #[serde(default)]
     pub make_deposit: bool,
-    #[serde_as(as = "Option<serde_with::DurationSeconds<i64>>")]
+    #[serde_as(as = "Option<DurationSeconds<u64>>")]
     pub extend_timeout: Option<Duration>,
 }
 
@@ -110,6 +110,28 @@ mod test {
             "paymentPlatform": { "token": "GLM" },
             "totalAmount": "512.2345"
         }"#,
+        );
+    }
+
+    #[test]
+    fn test_allocation() {
+        let j = serde_json::to_string(&Allocation {
+            allocation_id: "".to_string(),
+            address: "".to_string(),
+            payment_platform: "".to_string(),
+            total_amount: Default::default(),
+            spent_amount: Default::default(),
+            remaining_amount: Default::default(),
+            timestamp: Default::default(),
+            timeout: None,
+            deposit: None,
+            make_deposit: false,
+            extend_timeout: None,
+        })
+        .unwrap();
+        assert_eq!(
+            r#"{"allocationId":"","address":"","paymentPlatform":"","totalAmount":"0","spentAmount":"0","remainingAmount":"0","timestamp":"1970-01-01T00:00:00Z","makeDeposit":false}"#,
+            j
         );
     }
 }
