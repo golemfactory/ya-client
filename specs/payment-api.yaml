@@ -1033,19 +1033,18 @@ components:
           agreementId:
             type: string
             readOnly: true
-
-      required:
-        - debitNoteId
-        - issuerId
-        - recipientId
-        - payeeAddr
-        - payerAddr
-        - paymentPlatform
-        - timestamp
-        - agreementId
-        - activityId
-        - totalAmountDue
-        - status
+        required:
+          - debitNoteId
+          - issuerId
+          - recipientId
+          - payeeAddr
+          - payerAddr
+          - paymentPlatform
+          - timestamp
+          - agreementId
+          - activityId
+          - totalAmountDue
+          - status
 
     Invoice:
       description: >
