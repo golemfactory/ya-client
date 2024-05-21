@@ -1254,6 +1254,8 @@ components:
               type: string
             contract:
               type: string
+            validate:
+              type: object
           required:
             - id
             - contract

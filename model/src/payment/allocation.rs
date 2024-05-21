@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use std::time::Duration;
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
@@ -5,9 +7,16 @@ use serde::{Deserialize, Serialize};
 use serde_with::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ValidateDepositCall {
+    #[serde(flatten)]
+    pub arguments: HashMap<String, String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Deposit {
     pub id: String,
     pub contract: String,
+    pub validate: Option<ValidateDepositCall>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

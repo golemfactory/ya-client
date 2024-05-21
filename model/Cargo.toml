@@ -17,7 +17,6 @@ sgx = ['secp256k1', 'openssl', 'hex', 'secp256k1/serde']
 bigdecimal = { version = "0.2", features = ["serde"]}
 chrono = { version = "0.4", features = ["serde"]}
 derive_more = "0.99"
-humantime-serde = "1.1"
 rand = "0.8"
 serde = { version = "1.0.146", features = ["derive"] }
 serde_with = { version = "3" }
