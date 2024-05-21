@@ -1217,6 +1217,7 @@ components:
           format: date-time
         makeDeposit:
           type: boolean
+          deprecated: true
         deposit:
           type: object
           properties:
@@ -1235,7 +1236,6 @@ components:
         - spentAmount
         - remainingAmount
         - timestamp
-        - makeDeposit
 
     AllocationUpdate:
       type: object
