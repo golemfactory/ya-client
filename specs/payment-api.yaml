@@ -1228,7 +1228,7 @@ components:
 
     Allocation:
       allOf:
-        - $ref: '#/components/schemas/Allocation'
+        - $ref: '#/components/schemas/AllocationWrite'
         - type: object
           description: >
             An Allocation is a designated sum of money reserved for the purpose of
