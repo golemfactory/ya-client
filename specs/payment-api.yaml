@@ -797,7 +797,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/DebitNote'
+            $ref: '#/components/schemas/DebitNoteWrite'
 
     Invoice:
       required: true
@@ -960,6 +960,29 @@ components:
             $ref: '#/components/schemas/MarketDecoration'
 
   schemas:
+    DebitNoteWrite:
+      description: >
+        Subset of debit-note used for creating it. See `DebitNote` for a complete
+        description.
+      type: object
+      properties:
+        activityId:
+          type: string
+        totalAmountDue:
+          type: string
+        usageCounterVector:
+          type: object
+        paymentDueDate:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/InvoiceStatus'
+
+      required:
+        - activityId
+        - totalAmountDue
+        - status
+
     DebitNote:
       description: >
         A Debit Note is an artifact issued by the Provider to the Requestor,
@@ -978,47 +1001,38 @@ components:
         trigger payments, therefore payment amount for the newly received Debit
         Note is expected to be determined by difference of Total Payments for
         the Agreement vs Total Amount Due.
-      type: object
-      properties:
-        debitNoteId:
-          type: string
-          readOnly: true
-        issuerId:
-          type: string
-          readOnly: true
-        recipientId:
-          type: string
-          readOnly: true
-        payeeAddr:
-          type: string
-          readOnly: true
-        payerAddr:
-          type: string
-          readOnly: true
-        paymentPlatform:
-          type: string
-          readOnly: true
-        previousDebitNoteId:
-          type: string
-          readOnly: true
-        timestamp:
-          type: string
-          format: date-time
-          readOnly: true
-        agreementId:
-          type: string
-          readOnly: true
-        activityId:
-          type: string
-        totalAmountDue:
-          type: string
-        usageCounterVector:
-          type: object
-        paymentDueDate:
-          type: string
-          format: date-time
-        status:
-          $ref: '#/components/schemas/InvoiceStatus'
+      allOf:
+      - $ref: '#/components/schemas/DebitNoteWrite'
+      - type: object
+        properties:
+          debitNoteId:
+            type: string
+            readOnly: true
+          issuerId:
+            type: string
+            readOnly: true
+          recipientId:
+            type: string
+            readOnly: true
+          payeeAddr:
+            type: string
+            readOnly: true
+          payerAddr:
+            type: string
+            readOnly: true
+          paymentPlatform:
+            type: string
+            readOnly: true
+          previousDebitNoteId:
+            type: string
+            readOnly: true
+          timestamp:
+            type: string
+            format: date-time
+            readOnly: true
+          agreementId:
+            type: string
+            readOnly: true
 
       required:
         - debitNoteId
