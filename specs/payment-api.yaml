@@ -811,7 +811,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Allocation'
+            $ref: '#/components/schemas/AllocationWrite'
 
     AllocationUpdate:
       required: true
@@ -1177,23 +1177,14 @@ components:
         token:
           type: string
 
-    Allocation:
+    AllocationWrite:
       type: object
       description: >
-        An Allocation is a designated sum of money reserved for the purpose of
-        making some particular payments. Allocations are currently purely virtual
-        objects. They exist only in Requestor's database. An Allocation is
-        connected to a payment account (wallet) specified by `address` and
-        `paymentPlatform` field. If these fields are not present the default
-        payment platform is used and the address is assumed to be identical to
-        the Requestor's Node ID.
+        Subset of allocation used for creating it. See `Allocation` for a complete
+        description.
 
-
-        **NOTE:** `timeout` and `makeDeposit` field are currently ignored.
+        **NOTE:** The `makeDeposit` field is deprecated and ignored.
       properties:
-        allocationId:
-          type: string
-          readOnly: true
         address:
           type: string
         paymentPlatform:
@@ -1202,22 +1193,9 @@ components:
             - type: string
         totalAmount:
           type: string
-        spentAmount:
-          type: string
-          readOnly: true
-        remainingAmount:
-          type: string
-          readOnly: true
-        timestamp:
-          type: string
-          format: date-time
-          readOnly: true
         timeout:
           type: string
           format: date-time
-        makeDeposit:
-          type: boolean
-          deprecated: true
         deposit:
           type: object
           properties:
@@ -1230,12 +1208,11 @@ components:
           required:
             - id
             - contract
+        makeDeposit:
+          type: boolean
+          deprecated: true
       required:
-        - allocationId
         - totalAmount
-        - spentAmount
-        - remainingAmount
-        - timestamp
 
     AllocationUpdate:
       type: object
@@ -1248,6 +1225,41 @@ components:
         timeout:
           type: string
           format: date-time
+
+    Allocation:
+      allOf:
+        - $ref: '#/components/schemas/Allocation'
+        - type: object
+          description: >
+            An Allocation is a designated sum of money reserved for the purpose of
+            making some particular payments. Allocations are currently purely virtual
+            objects. They exist only in Requestor's database. An Allocation is
+            connected to a payment account (wallet) specified by `address` and
+            `paymentPlatform` field. If these fields are not present the default
+            payment platform is used and the address is assumed to be identical to
+            the Requestor's Node ID.
+
+
+            **NOTE:** The `makeDeposit` field is deprecated and ignored.
+          properties:
+            allocationId:
+              type: string
+              readOnly: true
+            spentAmount:
+              type: string
+              readOnly: true
+            remainingAmount:
+              type: string
+              readOnly: true
+            timestamp:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+            - allocationId
+            - spentAmount
+            - remainingAmount
+            - timestamp
 
     Payment:
       type: object
