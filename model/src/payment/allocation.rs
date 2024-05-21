@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use std::time::Duration;
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_with::*;
+use std::time::Duration;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ValidateDepositCall {
@@ -36,7 +36,7 @@ pub struct Allocation {
     #[serde(default)]
     pub make_deposit: bool,
     #[serde_as(as = "Option<serde_with::DurationSeconds<i64>>")]
-    pub extend_timeout : Option<Duration>
+    pub extend_timeout: Option<Duration>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -54,7 +54,6 @@ pub enum PaymentPlatformEnum {
     PaymentPlatform(PaymentPlatform),
 }
 
-
 #[serde_as]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -67,7 +66,7 @@ pub struct NewAllocation {
     #[serde(default)]
     pub make_deposit: bool,
     #[serde_as(as = "Option<serde_with::DurationSeconds<u64>>")]
-    pub extend_timeout : Option<Duration>
+    pub extend_timeout: Option<Duration>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -81,31 +80,36 @@ pub struct AllocationUpdate {
 
 #[cfg(test)]
 mod test {
-    use std::fmt::Debug;
-    use serde::de::DeserializeOwned;
     use super::*;
+    use serde::de::DeserializeOwned;
+    use std::fmt::Debug;
 
-    fn can_parse_to<T : DeserializeOwned + Debug>(json : &str) {
-        let v : T = serde_json::from_str(json).unwrap();
+    fn can_parse_to<T: DeserializeOwned + Debug>(json: &str) {
+        let v: T = serde_json::from_str(json).unwrap();
         eprintln!("{:?}", v);
     }
 
     #[test]
     fn test_new_allocation() {
-        can_parse_to::<NewAllocation>(r#"{
+        can_parse_to::<NewAllocation>(
+            r#"{
             "paymentPlatform": "erc20-polygon-glm",
             "totalAmount": 1.0,
             "timeout": "2023-08-28T15:16:31.858Z",
             "makeDeposit": false,
             "extendTimeout": 3600
-        }"#);
-        can_parse_to::<NewAllocation>(r#"{
+        }"#,
+        );
+        can_parse_to::<NewAllocation>(
+            r#"{
             "totalAmount": 5
-        }"#);
-        can_parse_to::<NewAllocation>(r#"{
+        }"#,
+        );
+        can_parse_to::<NewAllocation>(
+            r#"{
             "paymentPlatform": { "token": "GLM" },
             "totalAmount": "512.2345"
-        }"#);
+        }"#,
+        );
     }
-
 }

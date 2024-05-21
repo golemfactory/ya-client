@@ -13,5 +13,5 @@ pub struct Acceptance {
 pub struct DebitNoteAcceptance {
     pub total_amount_accepted: BigDecimal,
     pub allocation_id: String,
-    pub auto_accept_to : Option<BigDecimal>
+    pub auto_accept_to: Option<BigDecimal>,
 }
