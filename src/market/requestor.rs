@@ -1,12 +1,14 @@
 //! Requestor part of the Market API
 use ya_client_model::market::{
     agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, AgreementProposal,
-    Demand, NewDemand, NewProposal, Proposal, Reason, RequestorEvent,
+    Demand, NewDemand, NewProposal, Offer, Proposal, Reason, RequestorEvent,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 use chrono::{DateTime, TimeZone, Utc};
 use std::fmt::Display;
+use ya_client_model::market::scan::NewScan;
+use ya_client_model::NodeId;
 
 /// Bindings for Requestor part of the Market API.
 #[derive(Clone)]
@@ -307,5 +309,33 @@ impl MarketRequestorApi {
             #[query] app_session_id,
         );
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
+    }
+
+    pub async fn scan(&self, scan_req: &NewScan) -> Result<String> {
+        self.client.post("scan").send_json(&scan_req).json().await
+    }
+
+    pub async fn collect_scan(
+        &self,
+        subscription_id: &str,
+        timeout: Option<f32>,
+        max_events: Option<usize>,
+        peer_id: Option<&NodeId>,
+    ) -> Result<Vec<Offer>> {
+        let url = url_format!(
+            "scan/{subscription_id}/events",
+            #[query]
+            timeout,
+            #[query]
+            max_events,
+            #[query]
+            peer_id
+        );
+        self.client
+            .get(&url)
+            .send()
+            .json()
+            .await
+            .or_else(default_on_timeout)
     }
 }
