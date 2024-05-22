@@ -1046,43 +1046,12 @@ components:
           - totalAmountDue
           - status
 
-    Invoice:
+    InvoiceWrite:
       description: >
-        An Invoice is an artifact issued by the Provider to the Requestor, in
-        the context of a specific Agreement. It indicates the total Amount owed
-        by the Requestor in this Agreement. No further Debit Notes shall be
-        issued after the Invoice is issued. The issue of Invoice signals the
-        Termination of the Agreement (if it hasn't been terminated already).
-        No Activity execution is allowed after the Invoice is issued.
-
-
-        **NOTE:** An invoice can be issued even before any Activity is started in
-        the context of an Agreement (eg. in one off, 'fire-and-forget' payment
-        regime).
+        Subset of invoice used for creating it. See `Invoice` for a complete
+        description.
       type: object
       properties:
-        invoiceId:
-          type: string
-          readOnly: true
-        issuerId:
-          type: string
-          readOnly: true
-        recipientId:
-          type: string
-          readOnly: true
-        payeeAddr:
-          type: string
-          readOnly: true
-        payerAddr:
-          type: string
-          readOnly: true
-        paymentPlatform:
-          type: string
-          readOnly: true
-        timestamp:
-          type: string
-          format: date-time
-          readOnly: true
         agreementId:
           type: string
         activityIds:
@@ -1096,19 +1065,59 @@ components:
           format: date-time
         status:
           $ref: '#/components/schemas/InvoiceStatus'
-
       required:
-        - invoiceId
-        - issuerId
-        - recipientId
-        - payeeAddr
-        - payerAddr
-        - paymentPlatform
-        - timestamp
         - agreementId
         - amount
         - paymentDueDate
         - status
+
+    Invoice:
+      description: >
+        An Invoice is an artifact issued by the Provider to the Requestor, in
+        the context of a specific Agreement. It indicates the total Amount owed
+        by the Requestor in this Agreement. No further Debit Notes shall be
+        issued after the Invoice is issued. The issue of Invoice signals the
+        Termination of the Agreement (if it hasn't been terminated already).
+        No Activity execution is allowed after the Invoice is issued.
+
+
+        **NOTE:** An invoice can be issued even before any Activity is started in
+        the context of an Agreement (eg. in one off, 'fire-and-forget' payment
+        regime).
+      allOf:
+        - $ref: '#/components/schemas/InvoiceWrite'
+        - type: object
+          properties:
+            invoiceId:
+              type: string
+              readOnly: true
+            issuerId:
+              type: string
+              readOnly: true
+            recipientId:
+              type: string
+              readOnly: true
+            payeeAddr:
+              type: string
+              readOnly: true
+            payerAddr:
+              type: string
+              readOnly: true
+            paymentPlatform:
+              type: string
+              readOnly: true
+            timestamp:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+            - invoiceId
+            - issuerId
+            - recipientId
+            - payeeAddr
+            - payerAddr
+            - paymentPlatform
+            - timestamp
 
     InvoiceStatus:
       description: >
