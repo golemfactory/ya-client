@@ -1063,13 +1063,10 @@ components:
         paymentDueDate:
           type: string
           format: date-time
-        status:
-          $ref: '#/components/schemas/InvoiceStatus'
       required:
         - agreementId
         - amount
         - paymentDueDate
-        - status
 
     Invoice:
       description: >
@@ -1110,6 +1107,8 @@ components:
               type: string
               format: date-time
               readOnly: true
+            status:
+              $ref: '#/components/schemas/InvoiceStatus'
           required:
             - invoiceId
             - issuerId
@@ -1118,6 +1117,7 @@ components:
             - payerAddr
             - paymentPlatform
             - timestamp
+            - status
 
     InvoiceStatus:
       description: >
