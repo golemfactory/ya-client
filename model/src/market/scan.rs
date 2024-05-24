@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NewScan {
     timeout: Option<u64>,
-    stype: ScanType,
+    #[serde(rename="type")]
+    scan_type: ScanType,
+    constraints : Option<String>
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

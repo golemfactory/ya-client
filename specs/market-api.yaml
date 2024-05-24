@@ -1367,10 +1367,14 @@ components:
             The value may be unspecified, defaulting to 30 seconds.
             This is intended to protect the server from memory leaks in applications that do not clean up
             their resources.
-        stype:
+        type:
           $ref: '#/components/schemas/ScanType'
+        constraints:
+          description: >
+            optional filter.
+          type: string
       required:
-        - stype
+        - type
 
     ScanType:
       description: >
