@@ -37,7 +37,7 @@ paths:
       operationId: createNetwork
       summary: CreateNetwork - Creates a new Network.
       requestBody:
-        $ref: '#/components/requestBodies/Network'
+        $ref: '#/components/requestBodies/NewNetwork'
       responses:
         200:
           $ref: '#/components/responses/Network'
@@ -278,12 +278,12 @@ components:
           schema:
             $ref: '#/components/schemas/Address'
 
-    Network:
+    NewNetwork:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Network'
+            $ref: '#/components/schemas/NewNetwork'
 
     Node:
       required: true
@@ -372,10 +372,25 @@ components:
           type: integer
           readOnly: true
 
-    Network:
+    NewNetwork:
       type: object
       required:
         - ip
+      properties:
+        ip:
+          type: string
+        mask:
+          type: string
+        gateway:
+          type: string
+
+    Network:
+      type: object
+      required:
+        - id
+        - ip
+        - mask
+        - gateway
       properties:
         id:
           type: string
