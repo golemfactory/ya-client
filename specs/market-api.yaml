@@ -47,7 +47,7 @@ paths:
       description: >
         Creates new offer/demand Iterator.
 
-      operationId: scan
+      operationId: beginScan
       requestBody:
         $ref: '#/components/requestBodies/NewScan'
       responses:
@@ -64,7 +64,7 @@ paths:
     get:
       tags:
         - requestor
-      operationId: collectScan
+      operationId: collectScanResults
       parameters:
         - $ref: '#/components/parameters/subscriptionId'
         - $ref: 'common.yaml#/parameters/pollTimeout'
@@ -72,14 +72,28 @@ paths:
         - $ref: '#/components/parameters/eventPeerId'
       responses:
         200:
-          $ref: '#/components/responses/OfferList'
+          $ref: '#/components/responses/ScanEvents'
         401:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-
+    delete:
+      tags:
+        - requestor
+      operationId: endScan
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId'
+      responses:
+        201:
+          description: scan deleted
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
 
   /offers:
     get:
@@ -1114,6 +1128,16 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Offer'
+
+    ScanEvents:
+      description: Scan Events
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Offer'
+
 
     EventList:
       description: Proposal or Agreement event list.

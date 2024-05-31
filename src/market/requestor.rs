@@ -311,7 +311,7 @@ impl MarketRequestorApi {
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
     }
 
-    pub async fn scan(&self, scan_req: &NewScan) -> Result<String> {
+    pub async fn begin_scan(&self, scan_req: &NewScan) -> Result<String> {
         self.client.post("scan").send_json(&scan_req).json().await
     }
 
@@ -337,5 +337,10 @@ impl MarketRequestorApi {
             .json()
             .await
             .or_else(default_on_timeout)
+    }
+
+    pub async fn end_scan(&self, subscription_id: &str) -> Result<()> {
+        let url = url_format!("scan/{subscription_id}/events");
+        self.client.delete(&url).send().json().await
     }
 }
