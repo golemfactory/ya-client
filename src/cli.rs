@@ -1,7 +1,8 @@
 use structopt::StructOpt;
 use url::Url;
 
-use crate::{activity, market, net, payment, web::WebClient, web::WebInterface};
+use crate::identity::IDENTITY_URL_ENV_VAR;
+use crate::{activity, identity, market, net, payment, web::WebClient, web::WebInterface};
 use std::convert::TryFrom;
 
 use crate::activity::ACTIVITY_URL_ENV_VAR;
@@ -17,6 +18,7 @@ pub trait ApiClient: Clone {
     type Activity: WebInterface;
     type Payment: WebInterface;
     type Net: WebInterface;
+    type Identity: WebInterface;
 }
 
 #[derive(Clone)]
@@ -25,6 +27,7 @@ pub struct Api<T: ApiClient> {
     pub activity: T::Activity,
     pub payment: T::Payment,
     pub net: T::Net,
+    pub identity: T::Identity,
 }
 
 pub type RequestorApi = Api<Requestor>;
@@ -40,6 +43,7 @@ impl ApiClient for Requestor {
     type Activity = activity::ActivityRequestorApi;
     type Payment = payment::PaymentApi;
     type Net = net::NetApi;
+    type Identity = identity::IdentityApi;
 }
 
 impl ApiClient for Provider {
@@ -47,6 +51,7 @@ impl ApiClient for Provider {
     type Activity = activity::ActivityProviderApi;
     type Payment = payment::PaymentApi;
     type Net = net::NetApi;
+    type Identity = identity::IdentityApi;
 }
 
 #[derive(StructOpt, Clone)]
@@ -80,6 +85,10 @@ pub struct ApiOpts {
     /// Net API URL
     #[structopt(long, env = NET_URL_ENV_VAR, hide_env_values = true)]
     net_url: Option<Url>,
+
+    /// Identity API URL
+    #[structopt(long, env = IDENTITY_URL_ENV_VAR, hide_env_values = true)]
+    identity_url: Option<Url>,
 }
 
 impl<T: ApiClient> TryFrom<&ApiOpts> for Api<T> {
@@ -96,6 +105,7 @@ impl<T: ApiClient> TryFrom<&ApiOpts> for Api<T> {
             activity: client.interface_at(cli.activity_url.clone())?,
             payment: client.interface_at(cli.payment_url.clone())?,
             net: client.interface_at(cli.net_url.clone())?,
+            identity: client.interface_at(cli.identity_url.clone())?,
         })
     }
 }
