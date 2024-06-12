@@ -82,6 +82,7 @@ async fn main() -> Result<()> {
             let new_allocation = AllocationUpdate {
                 total_amount: Some(BigDecimal::from_str(&budget).unwrap()),
                 timeout: None,
+                deposit: None,
             };
 
             let allocation = client.amend_allocation(&id, &new_allocation).await?;
