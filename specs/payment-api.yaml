@@ -1248,6 +1248,11 @@ components:
         timeout:
           type: string
           format: date-time
+        deposit:
+          type: object
+          properties:
+            validate:
+              type: object
 
     Payment:
       type: object
