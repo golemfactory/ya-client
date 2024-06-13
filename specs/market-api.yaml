@@ -924,6 +924,31 @@ paths:
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
+
+  /agreements/{agreementId}/terminate/reason:
+    parameters:
+      - $ref: '#/components/parameters/agreementId'
+    post:
+      tags:
+        - provider
+        - requestor
+      operationId: getTerminateAgreementReason
+      summary: Gets termination reason reported when terminateAgreement operation was called.
+      description: >
+        Method to get the reason for terminating the Agreement.
+      responses:
+        200:
+          $ref: '#/components/schemas/AgreementTerminatedEvent'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+
 components:
 
   securitySchemes:
