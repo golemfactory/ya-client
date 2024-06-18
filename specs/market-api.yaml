@@ -938,7 +938,7 @@ paths:
         Method to get the reason for terminating the Agreement.
       responses:
         200:
-          $ref: '#/components/schemas/AgreementTerminatedEvent'
+          $ref: '#/components/responses/AgreementTerminationReason'
         400:
           $ref: 'common.yaml#/responses/BadRequest'
         401:
@@ -1091,6 +1091,13 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/AgreementOperationEvent'
+
+    AgreementTerminationReason:
+      description: Agreement termination reason.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AgreementTerminatedEvent'
 
     AgreementList:
       description: Result of listing agreements.
@@ -1423,6 +1430,9 @@ components:
               $ref: 'common.yaml#/components/schemas/Reason'
 
     AgreementTerminatedEvent:
+      description: >
+        One party terminated Agreement. Termination Reason and signature
+        can be retrieved from event.
       allOf:
         - $ref: '#/components/schemas/AgreementOperationEvent'
         - type: object
