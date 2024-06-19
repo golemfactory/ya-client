@@ -40,6 +40,61 @@ tags:
     description: Provider part
 
 paths:
+  /scan:
+    post:
+      tags:
+        - requestor
+      description: >
+        Creates new offer/demand Iterator.
+
+      operationId: beginScan
+      requestBody:
+        $ref: '#/components/requestBodies/NewScan'
+      responses:
+        201:
+          $ref: '#/components/responses/ScanId'
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /scan/{subscriptionId}/events:
+    get:
+      tags:
+        - requestor
+      operationId: collectScanResults
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId'
+        - $ref: 'common.yaml#/parameters/pollTimeout'
+        - $ref: 'common.yaml#/parameters/maxEvents'
+        - $ref: '#/components/parameters/eventPeerId'
+      responses:
+        200:
+          $ref: '#/components/responses/ScanEvents'
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+    delete:
+      tags:
+        - requestor
+      operationId: endScan
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId'
+      responses:
+        201:
+          description: scan deleted
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
   /offers:
     get:
       tags:
@@ -961,6 +1016,16 @@ components:
         type: string
 
 
+    eventPeerId:
+      description: >
+        allows to query offers from specified node.
+      name: peerId
+      in: query
+      required: false
+      schema:
+        type: string
+
+
   requestBodies:
 
     Offer:
@@ -1005,8 +1070,23 @@ components:
           schema:
             $ref: '#/components/schemas/PropertyQueryReply'
 
+    NewScan:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewScan'
+
 
   responses:
+
+    ScanId:
+      description: Market scan start.
+      content:
+        application/json:
+          schema:
+            type: string
+            description: Iterator id
 
     SubscriptionId:
       description: Subscribed.
@@ -1048,6 +1128,16 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Offer'
+
+    ScanEvents:
+      description: Scan Events
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Offer'
+
 
     EventList:
       description: Proposal or Agreement event list.
@@ -1289,6 +1379,34 @@ components:
     PropertyQueryReply:
       type: object
 
+    NewScan:
+      description: >
+      type: object
+      properties:
+        timeout:
+          type: number
+          format: int32
+          description: >
+            specifies how long an unused iterator will live in the server's memory.
+            The value may be unspecified, defaulting to 30 seconds.
+            This is intended to protect the server from memory leaks in applications that do not clean up
+            their resources.
+        type:
+          $ref: '#/components/schemas/ScanType'
+        constraints:
+          description: >
+            optional filter.
+          type: string
+      required:
+        - type
+
+    ScanType:
+      description: >
+        scan type. offer for offers. demand for demands.
+      type: string
+      enum:
+        - offer
+        - demand
 
     Event:
       type: object
