@@ -286,8 +286,8 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Proposal'
       responses:
-        200:
-          $ref: '#/components/responses/Proposal'
+        201:
+          $ref: '#/components/responses/ProposalId'
         400:
           $ref: 'common.yaml#/responses/BadRequest'
         401:
@@ -513,8 +513,8 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/Proposal'
       responses:
-        200:
-          $ref: '#/components/responses/Proposal'
+        201:
+          $ref: '#/components/responses/ProposalId'
         400:
           $ref: 'common.yaml#/responses/BadRequest'
         401:
