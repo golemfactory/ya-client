@@ -7,25 +7,28 @@ use serde_with::*;
 use std::time::Duration;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ValidateDepositCall {
     #[serde(flatten)]
     pub arguments: HashMap<String, String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Deposit {
     pub id: String,
     pub contract: String,
     pub validate: Option<ValidateDepositCall>,
 }
 
-#[serde_as]
-#[skip_serializing_none]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DepositUpdate {
     pub validate: Option<ValidateDepositCall>,
 }
 
+#[serde_as]
+#[skip_serializing_none]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Allocation {
