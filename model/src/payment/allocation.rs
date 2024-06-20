@@ -22,6 +22,11 @@ pub struct Deposit {
 #[serde_as]
 #[skip_serializing_none]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct DepositUpdate {
+    pub validate: Option<ValidateDepositCall>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Allocation {
     pub allocation_id: String,
@@ -76,6 +81,8 @@ pub struct AllocationUpdate {
     pub total_amount: Option<BigDecimal>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub timeout: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub deposit: Option<DepositUpdate>,
 }
 
 #[cfg(test)]
