@@ -31,5 +31,4 @@ secp256k1 = { workspace = true, optional = true }
 openssl = { version = "0.10", optional = true }
 
 [package.metadata.release]
-dev-version = false
 enable-all-features = true
