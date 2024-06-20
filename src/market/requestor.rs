@@ -340,7 +340,7 @@ impl MarketRequestorApi {
     }
 
     pub async fn end_scan(&self, subscription_id: &str) -> Result<()> {
-        let url = url_format!("scan/{subscription_id}/events");
+        let url = url_format!("scan/{subscription_id}");
         self.client.delete(&url).send().json().await
     }
 }
