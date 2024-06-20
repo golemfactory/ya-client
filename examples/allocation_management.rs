@@ -97,6 +97,7 @@ async fn main() -> Result<()> {
                     address: None,
                     payment_platform: Some(PaymentPlatformEnum::PaymentPlatformName(platform)),
                     timeout: None,
+                    extend_timeout: None,
                 })
                 .await?;
             println!("{:#?}", allocation);
