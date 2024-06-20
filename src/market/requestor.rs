@@ -1,7 +1,8 @@
 //! Requestor part of the Market API
 use ya_client_model::market::{
     agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, AgreementProposal,
-    AgreementTerminationReason, Demand, NewDemand, NewProposal, Proposal, Offer, Reason, RequestorEvent,
+    AgreementTerminationReason, Demand, NewDemand, NewProposal, Offer, Proposal, Reason,
+    RequestorEvent,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
