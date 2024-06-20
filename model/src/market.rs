@@ -9,6 +9,7 @@ pub mod offer;
 pub mod property_query;
 pub mod proposal;
 pub mod reason;
+pub mod scan;
 
 pub use agreement::{Agreement, AgreementListEntry, Role};
 pub use agreement_event::{AgreementEventType, AgreementOperationEvent, AgreementTerminator};
