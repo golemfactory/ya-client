@@ -11,6 +11,7 @@
 use crate::activity::ExeScriptCommandState;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::time::Duration;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,6 +22,18 @@ pub enum ExeScriptCommand {
         net: Vec<Network>,
         #[serde(default)]
         hosts: HashMap<String, String>, // hostname -> IP
+
+        #[serde(default)]
+        hostname: Option<String>,
+
+        #[serde(default)]
+        volumes: Vec<String>,
+
+        #[serde(default)]
+        env: HashMap<String, String>,
+
+        #[serde(default)]
+        progress: Option<ProgressArgs>,
     },
     Start {
         #[serde(default)]
@@ -39,6 +52,8 @@ pub enum ExeScriptCommand {
         to: String,
         #[serde(flatten)]
         args: TransferArgs,
+        #[serde(default)]
+        progress: Option<ProgressArgs>,
     },
     Terminate {},
 }
@@ -105,6 +120,16 @@ pub struct TransferArgs {
     pub format: Option<String>,
     pub depth: Option<usize>,
     pub fileset: Option<FileSet>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ProgressArgs {
+    #[serde(default)]
+    #[serde(with = "humantime_serde")]
+    pub update_interval: Option<Duration>,
+    /// Number of bytes after which next progress event will be sent.
+    pub update_step: Option<usize>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
