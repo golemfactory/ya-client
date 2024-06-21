@@ -1,7 +1,8 @@
 //! Provider part of the Market API
 use ya_client_model::market::{
-    agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, NewOffer,
-    NewProposal, Offer, Proposal, ProviderEvent, Reason, MARKET_API_PATH,
+    agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent,
+    AgreementTerminationReason, NewOffer, NewProposal, Offer, Proposal, ProviderEvent, Reason,
+    MARKET_API_PATH,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
@@ -227,6 +228,15 @@ impl MarketProviderApi {
     /// Fetches agreement with given agreement id.
     pub async fn get_agreement(&self, agreement_id: &str) -> Result<Agreement> {
         let url = url_format!("agreements/{agreement_id}");
+        self.client.get(&url).send().json().await
+    }
+
+    /// Query termination Reason for specific Agreement.
+    pub async fn get_agreement_termination_reason(
+        &self,
+        agreement_id: &str,
+    ) -> Result<AgreementTerminationReason> {
+        let url = url_format!("agreements/{agreement_id}/terminate/reason");
         self.client.get(&url).send().json().await
     }
 

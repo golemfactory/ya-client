@@ -1,7 +1,8 @@
 //! Requestor part of the Market API
 use ya_client_model::market::{
     agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, AgreementProposal,
-    Demand, NewDemand, NewProposal, Offer, Proposal, Reason, RequestorEvent,
+    AgreementTerminationReason, Demand, NewDemand, NewProposal, Offer, Proposal, Reason,
+    RequestorEvent,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
@@ -262,6 +263,15 @@ impl MarketRequestorApi {
     ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate");
         self.client.post(&url).send_json(&reason).json().await
+    }
+
+    /// Query termination Reason for specific Agreement.
+    pub async fn get_agreement_termination_reason(
+        &self,
+        agreement_id: &str,
+    ) -> Result<AgreementTerminationReason> {
+        let url = url_format!("agreements/{agreement_id}/terminate/reason");
+        self.client.get(&url).send().json().await
     }
 
     /// Collects events related to an Agreement.

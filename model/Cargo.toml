@@ -6,7 +6,7 @@ authors = ["Golem Factory <contact@golem.network>"]
 homepage = "https://github.com/golemfactory/ya-client"
 repository = "https://github.com/golemfactory/ya-client"
 license = "LGPL-3.0"
-edition = "2018"
+edition = "2021"
 
 [features]
 default = []
@@ -19,6 +19,7 @@ chrono = { version = "0.4", features = ["serde"]}
 derive_more = "0.99"
 rand = "0.8"
 serde = { version = "1.0.146", features = ["derive"] }
+serde_with = { version = "3" }
 serde_bytes = "0.11.14"
 serde_json = "1.0.96"
 strum = "0.24.1"
