@@ -11,6 +11,7 @@
 use crate::activity::ExeScriptCommandState;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,6 +22,8 @@ pub enum ExeScriptCommand {
         net: Vec<Network>,
         #[serde(default)]
         hosts: HashMap<String, String>, // hostname -> IP
+        #[serde(flatten)]
+        authorization: TransferAuthorization,
     },
     Start {
         #[serde(default)]
@@ -39,6 +42,8 @@ pub enum ExeScriptCommand {
         to: String,
         #[serde(flatten)]
         args: TransferArgs,
+        #[serde(flatten)]
+        authorization: TransferAuthorization,
     },
     Terminate {},
 }
@@ -126,6 +131,56 @@ pub struct SetObject {
 pub enum SetEntry<T> {
     Single(T),
     Multiple(Vec<T>),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(untagged)]
+pub enum TransferAuthorization {
+    #[default]
+    None,
+    HttpAuthorization(HttpAuthorization),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum HttpAuthorization {
+    BasicAuth(BasicAuth),
+    BearerToken(BearerToken),
+}
+
+impl Into<Option<HttpAuthorization>> for &TransferAuthorization {
+    fn into(self) -> Option<HttpAuthorization> {
+        return match &self {
+            TransferAuthorization::HttpAuthorization(http_authorization) => {
+                Some(http_authorization.clone())
+            }
+            _ => None,
+        };
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BasicAuth {
+    pub username: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+}
+
+impl fmt::Debug for BasicAuth {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "username={}, password=***", self.username)
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BearerToken {
+    pub token: String,
+}
+
+impl fmt::Debug for BearerToken {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "token=***")
+    }
 }
 
 impl From<ExeScriptCommand> for ExeScriptCommandState {
