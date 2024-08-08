@@ -23,6 +23,7 @@ pub struct DebitNote {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub payment_due_date: Option<DateTime<Utc>>,
     pub status: crate::payment::DocumentStatus,
+    pub debit_nonce: i32,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
