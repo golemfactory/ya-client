@@ -14,8 +14,9 @@ with-diesel = ['diesel']
 sgx = ['secp256k1', 'openssl', 'hex', 'secp256k1/serde']
 
 [dependencies]
-bigdecimal = { version = "0.2", features = ["serde"]}
-chrono = { version = "0.4", features = ["serde"]}
+bigdecimal = { version = "0.2", features = ["serde"] }
+bytesize = { version = "1.3.0", features = ["serde"] }
+chrono = { version = "0.4", features = ["serde"] }
 derive_more = "0.99"
 rand = "0.8"
 serde = { version = "1.0.146", features = ["derive"] }
@@ -27,7 +28,7 @@ strum_macros = "0.24.3"
 thiserror = "1.0"
 
 diesel = { version = "1.4", optional = true }
-hex = { version = "0.4", optional = true}
+hex = { version = "0.4", optional = true }
 secp256k1 = { workspace = true, optional = true }
 openssl = { version = "0.10", optional = true }
 
