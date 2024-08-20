@@ -9,6 +9,7 @@
  */
 
 use crate::activity::ExeScriptCommandState;
+use bytesize::ByteSize;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -52,15 +53,15 @@ pub enum VolumeMount {
     Ram {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        size: Option<String>,
+        size: Option<ByteSize>,
     },
     Storage {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        size: Option<String>,
+        size: Option<ByteSize>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        preallocate: Option<String>,
+        preallocate: Option<ByteSize>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         errors: Option<String>,
@@ -215,6 +216,8 @@ impl From<ExeScriptCommand> for ExeScriptCommandState {
 
 #[cfg(test)]
 mod test {
+    use bytesize::ByteSize;
+
     use super::Volumes;
     use crate::activity::exe_script_command::{VolumeInfo, VolumeMount};
     use std::collections::HashMap;
@@ -280,13 +283,13 @@ mod test {
             "/golem/output": {},
             "/storage": {
                 "storage": {
-                    "size": "10g",
-                    "preallocate": "2g"
+                    "size": "10GiB",
+                    "preallocate": "2GiB"
                 }
             },
             "/": {
                 "ram": {
-                    "size": "1g"
+                    "size": "1024MiB"
                 }
             }
         }"#;
@@ -302,15 +305,15 @@ mod test {
                     map.insert(
                         "/storage".to_string(),
                         VolumeInfo::Mount(VolumeMount::Storage {
-                            size: Some("10g".to_string()),
-                            preallocate: Some("2g".to_string()),
+                            size: Some(ByteSize::gib(10)),
+                            preallocate: Some(ByteSize::gib(2)),
                             errors: None,
                         }),
                     );
                     map.insert(
                         "/".to_string(),
                         VolumeInfo::Mount(VolumeMount::Ram {
-                            size: Some("1g".to_string()),
+                            size: Some(ByteSize::b(1073741824)),
                         }),
                     );
                     map
