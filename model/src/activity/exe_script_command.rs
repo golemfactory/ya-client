@@ -21,6 +21,9 @@ pub enum ExeScriptCommand {
         net: Vec<Network>,
         #[serde(default)]
         hosts: HashMap<String, String>, // hostname -> IP
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        volumes: Option<Volumes>,
     },
     Start {
         #[serde(default)]
@@ -41,6 +44,44 @@ pub enum ExeScriptCommand {
         args: TransferArgs,
     },
     Terminate {},
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VolumeMount {
+    Ram {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        size: Option<String>,
+    },
+    Storage {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        size: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        preallocate: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        errors: Option<String>,
+    },
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum VolumeInfo {
+    Mount(VolumeMount),
+    Override {},
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Volumes {
+    Simple(Vec<String>),
+    Detailed {
+        #[serde(flatten)]
+        volumes: HashMap<String, VolumeInfo>,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -174,6 +215,9 @@ impl From<ExeScriptCommand> for ExeScriptCommandState {
 
 #[cfg(test)]
 mod test {
+    use super::Volumes;
+    use crate::activity::exe_script_command::{VolumeInfo, VolumeMount};
+    use std::collections::HashMap;
 
     #[test]
     fn test_transfers_parsing() {
@@ -210,5 +254,68 @@ mod test {
 
         ]"#;
         let _: Vec<super::ExeScriptCommand> = serde_json::from_str(command).unwrap();
+    }
+
+    #[test]
+    fn test_volumes_simple() {
+        let volumes_json = r#"[
+            "/golem/input",
+            "/golem/output"
+        ]"#;
+        let volumes: Volumes = serde_json::from_str(&volumes_json).unwrap();
+
+        assert_eq!(
+            volumes,
+            Volumes::Simple(vec![
+                "/golem/input".to_string(),
+                "/golem/output".to_string()
+            ])
+        );
+    }
+
+    #[test]
+    fn test_volumes_detailed() {
+        let volumes_json = r#"{
+            "/golem/input": {},
+            "/golem/output": {},
+            "/storage": {
+                "storage": {
+                    "size": "10g",
+                    "preallocate": "2g"
+                }
+            },
+            "/": {
+                "ram": {
+                    "size": "1g"
+                }
+            }
+        }"#;
+        let volumes: Volumes = serde_json::from_str(&volumes_json).unwrap();
+
+        assert_eq!(
+            volumes,
+            Volumes::Detailed {
+                volumes: {
+                    let mut map = HashMap::new();
+                    map.insert("/golem/input".to_string(), VolumeInfo::Override {});
+                    map.insert("/golem/output".to_string(), VolumeInfo::Override {});
+                    map.insert(
+                        "/storage".to_string(),
+                        VolumeInfo::Mount(VolumeMount::Storage {
+                            size: Some("10g".to_string()),
+                            preallocate: Some("2g".to_string()),
+                            errors: None,
+                        }),
+                    );
+                    map.insert(
+                        "/".to_string(),
+                        VolumeInfo::Mount(VolumeMount::Ram {
+                            size: Some("1g".to_string()),
+                        }),
+                    );
+                    map
+                }
+            }
+        );
     }
 }
