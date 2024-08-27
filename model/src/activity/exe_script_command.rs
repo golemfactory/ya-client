@@ -51,14 +51,10 @@ pub enum ExeScriptCommand {
 #[serde(rename_all = "lowercase")]
 pub enum VolumeMount {
     Ram {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        size: Option<ByteSize>,
+        size: ByteSize,
     },
     Storage {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        size: Option<ByteSize>,
+        size: ByteSize,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         preallocate: Option<ByteSize>,
@@ -305,7 +301,7 @@ mod test {
                     map.insert(
                         "/storage".to_string(),
                         VolumeInfo::Mount(VolumeMount::Storage {
-                            size: Some(ByteSize::gib(10)),
+                            size: ByteSize::gib(10),
                             preallocate: Some(ByteSize::gib(2)),
                             errors: None,
                         }),
@@ -313,7 +309,7 @@ mod test {
                     map.insert(
                         "/".to_string(),
                         VolumeInfo::Mount(VolumeMount::Ram {
-                            size: Some(ByteSize::b(1073741824)),
+                            size: ByteSize::b(1073741824),
                         }),
                     );
                     map
