@@ -50,6 +50,7 @@ pub enum ExeScriptCommand {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum VolumeMount {
+    Host {},
     Ram {
         size: ByteSize,
     },
@@ -66,18 +67,11 @@ pub enum VolumeMount {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum VolumeInfo {
-    Mount(VolumeMount),
-    Override {},
-}
-
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
 pub enum Volumes {
     Simple(Vec<String>),
     Detailed {
         #[serde(flatten)]
-        volumes: HashMap<String, VolumeInfo>,
+        volumes: HashMap<String, VolumeMount>,
     },
 }
 
@@ -215,7 +209,7 @@ mod test {
     use bytesize::ByteSize;
 
     use super::Volumes;
-    use crate::activity::exe_script_command::{VolumeInfo, VolumeMount};
+    use crate::activity::exe_script_command::VolumeMount;
     use std::collections::HashMap;
 
     #[test]
@@ -275,8 +269,8 @@ mod test {
     #[test]
     fn test_volumes_detailed() {
         let volumes_json = r#"{
-            "/golem/input": {},
-            "/golem/output": {},
+            "/golem/input": { "host": {} },
+            "/golem/output": { "host": {} },
             "/storage": {
                 "storage": {
                     "size": "10GiB",
@@ -296,21 +290,21 @@ mod test {
             Volumes::Detailed {
                 volumes: {
                     let mut map = HashMap::new();
-                    map.insert("/golem/input".to_string(), VolumeInfo::Override {});
-                    map.insert("/golem/output".to_string(), VolumeInfo::Override {});
+                    map.insert("/golem/input".to_string(), VolumeMount::Host {});
+                    map.insert("/golem/output".to_string(), VolumeMount::Host {});
                     map.insert(
                         "/storage".to_string(),
-                        VolumeInfo::Mount(VolumeMount::Storage {
+                        VolumeMount::Storage {
                             size: ByteSize::gib(10),
                             preallocate: Some(ByteSize::gib(2)),
                             errors: None,
-                        }),
+                        },
                     );
                     map.insert(
                         "/".to_string(),
-                        VolumeInfo::Mount(VolumeMount::Ram {
+                        VolumeMount::Ram {
                             size: ByteSize::b(1073741824),
-                        }),
+                        },
                     );
                     map
                 }
