@@ -75,6 +75,18 @@ pub enum Volumes {
     },
 }
 
+impl Volumes {
+    pub fn as_volumes(self) -> HashMap<String, VolumeMount> {
+        match self {
+            Volumes::Simple(paths) => paths
+                .into_iter()
+                .map(|path| (path, VolumeMount::Host {}))
+                .collect(),
+            Volumes::Detailed { volumes } => volumes,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Network {
