@@ -33,10 +33,10 @@ pub struct DepositUpdate {
 #[serde(rename_all = "camelCase")]
 pub struct AllocationExpenditure {
     pub allocation_id: String,
+    pub agreement_id: String,
+    pub activity_id: Option<String>,
     pub accepted_amount: BigDecimal,
     pub scheduled_amount: BigDecimal,
-    pub created_ts: DateTime<Utc>,
-    pub updated_ts: DateTime<Utc>,
 }
 
 #[serde_as]
