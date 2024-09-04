@@ -31,6 +31,18 @@ pub struct DepositUpdate {
 #[skip_serializing_none]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct AllocationExpenditure {
+    pub allocation_id: String,
+    pub accepted_amount: BigDecimal,
+    pub scheduled_amount: BigDecimal,
+    pub created_ts: DateTime<Utc>,
+    pub updated_ts: DateTime<Utc>,
+}
+
+#[serde_as]
+#[skip_serializing_none]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Allocation {
     pub allocation_id: String,
     pub address: String,
@@ -41,6 +53,8 @@ pub struct Allocation {
     pub timestamp: DateTime<Utc>,
     pub timeout: Option<DateTime<Utc>>,
     pub deposit: Option<Deposit>,
+    pub created_ts: DateTime<Utc>,
+    pub updated_ts: DateTime<Utc>,
     #[serde(default)]
     pub make_deposit: bool,
     #[serde_as(as = "Option<DurationSeconds<u64>>")]
