@@ -481,6 +481,11 @@ impl PaymentApi {
         self.client.get(&url).send().json().await
     }
 
+    pub async fn get_signed_payment(&self, payment_id: &str) -> Result<Signed<Payment>> {
+        let url = url_format!("payments/{payment_id}");
+        self.client.get(&url).send().json().await
+    }
+
     pub async fn driver_status(
         &self,
         driver: Option<String>,
