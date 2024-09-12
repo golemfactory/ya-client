@@ -82,6 +82,7 @@ async fn main() -> Result<()> {
             let new_allocation = AllocationUpdate {
                 total_amount: Some(BigDecimal::from_str(&budget).unwrap()),
                 timeout: None,
+                deposit: None,
             };
 
             let allocation = client.amend_allocation(&id, &new_allocation).await?;
@@ -96,6 +97,7 @@ async fn main() -> Result<()> {
                     address: None,
                     payment_platform: Some(PaymentPlatformEnum::PaymentPlatformName(platform)),
                     timeout: None,
+                    extend_timeout: None,
                 })
                 .await?;
             println!("{:#?}", allocation);

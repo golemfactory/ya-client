@@ -62,11 +62,19 @@ pub struct FilterParams {
     pub after_timestamp: Option<DateTime<Utc>>,
 }
 
+// Event params has to be flattened by hand due to bug in actix Params serialization
+// https://github.com/nox/serde_urlencoded/issues/33
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DriverNetworkParams {
-    #[serde(flatten)]
-    pub event_params: EventParams,
+    #[serde(default)]
+    pub timeout: Option<f64>,
+    #[serde(default)]
+    pub after_timestamp: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub max_events: Option<u32>,
+    #[serde(default)]
+    pub app_session_id: Option<String>,
     #[serde(default)]
     pub network: Option<String>,
     #[serde(default)]

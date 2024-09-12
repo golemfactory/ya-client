@@ -1,12 +1,15 @@
 //! Requestor part of the Market API
 use ya_client_model::market::{
     agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, AgreementProposal,
-    Demand, NewDemand, NewProposal, Proposal, Reason, RequestorEvent,
+    AgreementTerminationReason, Demand, NewDemand, NewProposal, Offer, Proposal, Reason,
+    RequestorEvent,
 };
 
 use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
 use chrono::{DateTime, TimeZone, Utc};
 use std::fmt::Display;
+use ya_client_model::market::scan::NewScan;
+use ya_client_model::NodeId;
 
 /// Bindings for Requestor part of the Market API.
 #[derive(Clone)]
@@ -262,6 +265,15 @@ impl MarketRequestorApi {
         self.client.post(&url).send_json(&reason).json().await
     }
 
+    /// Query termination Reason for specific Agreement.
+    pub async fn get_agreement_termination_reason(
+        &self,
+        agreement_id: &str,
+    ) -> Result<AgreementTerminationReason> {
+        let url = url_format!("agreements/{agreement_id}/terminate/reason");
+        self.client.get(&url).send().json().await
+    }
+
     /// Collects events related to an Agreement.
     ///
     /// This is a blocking operation. It will not return until there is
@@ -307,5 +319,38 @@ impl MarketRequestorApi {
             #[query] app_session_id,
         );
         self.client.get(&url).send().json().await.or_else(default_on_timeout)
+    }
+
+    pub async fn begin_scan(&self, scan_req: &NewScan) -> Result<String> {
+        self.client.post("scan").send_json(&scan_req).json().await
+    }
+
+    pub async fn collect_scan(
+        &self,
+        subscription_id: &str,
+        timeout: Option<f32>,
+        max_events: Option<usize>,
+        peer_id: Option<&NodeId>,
+    ) -> Result<Vec<Offer>> {
+        let url = url_format!(
+            "scan/{subscription_id}/events",
+            #[query]
+            timeout,
+            #[query]
+            max_events,
+            #[query]
+            peer_id
+        );
+        self.client
+            .get(&url)
+            .send()
+            .json()
+            .await
+            .or_else(default_on_timeout)
+    }
+
+    pub async fn end_scan(&self, subscription_id: &str) -> Result<()> {
+        let url = url_format!("scan/{subscription_id}");
+        self.client.delete(&url).send().json().await
     }
 }
