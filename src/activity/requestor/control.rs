@@ -69,7 +69,12 @@ impl ActivityRequestorControlApi {
     /// Destroys given Activity.
     pub async fn destroy_activity(&self, activity_id: &str) -> Result<()> {
         let uri = url_format!("activity/{activity_id}");
-        self.client.delete(&uri).send().json().await?;
+
+        // Specify serialization target because of a rustc bug falsely
+        // emitting dependency_on_unit_never_type_fallback.
+        // If some time has passed try removing ::<()> and see if it still
+        // emits a warning.
+        self.client.delete(&uri).send().json::<()>().await?;
         Ok(())
     }
 
