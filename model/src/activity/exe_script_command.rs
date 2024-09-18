@@ -9,8 +9,10 @@
  */
 
 use crate::activity::ExeScriptCommandState;
+use bytesize::ByteSize;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::time::Duration;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
