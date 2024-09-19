@@ -1,10 +1,10 @@
 [package]
 name = "ya-client-model"
-version = "0.6.0"
+version = "0.7.0"
 description = "Yagna REST API data model"
 authors = ["Golem Factory <contact@golem.network>"]
 homepage = "https://github.com/golemfactory/ya-client"
-repository = "https://github.com/golemfactory/ya-client"
+repository = "https:F//github.com/golemfactory/ya-client"
 license = "LGPL-3.0"
 edition = "2021"
 
