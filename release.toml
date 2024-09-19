@@ -1,0 +1,5 @@
+sign-commit=true
+sign-tag=true
+dev-version=false
+pre-release-commit-message="release {{crate_name}} {{version}}"
+enable-all-features=true

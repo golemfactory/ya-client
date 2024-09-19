@@ -79,8 +79,6 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
-
-  /scan/{subscriptionId}:
     delete:
       tags:
         - requestor

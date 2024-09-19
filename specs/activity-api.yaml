@@ -487,6 +487,7 @@ components:
               "net": [{ "id": "id", "ip": "10.0.0.2", "mask": "255.255.0.0" }],
               "hosts": {"master": "10.0.0.1"},
               "nodes": {"10.0.0.1": "0xdeadbeef"},
+              "volumes": {"/": { "storage": { "size": "10g" } }},
               "progress" : {"updateInterval": "300ms", "updateStep": null}
             }
         },
@@ -556,6 +557,10 @@ components:
           additionalProperties:
             type: string
         nodes:
+          type: object
+          additionalProperties:
+            type: string
+        volumes:
           type: object
           additionalProperties:
             type: string

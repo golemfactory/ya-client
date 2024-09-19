@@ -9,6 +9,7 @@
  */
 
 use crate::activity::ExeScriptCommandState;
+use bytesize::ByteSize;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::Duration;
@@ -26,8 +27,9 @@ pub enum ExeScriptCommand {
         #[serde(default)]
         hostname: Option<String>,
 
+        #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        volumes: Vec<String>,
+        volumes: Option<Volumes>,
 
         #[serde(default)]
         env: HashMap<String, String>,
@@ -56,6 +58,46 @@ pub enum ExeScriptCommand {
         progress: Option<ProgressArgs>,
     },
     Terminate {},
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VolumeMount {
+    Host {},
+    Ram {
+        size: ByteSize,
+    },
+    Storage {
+        size: ByteSize,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        preallocate: Option<ByteSize>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        errors: Option<String>,
+    },
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Volumes {
+    Simple(Vec<String>),
+    Detailed {
+        #[serde(flatten)]
+        volumes: HashMap<String, VolumeMount>,
+    },
+}
+
+impl Volumes {
+    pub fn as_volumes(self) -> HashMap<String, VolumeMount> {
+        match self {
+            Volumes::Simple(paths) => paths
+                .into_iter()
+                .map(|path| (path, VolumeMount::Host {}))
+                .collect(),
+            Volumes::Detailed { volumes } => volumes,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -199,6 +241,11 @@ impl From<ExeScriptCommand> for ExeScriptCommandState {
 
 #[cfg(test)]
 mod test {
+    use bytesize::ByteSize;
+
+    use super::Volumes;
+    use crate::activity::exe_script_command::VolumeMount;
+    use std::collections::HashMap;
 
     #[test]
     fn test_transfers_parsing() {
@@ -235,5 +282,68 @@ mod test {
 
         ]"#;
         let _: Vec<super::ExeScriptCommand> = serde_json::from_str(command).unwrap();
+    }
+
+    #[test]
+    fn test_volumes_simple() {
+        let volumes_json = r#"[
+            "/golem/input",
+            "/golem/output"
+        ]"#;
+        let volumes: Volumes = serde_json::from_str(&volumes_json).unwrap();
+
+        assert_eq!(
+            volumes,
+            Volumes::Simple(vec![
+                "/golem/input".to_string(),
+                "/golem/output".to_string()
+            ])
+        );
+    }
+
+    #[test]
+    fn test_volumes_detailed() {
+        let volumes_json = r#"{
+            "/golem/input": { "host": {} },
+            "/golem/output": { "host": {} },
+            "/storage": {
+                "storage": {
+                    "size": "10GiB",
+                    "preallocate": "2GiB"
+                }
+            },
+            "/": {
+                "ram": {
+                    "size": "1024MiB"
+                }
+            }
+        }"#;
+        let volumes: Volumes = serde_json::from_str(&volumes_json).unwrap();
+
+        assert_eq!(
+            volumes,
+            Volumes::Detailed {
+                volumes: {
+                    let mut map = HashMap::new();
+                    map.insert("/golem/input".to_string(), VolumeMount::Host {});
+                    map.insert("/golem/output".to_string(), VolumeMount::Host {});
+                    map.insert(
+                        "/storage".to_string(),
+                        VolumeMount::Storage {
+                            size: ByteSize::gib(10),
+                            preallocate: Some(ByteSize::gib(2)),
+                            errors: None,
+                        },
+                    );
+                    map.insert(
+                        "/".to_string(),
+                        VolumeMount::Ram {
+                            size: ByteSize::b(1073741824),
+                        },
+                    );
+                    map
+                }
+            }
+        );
     }
 }
