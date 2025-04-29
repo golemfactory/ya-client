@@ -149,12 +149,14 @@ mod test {
             timestamp: Default::default(),
             timeout: None,
             deposit: None,
+            created_ts: Default::default(),
+            updated_ts: Default::default(),
             make_deposit: false,
             extend_timeout: None,
         })
         .unwrap();
         assert_eq!(
-            r#"{"allocationId":"","address":"","paymentPlatform":"","totalAmount":"0","spentAmount":"0","remainingAmount":"0","timestamp":"1970-01-01T00:00:00Z","makeDeposit":false}"#,
+            r#"{"allocationId":"","address":"","paymentPlatform":"","totalAmount":"0","spentAmount":"0","remainingAmount":"0","timestamp":"1970-01-01T00:00:00Z","createdTs":"1970-01-01T00:00:00Z","updatedTs":"1970-01-01T00:00:00Z","makeDeposit":false}"#,
             j
         );
     }
