@@ -47,7 +47,8 @@ pub struct Offer {
     pub offer_id: String,
     #[serde(rename = "providerId")]
     pub provider_id: NodeId,
-    // TODO: introduce TTL aka validTo
+    #[serde(rename = "expiration")]
+    pub expiration: DateTime<Utc>,
     /// Object creation timestamp
     #[serde(rename = "timestamp")]
     pub timestamp: DateTime<Utc>,
@@ -59,6 +60,7 @@ impl Offer {
         constraints: String,
         offer_id: String,
         provider_id: NodeId,
+        expiration: DateTime<Utc>,
         timestamp: DateTime<Utc>,
     ) -> Offer {
         Offer {
@@ -66,6 +68,7 @@ impl Offer {
             constraints,
             offer_id,
             provider_id,
+            expiration,
             timestamp,
         }
     }
