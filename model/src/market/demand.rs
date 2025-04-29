@@ -47,6 +47,8 @@ pub struct Demand {
     pub demand_id: String,
     #[serde(rename = "requestorId")]
     pub requestor_id: NodeId,
+    #[serde(rename = "expiration")]
+    pub expiration: DateTime<Utc>,
     /// Object creation timestamp
     #[serde(rename = "timestamp")]
     pub timestamp: DateTime<Utc>,
@@ -58,6 +60,7 @@ impl Demand {
         constraints: String,
         demand_id: String,
         requestor_id: NodeId,
+        expiration: DateTime<Utc>,
         timestamp: DateTime<Utc>,
     ) -> Demand {
         Demand {
@@ -65,6 +68,7 @@ impl Demand {
             constraints,
             demand_id,
             requestor_id,
+            expiration,
             timestamp,
         }
     }
