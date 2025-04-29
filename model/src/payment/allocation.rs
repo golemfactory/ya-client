@@ -31,6 +31,18 @@ pub struct DepositUpdate {
 #[skip_serializing_none]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct AllocationExpenditure {
+    pub allocation_id: String,
+    pub agreement_id: String,
+    pub activity_id: Option<String>,
+    pub accepted_amount: BigDecimal,
+    pub scheduled_amount: BigDecimal,
+}
+
+#[serde_as]
+#[skip_serializing_none]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Allocation {
     pub allocation_id: String,
     pub address: String,
@@ -41,6 +53,8 @@ pub struct Allocation {
     pub timestamp: DateTime<Utc>,
     pub timeout: Option<DateTime<Utc>>,
     pub deposit: Option<Deposit>,
+    pub created_ts: DateTime<Utc>,
+    pub updated_ts: DateTime<Utc>,
     #[serde(default)]
     pub make_deposit: bool,
     #[serde_as(as = "Option<DurationSeconds<u64>>")]
@@ -135,12 +149,14 @@ mod test {
             timestamp: Default::default(),
             timeout: None,
             deposit: None,
+            created_ts: Default::default(),
+            updated_ts: Default::default(),
             make_deposit: false,
             extend_timeout: None,
         })
         .unwrap();
         assert_eq!(
-            r#"{"allocationId":"","address":"","paymentPlatform":"","totalAmount":"0","spentAmount":"0","remainingAmount":"0","timestamp":"1970-01-01T00:00:00Z","makeDeposit":false}"#,
+            r#"{"allocationId":"","address":"","paymentPlatform":"","totalAmount":"0","spentAmount":"0","remainingAmount":"0","timestamp":"1970-01-01T00:00:00Z","createdTs":"1970-01-01T00:00:00Z","updatedTs":"1970-01-01T00:00:00Z","makeDeposit":false}"#,
             j
         );
     }
