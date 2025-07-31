@@ -56,7 +56,7 @@ openssl = { version = "0.10", optional = true }
 [dev-dependencies]
 actix-rt = "2.7.0"
 anyhow = "1.0"
-bigdecimal = { version = "0.2" }
+bigdecimal = { version = "0.4" }
 env_logger = "0.10"
 structopt = "0.3"
 

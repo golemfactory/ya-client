@@ -80,9 +80,11 @@ impl DebitNoteEventType {
 
 #[cfg(test)]
 mod test {
+    use std::str::FromStr;
+
     use super::*;
     use crate::payment::{Rejection, RejectionReason};
-    use bigdecimal::{BigDecimal, FromPrimitive};
+    use bigdecimal::BigDecimal;
 
     #[test]
     fn test_serialize_rejected_event_has_flat_rejection() {
@@ -94,7 +96,7 @@ mod test {
             event_type: DebitNoteEventType::DebitNoteRejectedEvent {
                 rejection: Rejection {
                     rejection_reason: RejectionReason::UnsolicitedService,
-                    total_amount_accepted: BigDecimal::from_f32(13.14).unwrap(),
+                    total_amount_accepted: BigDecimal::from_str("13.14000").unwrap(),
                     message: None,
                 },
             },
