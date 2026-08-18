@@ -35,6 +35,7 @@ openssl = { version = "0.10", optional = true }
 
 [dev-dependencies]
 diesel = { version = "2.1", features = ["sqlite"] }
+libsqlite3-sys = { version = "0.28", features = ["bundled"] }
 
 [package.metadata.release]
 dev-version = false
