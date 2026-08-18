@@ -1,7 +1,7 @@
 use ya_client_model::identity::Identity;
 
-use crate::web::{WebClient, WebInterface};
 use crate::Result;
+use crate::web::{WebClient, WebInterface};
 
 pub const IDENTITY_URL_ENV_VAR: &str = "YAGNA_IDENTITY_URL";
 

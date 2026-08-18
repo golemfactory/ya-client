@@ -1,13 +1,13 @@
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use structopt::StructOpt;
 use url::Url;
 use ya_client::{
+    Result,
     payment::PaymentApi,
     web::{WebClient, WebInterface},
-    Result,
 };
 use ya_client_model::payment::allocation::PaymentPlatformEnum;
 use ya_client_model::payment::{Allocation, AllocationUpdate, NewAllocation};
@@ -59,11 +59,10 @@ fn print_allocations<'a>(allocations: impl IntoIterator<Item = &'a Allocation>) 
 async fn main() -> Result<()> {
     let options = Options::from_args();
     println!("\nrun this example with RUST_LOG=debug to see REST calls\n");
-    env::set_var(
-        "RUST_LOG",
-        env::var("RUST_LOG").unwrap_or(options.log_level.clone()),
-    );
-    env_logger::init();
+    env_logger::Builder::from_env(
+        env_logger::Env::default().default_filter_or(options.log_level.clone()),
+    )
+    .init();
 
     let client: PaymentApi = WebClient::with_token(&options.app_key).interface_at(options.url)?;
 

@@ -86,7 +86,7 @@ impl EncryptionCtx {
 
     pub fn encrypt_bytes(&self, buf: &[u8]) -> Result<Vec<u8>, EncryptionError> {
         let mut bytes = Vec::with_capacity(12 + 16 + buf.len() + 5);
-        let iv: [u8; 12] = rand::thread_rng().gen();
+        let iv: [u8; 12] = rand::thread_rng().r#gen();
         let mut tag = [0u8; 16];
         let out = openssl::symm::encrypt_aead(
             openssl::symm::Cipher::aes_256_gcm(),

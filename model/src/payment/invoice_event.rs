@@ -44,8 +44,8 @@ impl InvoiceEventType {
     }
 
     pub fn details(&self) -> Option<serde_json::Value> {
-        use serde_json::to_value;
         use InvoiceEventType::*;
+        use serde_json::to_value;
 
         match self {
             InvoiceRejectedEvent { rejection } => to_value(rejection).ok(),
@@ -58,8 +58,8 @@ impl InvoiceEventType {
         discriminant: &str,
         details: Option<serde_json::Value>,
     ) -> Option<Self> {
-        use serde_json::from_value;
         use InvoiceEventType::*;
+        use serde_json::from_value;
 
         Some(match (discriminant, details) {
             ("RECEIVED", _) => InvoiceReceivedEvent,

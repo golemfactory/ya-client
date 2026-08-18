@@ -1,11 +1,11 @@
 //! Provider part of the Market API
 use ya_client_model::market::{
-    agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent,
-    AgreementTerminationReason, NewOffer, NewProposal, Offer, Proposal, ProviderEvent, Reason,
-    MARKET_API_PATH,
+    Agreement, AgreementListEntry, AgreementOperationEvent, AgreementTerminationReason,
+    MARKET_API_PATH, NewOffer, NewProposal, Offer, Proposal, ProviderEvent, Reason,
+    agreement::State,
 };
 
-use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
+use crate::{Result, web::WebClient, web::WebInterface, web::default_on_timeout};
 use chrono::{DateTime, TimeZone, Utc};
 use std::fmt::Display;
 

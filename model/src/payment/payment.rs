@@ -1,5 +1,5 @@
-use crate::payment::{ActivityPayment, AgreementPayment};
 use crate::NodeId;
+use crate::payment::{ActivityPayment, AgreementPayment};
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

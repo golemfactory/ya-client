@@ -11,7 +11,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  rust_stable: 1.71.1
 
 jobs:
   build:
@@ -27,10 +26,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Install Rust ${{ env.rust_stable }}
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ env.rust_stable }}
+      - name: Set up mise
+        uses: jdx/mise-action@v4.2.5
 
       - name: Cache cargo registry
         uses: actions/cache@v4
@@ -55,25 +52,16 @@ jobs:
           key: ${{ runner.os }}-cargo-build-target1-${{ hashFiles('**/Cargo.lock') }}
 
       - name: cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: mise x -- cargo fmt --all -- --check
 
       - name: cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --workspace
+        run: mise x -- cargo test --workspace
+
+      - name: cargo test with Diesel integration
+        run: mise x -- cargo test -p ya-client-model --features with-diesel
 
       - name: cargo test cli
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --features cli
+        run: mise x -- cargo test --features cli
 
       - name: cargo build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --workspace
+        run: mise x -- cargo build --workspace

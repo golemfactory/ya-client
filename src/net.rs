@@ -2,9 +2,9 @@ use crate::error::Error;
 use crate::model::net::*;
 use crate::web::{WebClient, WebInterface};
 use actix_codec::Framed;
+use awc::BoxedSocket;
 use awc::http::Method;
 use awc::ws::Codec;
-use awc::BoxedSocket;
 use std::ops::Not;
 
 pub const NET_URL_ENV_VAR: &str = "YAGNA_NET_URL";

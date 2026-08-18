@@ -1,16 +1,16 @@
-use std::{env, thread, time::Duration};
+use std::{thread, time::Duration};
 use structopt::StructOpt;
 use url::Url;
 
 use std::time::{SystemTime, UNIX_EPOCH};
 use ya_client::{
+    Error, Result,
     market::{MarketProviderApi, MarketRequestorApi},
     model::market::{
-        proposal::State, AgreementProposal, NewDemand, NewOffer, Proposal, ProviderEvent,
-        RequestorEvent,
+        AgreementProposal, NewDemand, NewOffer, Proposal, ProviderEvent, RequestorEvent,
+        proposal::State,
     },
     web::{WebClient, WebInterface},
-    Error, Result,
 };
 
 #[derive(Clone, StructOpt)]
@@ -295,11 +295,10 @@ async fn requestor_interact(options: Options, nanos: u32) -> Result<()> {
 async fn main() -> Result<()> {
     let options = Options::from_args();
     println!("\nrun this example with RUST_LOG=debug to see REST calls\n");
-    env::set_var(
-        "RUST_LOG",
-        env::var("RUST_LOG").unwrap_or(options.log_level.clone()),
-    );
-    env_logger::init();
+    env_logger::Builder::from_env(
+        env_logger::Env::default().default_filter_or(options.log_level.clone()),
+    )
+    .init();
 
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)

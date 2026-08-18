@@ -1,4 +1,4 @@
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use std::borrow::Cow;
 use std::convert::TryFrom;
 use std::str::FromStr;
@@ -29,6 +29,11 @@ pub struct InvalidLengthError {
 }
 
 /// Yagna node identity compliant with [Ethereum addresses](https://en.wikipedia.org/wiki/Ethereum#Addresses)
+#[cfg_attr(feature = "with-diesel", derive(diesel::FromSqlRow))]
+#[cfg_attr(
+    feature = "with-diesel",
+    diesel(sql_type = diesel::sql_types::Text)
+)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct NodeId {
     inner: [u8; NODE_ID_LENGTH],
@@ -237,26 +242,23 @@ impl<'de> Deserialize<'de> for NodeId {
 mod sql {
     use super::NodeId;
     use diesel::backend::Backend;
-    use diesel::deserialize::FromSql;
-    use diesel::expression::bound::Bound;
+    use diesel::deserialize::{self, FromSql};
     use diesel::expression::AsExpression;
-    use diesel::serialize::{IsNull, Output, ToSql};
     use diesel::sql_types::Text;
-    use diesel::*;
 
     impl AsExpression<Text> for NodeId {
-        type Expression = Bound<Text, String>;
+        type Expression = <String as AsExpression<Text>>::Expression;
 
         fn as_expression(self) -> Self::Expression {
-            Bound::new(self.to_string())
+            <String as AsExpression<Text>>::as_expression(self.to_string())
         }
     }
 
     impl AsExpression<Text> for &NodeId {
-        type Expression = Bound<Text, String>;
+        type Expression = <String as AsExpression<Text>>::Expression;
 
         fn as_expression(self) -> Self::Expression {
-            Bound::new(self.to_string())
+            <String as AsExpression<Text>>::as_expression(self.to_string())
         }
     }
 
@@ -265,34 +267,31 @@ mod sql {
         DB: Backend,
         String: FromSql<Text, DB>,
     {
-        fn from_sql(bytes: Option<&<DB as Backend>::RawValue>) -> deserialize::Result<Self> {
+        fn from_sql(bytes: DB::RawValue<'_>) -> deserialize::Result<Self> {
             let s: String = FromSql::from_sql(bytes)?;
             Ok(s.parse()?)
         }
     }
-
-    impl<DB> ToSql<Text, DB> for NodeId
-    where
-        DB: Backend,
-        for<'b> &'b str: ToSql<Text, DB>,
-    {
-        fn to_sql<W: std::io::Write>(
-            &self,
-            out: &mut Output<'_, W, DB>,
-        ) -> deserialize::Result<IsNull> {
-            self.with_hex(move |s: &str| ToSql::<Text, DB>::to_sql(s, out))
-        }
-    }
-
-    #[derive(FromSqlRow)]
-    #[diesel(foreign_derive)]
-    struct NodeIdProxy(NodeId);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::convert::TryInto;
+
+    #[cfg(feature = "with-diesel")]
+    diesel::table! {
+        diesel_node_ids (id) {
+            id -> Text,
+        }
+    }
+
+    #[cfg(feature = "with-diesel")]
+    #[derive(diesel::Insertable)]
+    #[diesel(table_name = diesel_node_ids)]
+    struct NewNodeId {
+        id: NodeId,
+    }
 
     #[test]
     fn parse_empty_str() {
@@ -353,6 +352,33 @@ mod tests {
                 .to_string(),
             "0xbabe000000000000000000000000000000000000".to_string()
         );
+    }
+
+    #[cfg(feature = "with-diesel")]
+    #[test]
+    fn diesel_sqlite_round_trip() {
+        use diesel::connection::SimpleConnection;
+        use diesel::{Connection, QueryDsl, RunQueryDsl, SqliteConnection};
+
+        let expected = "0xbabe000000000000000000000000000000000000"
+            .parse::<NodeId>()
+            .unwrap();
+        let mut connection = SqliteConnection::establish(":memory:").unwrap();
+        connection
+            .batch_execute("CREATE TABLE diesel_node_ids (id TEXT PRIMARY KEY NOT NULL)")
+            .unwrap();
+
+        diesel::insert_into(diesel_node_ids::table)
+            .values(NewNodeId { id: expected })
+            .execute(&mut connection)
+            .unwrap();
+
+        let actual = diesel_node_ids::table
+            .select(diesel_node_ids::id)
+            .first::<NodeId>(&mut connection)
+            .unwrap();
+
+        assert_eq!(actual, expected);
     }
 
     #[test]

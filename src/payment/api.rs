@@ -6,8 +6,8 @@ use std::marker::PhantomData;
 use std::sync::Arc;
 
 use crate::{
-    web::{default_on_timeout, url_format_obj, WebClient, WebInterface},
     Result,
+    web::{WebClient, WebInterface, default_on_timeout, url_format_obj},
 };
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
@@ -216,7 +216,7 @@ impl PaymentApi {
     ///     }
     /// }
     /// ```
-    pub fn events<Evtype: PaymentEvent>(&self) -> EventsBuilder<Evtype> {
+    pub fn events<Evtype: PaymentEvent>(&self) -> EventsBuilder<'_, Evtype> {
         EventsBuilder::with_client(&self.client)
     }
 
@@ -565,11 +565,7 @@ impl<'a, EvType: PaymentEvent> EventsBuilder<'a, EvType> {
             }
             buf.push_str(&ename)
         }
-        if buf.is_empty() {
-            None
-        } else {
-            Some(buf)
-        }
+        if buf.is_empty() { None } else { Some(buf) }
     }
 
     pub fn provider_events(

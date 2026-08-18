@@ -1,24 +1,24 @@
 //! Web utils
 use actix_codec::Framed;
 use awc::{
+    BoxedSocket, ClientRequest, ClientResponse, SendClientRequest,
     error::{PayloadError, SendRequestError},
     http::header::{HeaderMap, HeaderName, HeaderValue},
-    http::{header, Method, StatusCode},
+    http::{Method, StatusCode, header},
     ws::Codec,
-    BoxedSocket, ClientRequest, ClientResponse, SendClientRequest,
 };
 use bytes::{Bytes, BytesMut};
 use futures::stream::Peekable;
 use futures::{Stream, StreamExt, TryStreamExt};
 use heck::ToLowerCamelCase;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use serde_qs;
 use std::cmp::max;
 use std::convert::TryFrom;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::{env, rc::Rc, str::FromStr, time::Duration};
-use url::{form_urlencoded, Url};
+use url::{Url, form_urlencoded};
 
 use crate::model::ErrorMessage;
 use crate::{Error, Result};
@@ -118,7 +118,10 @@ impl WebClient {
         }
     }
 
-    pub async fn event_stream(&self, url: &str) -> Result<impl Stream<Item = Result<Event>>> {
+    pub async fn event_stream(
+        &self,
+        url: &str,
+    ) -> Result<impl Stream<Item = Result<Event>> + use<>> {
         let url = self.url(url).unwrap().to_string();
         log::debug!("event stream at {}", url);
         let method = Method::GET;
@@ -505,13 +508,14 @@ where
                 let idx = this.buffer.len();
                 this.buffer.extend(bytes);
 
-                if let Some(result) = this.next_event(idx) {
-                    Poll::Ready(Some(result))
-                } else {
-                    if Pin::new(&mut this.inner).poll_peek(cx).is_ready() {
-                        cx.waker().wake_by_ref();
+                match this.next_event(idx) {
+                    Some(result) => Poll::Ready(Some(result)),
+                    _ => {
+                        if Pin::new(&mut this.inner).poll_peek(cx).is_ready() {
+                            cx.waker().wake_by_ref();
+                        }
+                        Poll::Pending
                     }
-                    Poll::Pending
                 }
             }
             Poll::Ready(Some(Err(e))) => Poll::Ready(Some(Err(e.into()))),
@@ -533,7 +537,7 @@ where
 /// url_format!("foo", #[query] bar) => "foo?bar=" + bar
 macro_rules! url_format {
     {
-        $path:expr $(,$var:ident)* $(,#[query] $varq:ident)* $(,)?
+        $path:expr_2021 $(,$var:ident)* $(,#[query] $varq:ident)* $(,)?
     } => {{
         let mut url = format!( $path $(, $var)* );
         let query = crate::web::QueryParamsBuilder::default()

@@ -1,10 +1,10 @@
 //! Requestor control part of Activity API
 use ya_client_model::activity::{
-    CreateActivityRequest, CreateActivityResult, ExeScriptCommandResult, ExeScriptRequest,
-    RuntimeEvent, ACTIVITY_API_PATH,
+    ACTIVITY_API_PATH, CreateActivityRequest, CreateActivityResult, ExeScriptCommandResult,
+    ExeScriptRequest, RuntimeEvent,
 };
 
-use crate::web::{default_on_timeout, Event, WebClient, WebInterface};
+use crate::web::{Event, WebClient, WebInterface, default_on_timeout};
 use crate::{Error, Result};
 use futures::{Stream, StreamExt};
 use std::convert::TryFrom;
@@ -106,7 +106,7 @@ impl ActivityRequestorControlApi {
         &self,
         activity_id: &str,
         batch_id: &str,
-    ) -> Result<impl Stream<Item = RuntimeEvent>> {
+    ) -> Result<impl Stream<Item = RuntimeEvent> + use<>> {
         let uri = url_format!("activity/{activity_id}/exec/{batch_id}",);
         let stream = self
             .client
@@ -133,17 +133,17 @@ impl TryFrom<Event> for RuntimeEvent {
 #[cfg(feature = "sgx")]
 pub mod sgx {
     use super::*;
+    use crate::Error as AppError;
+    use crate::SGX_CONFIG;
     use crate::market::MarketRequestorApi;
     use crate::model::activity::encrypted as enc;
     use crate::model::activity::{Credentials, ExeScriptCommand, SgxCredentials};
-    use crate::Error as AppError;
-    use crate::SGX_CONFIG;
     use graphene_sgx::AttestationResponse;
     use hex;
     use secp256k1::{PublicKey, SecretKey};
     use std::sync::Arc;
-    use ya_client_model::activity::encrypted::EncryptionCtx;
     use ya_client_model::activity::ExeScriptCommandState;
+    use ya_client_model::activity::encrypted::EncryptionCtx;
 
     #[derive(thiserror::Error, Debug)]
     pub enum SgxError {
@@ -197,7 +197,7 @@ pub mod sgx {
 
     fn gen_id() -> String {
         use rand::Rng;
-        let v: u128 = rand::thread_rng().gen();
+        let v: u128 = rand::thread_rng().r#gen();
         format!("{:032x}", v)
     }
 
@@ -376,7 +376,7 @@ mod test {
 
         let ctx1 = EncryptionCtx::new(&p2, &s1);
         let ctx2 = EncryptionCtx::new(&p1, &s2);
-        let data: [u8; 20] = rng.gen();
+        let data: [u8; 20] = rng.r#gen();
         let data2 = ctx2
             .decrypt_bytes(&ctx1.encrypt_bytes(&data).unwrap())
             .unwrap();

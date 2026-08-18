@@ -1,7 +1,7 @@
 //! Provider part of the Activity API
-use ya_client_model::activity::{ActivityState, ActivityUsage, ProviderEvent, ACTIVITY_API_PATH};
+use ya_client_model::activity::{ACTIVITY_API_PATH, ActivityState, ActivityUsage, ProviderEvent};
 
-use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
+use crate::{Result, web::WebClient, web::WebInterface, web::default_on_timeout};
 use chrono::{DateTime, Utc};
 use std::time::Duration;
 
