@@ -1,11 +1,10 @@
-use std::env;
 use std::time::Duration;
 
 use ya_client::{
+    Result,
     activity::{ActivityProviderApi, ActivityRequestorControlApi, ActivityRequestorStateApi},
     model::activity::ExeScriptRequest,
     web::WebClient,
-    Result,
 };
 
 async fn provider(client: &ActivityProviderApi, activity_id: &str) -> Result<()> {
@@ -82,14 +81,14 @@ async fn requestor_state(client: &ActivityRequestorStateApi, activity_id: &str) 
 async fn interact() -> Result<()> {
     let client = WebClient::builder().build();
     requestor(&client, "agreement_id").await?;
-    provider(&client.interface()?, "activity_id").await
+    let provider_client = client.interface()?;
+    provider(&provider_client, "activity_id").await
 }
 
 #[actix_rt::main]
 async fn main() -> Result<()> {
     println!("\nrun this example with RUST_LOG=info to see REST calls\n");
-    env::set_var("RUST_LOG", env::var("RUST_LOG").unwrap_or("warn".into()));
-    env_logger::init();
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn")).init();
 
     interact().await
 }

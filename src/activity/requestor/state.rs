@@ -1,9 +1,9 @@
 //! Requestor state part of Activity API
 use ya_client_model::activity::{
-    ActivityState, ActivityUsage, ExeScriptCommandState, ACTIVITY_API_PATH,
+    ACTIVITY_API_PATH, ActivityState, ActivityUsage, ExeScriptCommandState,
 };
 
-use crate::{web::WebClient, web::WebInterface, Result};
+use crate::{Result, web::WebClient, web::WebInterface};
 
 /// Bindings for Requestor State part of the Activity API.
 #[derive(Clone)]

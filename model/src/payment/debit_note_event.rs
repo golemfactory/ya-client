@@ -44,8 +44,8 @@ impl DebitNoteEventType {
     }
 
     pub fn details(&self) -> Option<serde_json::Value> {
-        use serde_json::to_value;
         use DebitNoteEventType::*;
+        use serde_json::to_value;
 
         match self {
             DebitNoteRejectedEvent { rejection } => to_value(rejection).ok(),
@@ -58,8 +58,8 @@ impl DebitNoteEventType {
         discriminant: &str,
         details: Option<serde_json::Value>,
     ) -> Option<Self> {
-        use serde_json::from_value;
         use DebitNoteEventType::*;
+        use serde_json::from_value;
 
         Some(match (discriminant, details) {
             ("RECEIVED", _) => DebitNoteReceivedEvent,

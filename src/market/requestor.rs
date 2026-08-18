@@ -1,15 +1,15 @@
 //! Requestor part of the Market API
 use ya_client_model::market::{
-    agreement::State, Agreement, AgreementListEntry, AgreementOperationEvent, AgreementProposal,
+    Agreement, AgreementListEntry, AgreementOperationEvent, AgreementProposal,
     AgreementTerminationReason, Demand, NewDemand, NewProposal, Offer, Proposal, Reason,
-    RequestorEvent,
+    RequestorEvent, agreement::State,
 };
 
-use crate::{web::default_on_timeout, web::WebClient, web::WebInterface, Result};
+use crate::{Result, web::WebClient, web::WebInterface, web::default_on_timeout};
 use chrono::{DateTime, TimeZone, Utc};
 use std::fmt::Display;
-use ya_client_model::market::scan::NewScan;
 use ya_client_model::NodeId;
+use ya_client_model::market::scan::NewScan;
 
 /// Bindings for Requestor part of the Market API.
 #[derive(Clone)]

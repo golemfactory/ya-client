@@ -3,9 +3,9 @@ mod provider;
 mod requestor;
 
 pub use provider::ActivityProviderApi;
+pub use requestor::ActivityRequestorApi;
 pub use requestor::control::ActivityRequestorControlApi;
 pub use requestor::state::ActivityRequestorStateApi;
-pub use requestor::ActivityRequestorApi;
 
 #[cfg(feature = "sgx")]
 pub use requestor::control::sgx::SecureActivityRequestorApi;

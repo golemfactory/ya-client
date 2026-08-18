@@ -11,8 +11,8 @@ use derive_more::Display;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumString;
 
-use crate::market::{Demand, Offer};
 use crate::NodeId;
+use crate::market::{Demand, Offer};
 
 /// Agreement expresses the terms of the deal between Provider and Requestor.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
