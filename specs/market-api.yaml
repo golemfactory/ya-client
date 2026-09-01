@@ -816,6 +816,14 @@ paths:
         * `AgreementTerminatedEvent` - Indicates that the Agreement has been
           terminated by specified party (contains signature).
 
+        * `AgreementTerminationNoticeEvent` - Indicates that the Provider
+          announced its intention to terminate the Agreement (see
+          `postAgreementTerminationNotice`). The Agreement stays `Approved`
+          and existing Activities may continue during the grace period; the
+          Requestor should finish or migrate its work by
+          `terminationDeadline`. Exactly one such event is ever emitted per
+          Agreement.
+
       responses:
         200:
           $ref: '#/components/responses/AgreementEventList'
@@ -950,6 +958,14 @@ paths:
         by both sides.
 
 
+        **Note**: When the Provider has announced a termination notice for
+        the Agreement (see `postAgreementTerminationNotice`), the Provider's
+        own call is refused with `409 Conflict` until `terminationDeadline`
+        has passed - the grace period promised to the Requestor cannot be cut
+        short. Without a notice the Provider's termination path is unchanged,
+        and the Requestor may terminate at any time.
+
+
         **Note**: Financial and reputational consequences are not
         defined by this specification.
       requestBody:
@@ -963,7 +979,10 @@ paths:
           $ref: 'common.yaml#/responses/NotFound'
         409:
           $ref: 'common.yaml#/responses/Conflict'
-          description: Agreement can not be terminated yet (is in `Proposal` or `Pending` state).
+          description: >
+            Agreement can not be terminated yet (is in `Proposal` or `Pending`
+            state), or the Provider announced a termination notice whose
+            deadline has not passed.
         410:
           $ref: 'common.yaml#/responses/Gone'
           description: >
@@ -1000,6 +1019,72 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /agreements/{agreementId}/terminationNotice:
+    parameters:
+      - $ref: '#/components/parameters/agreementId'
+      - $ref: 'common.yaml#/parameters/ackTimeout'
+    post:
+      tags:
+        - provider
+      operationId: postAgreementTerminationNotice
+      summary: PostAgreementTerminationNotice - Announces the Provider's intention to terminate an Agreement.
+      description: >
+        Sends the Requestor a termination notice for an Approved Agreement.
+        The Agreement remains `Approved` and its existing Activities may
+        continue. The Requestor is expected to finish or migrate its work by
+        `terminationDeadline`; once that deadline has passed, the Provider
+        may explicitly terminate the Agreement. Until then the Provider's own
+        `terminateAgreement` is refused for this Agreement, while the
+        Requestor may terminate at any time.
+
+
+        The call waits for the Requestor's node to record and acknowledge
+        the notice; the optional `timeout` parameter bounds that wait.
+        A `204` response means the Requestor's node recorded the notice -
+        not that the Requestor application has already consumed the event.
+
+
+        Only one notice may be recorded per Agreement and its
+        `terminationDeadline` and `reason` are immutable once acknowledged.
+        A repeated request with the same payload is acknowledged again
+        without creating a duplicate event, which makes retry safe after an
+        acknowledgement timeout; a request with a different payload returns
+        `409 Conflict`.
+
+
+        Available only to the Provider identity associated with the
+        Agreement. Posting a notice does not change the Agreement state.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgreementTerminationNotice'
+      responses:
+        204:
+          description: The Requestor's node recorded the notice.
+        400:
+          $ref: 'common.yaml#/responses/BadRequest'
+          description: The termination deadline is invalid or is not in the future.
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
+        403:
+          $ref: 'common.yaml#/responses/Forbidden'
+          description: The calling identity is not the Provider for this Agreement.
+        404:
+          $ref: 'common.yaml#/responses/NotFound'
+        408:
+          $ref: 'common.yaml#/responses/Timeout'
+          description: The Requestor did not acknowledge the notice before the timeout.
+        409:
+          $ref: 'common.yaml#/responses/Conflict'
+          description: The Agreement is not Approved or the notice conflicts with an already recorded notice.
+        410:
+          $ref: 'common.yaml#/responses/Gone'
+          description: The Agreement is already in a terminal state.
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -1563,5 +1648,41 @@ components:
               enum: [ Requestor, Provider ]
             signature:
               type: string
+            reason:
+              $ref: 'common.yaml#/components/schemas/Reason'
+
+    AgreementTerminationNotice:
+      type: object
+      required:
+        - terminationDeadline
+      properties:
+        terminationDeadline:
+          $ref: 'common.yaml#/components/schemas/Timestamp'
+          description: >
+            Absolute time by which the Provider expects the Requestor to
+            finish or migrate its work. It must be later than the time at
+            which the notice is posted.
+        reason:
+          $ref: 'common.yaml#/components/schemas/Reason'
+
+    AgreementTerminationNoticeEvent:
+      description: >
+        The Provider announced its intention to terminate this Agreement.
+        The Agreement remains `Approved` and existing Activities may continue
+        during the grace period. The Requestor should finish or migrate its
+        work by `terminationDeadline`, after which the Provider may terminate
+        the Agreement.
+
+        Exactly one such event is ever recorded per Agreement and its payload
+        is immutable. `eventDate` is the moment the Requestor's node recorded
+        the notice; `reason` carries the Provider's message verbatim.
+      allOf:
+        - $ref: '#/components/schemas/AgreementOperationEvent'
+        - type: object
+          required:
+            - terminationDeadline
+          properties:
+            terminationDeadline:
+              $ref: 'common.yaml#/components/schemas/Timestamp'
             reason:
               $ref: 'common.yaml#/components/schemas/Reason'

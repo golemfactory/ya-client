@@ -1,8 +1,8 @@
 //! Provider part of the Market API
 use ya_client_model::market::{
-    Agreement, AgreementListEntry, AgreementOperationEvent, AgreementTerminationReason,
-    MARKET_API_PATH, NewOffer, NewProposal, Offer, Proposal, ProviderEvent, Reason,
-    agreement::State,
+    Agreement, AgreementListEntry, AgreementOperationEvent, AgreementTerminationNotice,
+    AgreementTerminationReason, MARKET_API_PATH, NewOffer, NewProposal, Offer, Proposal,
+    ProviderEvent, Reason, agreement::State,
 };
 
 use crate::{Result, web::WebClient, web::WebInterface, web::default_on_timeout};
@@ -196,6 +196,35 @@ impl MarketProviderApi {
     ) -> Result<()> {
         let url = url_format!("agreements/{agreement_id}/terminate");
         self.client.post(&url).send_json(&reason).json().await
+    }
+
+    /// Announces the Provider's intention to terminate an Approved Agreement
+    /// (the Requestor receives an `AgreementTerminationNoticeEvent` through
+    /// `collectAgreementEvents`).
+    ///
+    /// The Agreement stays `Approved` and its existing Activities may
+    /// continue; the Requestor is expected to finish or migrate its work by
+    /// `termination_deadline`, after which the Provider may terminate the
+    /// Agreement. Until then the Provider's own `terminate_agreement` is
+    /// refused for this Agreement.
+    ///
+    /// The call waits (up to `timeout` seconds) for the Requestor's node to
+    /// record and acknowledge the notice. Only one notice may be recorded
+    /// per Agreement and its payload is immutable: retrying with the same
+    /// payload is acknowledged idempotently, a different payload is
+    /// rejected. Available only to the Provider identity of the Agreement.
+    pub async fn post_agreement_termination_notice(
+        &self,
+        agreement_id: &str,
+        notice: &AgreementTerminationNotice,
+        timeout: Option<f32>,
+    ) -> Result<()> {
+        let url = url_format!(
+            "agreements/{agreement_id}/terminationNotice",
+            #[query]
+            timeout,
+        );
+        self.client.post(&url).send_json(&notice).json().await
     }
 
     /// Lists agreements
