@@ -46,9 +46,12 @@ pub enum AgreementEventType {
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
         reason: Option<Reason>,
     },
-    /// The Provider is shutting down gracefully: the Agreement stays `Approved`
-    /// and running Activities continue, but no new Activities will be accepted.
-    /// The Requestor is expected to finish its work and terminate the Agreement.
+    /// The Provider announced a graceful shutdown: the Agreement stays
+    /// `Approved` and running Activities continue, but the Provider intends
+    /// to take no new work and expects the Requestor to finish and terminate
+    /// the Agreement. Advisory only - ignoring it has no protocol-level
+    /// consequence. At most one such event is ever recorded per Agreement;
+    /// `event_date` is the moment the Requestor's node recorded the notice.
     #[serde(rename = "AgreementShutdownNoticeEvent")]
     AgreementShutdownNoticeEvent {
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]

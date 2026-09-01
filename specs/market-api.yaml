@@ -816,10 +816,12 @@ paths:
         * `AgreementTerminatedEvent` - Indicates that the Agreement has been
           terminated by specified party (contains signature).
 
-        * `AgreementShutdownNoticeEvent` - Indicates that the Provider is
-          shutting down gracefully. The Agreement stays `Approved` and running
-          Activities continue, but no new Activities will be accepted. The
-          Requestor is expected to finish its work and terminate the Agreement.
+        * `AgreementShutdownNoticeEvent` - Indicates that the Provider
+          announced a graceful shutdown (see `postShutdownNotice`). The
+          Agreement stays `Approved` and running Activities continue, but the
+          Provider intends to take no new work; the Requestor is expected to
+          finish and terminate the Agreement. At most one such event is ever
+          emitted per Agreement.
 
       responses:
         200:
@@ -1015,19 +1017,56 @@ paths:
       operationId: postShutdownNotice
       summary: PostShutdownNotice - Notifies Requestors that this Provider is shutting down.
       description: >
-        Sends an `AgreementShutdownNoticeEvent` to the Requestor side of every
-        `Approved` Agreement in which the caller is the Provider.
+        Announces the graceful shutdown of this Provider to its Requestors.
 
 
-        The Agreements stay `Approved` and running Activities continue; the
-        notice is a hint for the Requestors to finish their work and terminate
-        the Agreements, because the Provider is shutting down gracefully and
-        will not accept new Agreements or Activities until it is restarted.
+        **Scope**: the notice is sent for every Agreement that is in the
+        `Approved` state at the moment of the call and in which the calling
+        identity is the Provider. Agreements of other identities on the same
+        node are not affected. An Agreement that reaches `Approved` after the
+        fan-out started is not notified; calling the operation again covers it.
+
+
+        **Trigger and delivery**: this call itself starts the fan-out and
+        blocks until a delivery attempt was made for every matching Agreement.
+        Delivery is synchronous and best-effort: an unreachable Requestor node
+        is skipped and no retry is scheduled. The returned number counts the
+        Agreements for which the notice was handed over to the Requestor's
+        node in this call - it is a delivery count, not a confirmation that
+        the Requestor application has consumed the event.
+
+
+        **Idempotency**: the operation may be called any number of times. The
+        Requestor's node records at most one `AgreementShutdownNoticeEvent`
+        per Agreement and silently drops repeats, so re-calling is a safe way
+        to retry failed deliveries or to cover Agreements approved since the
+        previous call. Repeated deliveries still count towards the returned
+        number.
+
+
+        **What it does NOT do**: nothing about the Agreements changes - they
+        stay `Approved`, running Activities continue and may finish normally,
+        and the market keeps accepting operations on them. Refusing new
+        Agreements or Activities is the responsibility of the shutting-down
+        Provider agent, not an effect of this operation. There is no
+        revocation: a delivered notice cannot be withdrawn if the shutdown is
+        later aborted.
+
+
+        **On the Requestor side** the notice surfaces as an
+        `AgreementShutdownNoticeEvent` in `collectAgreementEvents`, with
+        `eventDate` set to the moment the Requestor's node recorded it and
+        the optional `Reason` from the request body attached verbatim. The
+        event is advisory: ignoring it has no protocol-level consequence,
+        but a cooperative Requestor finishes its work and terminates the
+        Agreement.
       requestBody:
         $ref: '#/components/requestBodies/Reason'
       responses:
         200:
-          description: Number of Agreements for which the notice was delivered.
+          description: >
+            Number of Agreements for which the notice was delivered in this
+            call (0 when the caller has no Approved Agreements as Provider).
           content:
             application/json:
               schema:
@@ -1602,10 +1641,16 @@ components:
 
     AgreementShutdownNoticeEvent:
       description: >
-        The Provider is shutting down gracefully. The Agreement stays
-        `Approved` and running Activities continue, but no new Activities
-        will be accepted. The Requestor is expected to finish its work
-        and terminate the Agreement.
+        The Provider announced a graceful shutdown (see `postShutdownNotice`).
+        The Agreement stays `Approved` and running Activities continue, but
+        the Provider intends to take no new work and expects the Requestor to
+        finish and terminate the Agreement. Advisory only - ignoring it has no
+        protocol-level consequence.
+
+        At most one such event is ever recorded per Agreement; repeated
+        notices are dropped by the Requestor's node. `eventDate` is the moment
+        the Requestor's node recorded the notice; `reason` carries the
+        Provider's message verbatim.
       allOf:
         - $ref: '#/components/schemas/AgreementOperationEvent'
         - type: object

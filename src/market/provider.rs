@@ -198,14 +198,21 @@ impl MarketProviderApi {
         self.client.post(&url).send_json(&reason).json().await
     }
 
-    /// Notifies the Requestor side of every Approved Agreement, in which this
-    /// node is the Provider, that the Provider is shutting down gracefully
-    /// (they receive an `AgreementShutdownNoticeEvent`).
+    /// Announces a graceful shutdown to the Requestor side of every Agreement
+    /// that is `Approved` at the moment of the call and in which the calling
+    /// identity is the Provider (each receives an
+    /// `AgreementShutdownNoticeEvent` through `collectAgreementEvents`).
     ///
-    /// The Agreements stay `Approved` and running Activities continue; the
-    /// notice is a hint for Requestors to finish their work and terminate.
+    /// The call blocks until a delivery was attempted for every matching
+    /// Agreement. Delivery is best-effort with no retries; the returned
+    /// number counts successful hand-overs in this call. Safe to repeat: the
+    /// Requestor's node records at most one notice per Agreement and drops
+    /// repeats, so a re-call retries failed deliveries and covers Agreements
+    /// approved since the previous one.
     ///
-    /// Returns the number of Agreements for which the notice was delivered.
+    /// Advisory only: the Agreements stay `Approved`, running Activities
+    /// continue, and refusing new Agreements or Activities remains the
+    /// calling agent's responsibility - this operation changes no state.
     pub async fn post_shutdown_notice(&self, reason: &Option<Reason>) -> Result<u64> {
         self.client
             .post("shutdownNotice")
