@@ -816,6 +816,11 @@ paths:
         * `AgreementTerminatedEvent` - Indicates that the Agreement has been
           terminated by specified party (contains signature).
 
+        * `AgreementShutdownNoticeEvent` - Indicates that the Provider is
+          shutting down gracefully. The Agreement stays `Approved` and running
+          Activities continue, but no new Activities will be accepted. The
+          Requestor is expected to finish its work and terminate the Agreement.
+
       responses:
         200:
           $ref: '#/components/responses/AgreementEventList'
@@ -1000,6 +1005,35 @@ paths:
           $ref: 'common.yaml#/responses/Unauthorized'
         404:
           $ref: 'common.yaml#/responses/NotFound'
+        default:
+          $ref: 'common.yaml#/responses/UnexpectedError'
+
+  /shutdownNotice:
+    post:
+      tags:
+        - provider
+      operationId: postShutdownNotice
+      summary: PostShutdownNotice - Notifies Requestors that this Provider is shutting down.
+      description: >
+        Sends an `AgreementShutdownNoticeEvent` to the Requestor side of every
+        `Approved` Agreement in which the caller is the Provider.
+
+
+        The Agreements stay `Approved` and running Activities continue; the
+        notice is a hint for the Requestors to finish their work and terminate
+        the Agreements, because the Provider is shutting down gracefully and
+        will not accept new Agreements or Activities until it is restarted.
+      requestBody:
+        $ref: '#/components/requestBodies/Reason'
+      responses:
+        200:
+          description: Number of Agreements for which the notice was delivered.
+          content:
+            application/json:
+              schema:
+                type: integer
+        401:
+          $ref: 'common.yaml#/responses/Unauthorized'
         default:
           $ref: 'common.yaml#/responses/UnexpectedError'
 
@@ -1563,5 +1597,18 @@ components:
               enum: [ Requestor, Provider ]
             signature:
               type: string
+            reason:
+              $ref: 'common.yaml#/components/schemas/Reason'
+
+    AgreementShutdownNoticeEvent:
+      description: >
+        The Provider is shutting down gracefully. The Agreement stays
+        `Approved` and running Activities continue, but no new Activities
+        will be accepted. The Requestor is expected to finish its work
+        and terminate the Agreement.
+      allOf:
+        - $ref: '#/components/schemas/AgreementOperationEvent'
+        - type: object
+          properties:
             reason:
               $ref: 'common.yaml#/components/schemas/Reason'

@@ -46,6 +46,14 @@ pub enum AgreementEventType {
         #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
         reason: Option<Reason>,
     },
+    /// The Provider is shutting down gracefully: the Agreement stays `Approved`
+    /// and running Activities continue, but no new Activities will be accepted.
+    /// The Requestor is expected to finish its work and terminate the Agreement.
+    #[serde(rename = "AgreementShutdownNoticeEvent")]
+    AgreementShutdownNoticeEvent {
+        #[serde(rename = "reason", skip_serializing_if = "Option::is_none")]
+        reason: Option<Reason>,
+    },
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]

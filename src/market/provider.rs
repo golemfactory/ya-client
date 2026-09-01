@@ -198,6 +198,22 @@ impl MarketProviderApi {
         self.client.post(&url).send_json(&reason).json().await
     }
 
+    /// Notifies the Requestor side of every Approved Agreement, in which this
+    /// node is the Provider, that the Provider is shutting down gracefully
+    /// (they receive an `AgreementShutdownNoticeEvent`).
+    ///
+    /// The Agreements stay `Approved` and running Activities continue; the
+    /// notice is a hint for Requestors to finish their work and terminate.
+    ///
+    /// Returns the number of Agreements for which the notice was delivered.
+    pub async fn post_shutdown_notice(&self, reason: &Option<Reason>) -> Result<u64> {
+        self.client
+            .post("shutdownNotice")
+            .send_json(&reason)
+            .json()
+            .await
+    }
+
     /// Lists agreements
     ///
     /// Supports filtering by:
