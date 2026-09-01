@@ -1,8 +1,8 @@
 //! Provider part of the Market API
 use ya_client_model::market::{
-    Agreement, AgreementListEntry, AgreementOperationEvent, AgreementTerminationReason,
-    MARKET_API_PATH, NewOffer, NewProposal, Offer, Proposal, ProviderEvent, Reason,
-    agreement::State,
+    Agreement, AgreementListEntry, AgreementOperationEvent, AgreementTerminationNotice,
+    AgreementTerminationReason, MARKET_API_PATH, NewOffer, NewProposal, Offer, Proposal,
+    ProviderEvent, Reason, agreement::State,
 };
 
 use crate::{Result, web::WebClient, web::WebInterface, web::default_on_timeout};
@@ -198,27 +198,33 @@ impl MarketProviderApi {
         self.client.post(&url).send_json(&reason).json().await
     }
 
-    /// Announces a graceful shutdown to the Requestor side of every Agreement
-    /// that is `Approved` at the moment of the call and in which the calling
-    /// identity is the Provider (each receives an
-    /// `AgreementShutdownNoticeEvent` through `collectAgreementEvents`).
+    /// Announces the Provider's intention to terminate an Approved Agreement
+    /// (the Requestor receives an `AgreementTerminationNoticeEvent` through
+    /// `collectAgreementEvents`).
     ///
-    /// The call blocks until a delivery was attempted for every matching
-    /// Agreement. Delivery is best-effort with no retries; the returned
-    /// number counts successful hand-overs in this call. Safe to repeat: the
-    /// Requestor's node records at most one notice per Agreement and drops
-    /// repeats, so a re-call retries failed deliveries and covers Agreements
-    /// approved since the previous one.
+    /// The Agreement stays `Approved` and its existing Activities may
+    /// continue; the Requestor is expected to finish or migrate its work by
+    /// `termination_deadline`, after which the Provider may terminate the
+    /// Agreement. Until then the Provider's own `terminate_agreement` is
+    /// refused for this Agreement.
     ///
-    /// Advisory only: the Agreements stay `Approved`, running Activities
-    /// continue, and refusing new Agreements or Activities remains the
-    /// calling agent's responsibility - this operation changes no state.
-    pub async fn post_shutdown_notice(&self, reason: &Option<Reason>) -> Result<u64> {
-        self.client
-            .post("shutdownNotice")
-            .send_json(&reason)
-            .json()
-            .await
+    /// The call waits (up to `timeout` seconds) for the Requestor's node to
+    /// record and acknowledge the notice. Only one notice may be recorded
+    /// per Agreement and its payload is immutable: retrying with the same
+    /// payload is acknowledged idempotently, a different payload is
+    /// rejected. Available only to the Provider identity of the Agreement.
+    pub async fn post_agreement_termination_notice(
+        &self,
+        agreement_id: &str,
+        notice: &AgreementTerminationNotice,
+        timeout: Option<f32>,
+    ) -> Result<()> {
+        let url = url_format!(
+            "agreements/{agreement_id}/terminationNotice",
+            #[query]
+            timeout,
+        );
+        self.client.post(&url).send_json(&notice).json().await
     }
 
     /// Lists agreements

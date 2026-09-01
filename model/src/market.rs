@@ -10,6 +10,7 @@ pub mod property_query;
 pub mod proposal;
 pub mod reason;
 pub mod scan;
+pub mod termination_notice;
 
 pub use agreement::{Agreement, AgreementListEntry, Role};
 pub use agreement_event::{AgreementEventType, AgreementOperationEvent, AgreementTerminator};
@@ -22,5 +23,6 @@ pub use offer::Offer;
 pub use property_query::PropertyQuery;
 pub use proposal::Proposal;
 pub use reason::Reason;
+pub use termination_notice::AgreementTerminationNotice;
 
 pub const MARKET_API_PATH: &str = "/market-api/v1";
